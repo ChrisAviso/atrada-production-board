@@ -215,8 +215,9 @@ function orderTasksByChain(tasks){
 }
 
 function computeUnitProgress(unitId){
-  const raw = (allTasksByUnit[unitId] || []).filter(t => t.hierarchy_level === 2 && !t.is_not_applicable);
-  const tasks = orderTasksByChain(raw);
+  const hl2 = (allTasksByUnit[unitId] || []).filter(t => t.hierarchy_level === 2);
+  const ordered = orderTasksByChain(hl2);
+  const tasks = ordered.filter(t => !t.is_not_applicable);
   if (tasks.length === 0) return { pct: 0, currentStage: 'No tasks', status: 'not_started', overdue: false };
   const done = tasks.filter(t => t.percent_complete_numeric >= 1).length;
   const pct = Math.round((done / tasks.length) * 100);
@@ -277,6 +278,23 @@ document.getElementById('signOutBtn').addEventListener('click', async () => {
   checkSession();
 });
 
+async function fetchAllRows(query){
+  // Supabase/PostgREST caps a single response at 1000 rows by default.
+  // prod_tasks has 3000+ rows, so a naive .select() silently truncates —
+  // this pages through with .range() until a short page confirms we're done.
+  const pageSize = 1000;
+  let from = 0;
+  let all = [];
+  while (true){
+    const { data, error } = await query.range(from, from + pageSize - 1);
+    if (error) return { data: null, error };
+    all = all.concat(data || []);
+    if (!data || data.length < pageSize) break;
+    from += pageSize;
+  }
+  return { data: all, error: null };
+}
+
 async function loadBoard(){
   const { data: units, error: unitErr } = await sb
     .from('prod_units')
@@ -285,10 +303,10 @@ async function loadBoard(){
   if (unitErr){ console.error(unitErr); return; }
   allUnits = units || [];
 
-  const { data: tasks, error: taskErr } = await sb
-    .from('prod_tasks')
-    .select('id, unit_id, task_name, execution_group, hierarchy_level, duration_days, completion_date_planned, percent_complete_numeric, is_not_applicable, predecessor_task_id')
-    .order('id');
+  const { data: tasks, error: taskErr } = await fetchAllRows(
+    sb.from('prod_tasks')
+      .select('id, unit_id, task_name, execution_group, hierarchy_level, duration_days, completion_date_planned, percent_complete_numeric, is_not_applicable, predecessor_task_id')
+  );
   if (taskErr){ console.error(taskErr); return; }
 
   allTasksByUnit = {};
