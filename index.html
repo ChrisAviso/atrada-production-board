@@ -74,7 +74,7 @@
     position:sticky;top:0;z-index:20;
   }
   .brand{display:flex;align-items:center;gap:10px;}
-  .brand .mark{width:30px;height:30px;border-radius:8px;background:var(--primary);flex-shrink:0;}
+  .brand .mark{width:30px;height:30px;border-radius:8px;object-fit:contain;flex-shrink:0;}
   .brand h1{font-size:16px;margin:0;letter-spacing:-0.01em;color:#ffffff;}
   .brand .sub{font-size:12px;color:rgba(255,255,255,.55);}
   .topbar-right{display:flex;align-items:center;gap:14px;}
@@ -207,7 +207,7 @@
 <div id="appScreen" class="hidden">
   <header class="topbar">
     <div class="brand">
-      <div class="mark"></div>
+      <img class="mark" src="atrada-logo.png" alt="Atrada">
       <div>
         <h1>Production Board</h1>
         <div class="sub">Atrada &middot; Fabrication &rarr; QA &rarr; Dispatch</div>
