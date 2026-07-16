@@ -115,14 +115,14 @@ font-weight:600;font-size:14px;cursor:pointer;font-family:inherit;transition:bac
 #appScreen{min-height:100vh;}
 header.topbar{
 background:var(--topbar-bg);
-padding:14px 30px;display:flex;align-items:center;justify-content:space-between;
+padding:14px 30px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;row-gap:10px;
 position:sticky;top:0;z-index:20;box-shadow:0 2px 10px rgba(0,0,0,.18);
 }
 .brand{display:flex;align-items:center;gap:12px;}
 .brand .mark{width:32px;height:32px;border-radius:9px;object-fit:contain;flex-shrink:0;box-shadow:0 0 0 1px rgba(255,255,255,.08);}
 .brand h1{font-size:16px;margin:0;letter-spacing:-0.01em;color:#ffffff;font-weight:700;}
 .brand .sub{font-size:12px;color:rgba(255,255,255,.5);margin-top:1px;}
-.topbar-right{display:flex;align-items:center;gap:12px;}
+.topbar-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .user-chip{font-size:12.5px;color:rgba(255,255,255,.75);background:rgba(255,255,255,.08);padding:6px 12px;border-radius:20px;}
 .icon-btn{
 border:1.5px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);border-radius:8px;
@@ -175,7 +175,7 @@ padding:16px 18px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;
 
 /* ---------- Layout ---------- */
 .layout{display:block;}
-#detailPanel.modal-card{width:600px;position:relative;padding:26px 28px;}
+#detailPanel.modal-card{width:660px;position:relative;padding:26px 28px;}
 
 /* ---------- SO group cards ---------- */
 .so-group{
@@ -258,18 +258,32 @@ font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;
 letter-spacing:.05em;margin:20px 0 6px;
 }
 .task-row{
-display:flex;align-items:center;gap:11px;padding:10px 4px;border-bottom:1px solid var(--border);font-size:13px;
+border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;background:var(--surface-alt);
 }
-.task-row:last-child{border-bottom:none;}
-.task-row input[type=checkbox]{width:17px;height:17px;accent-color:var(--green);cursor:pointer;flex-shrink:0;}
-.task-row .tname{flex:1;min-width:0;}
-.task-row .tname.done{text-decoration:line-through;color:var(--text-dim);}
-.task-row .tname.na{text-decoration:line-through;color:var(--text-faint);font-style:italic;}
-.task-row .tdates{
-font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-dim);white-space:nowrap;text-align:right;
+.task-row:last-child{margin-bottom:0;}
+.task-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;}
+.task-top input[type=checkbox]{width:17px;height:17px;accent-color:var(--green);cursor:pointer;flex-shrink:0;margin-top:2px;}
+.task-top .tname{flex:1;min-width:0;line-height:1.4;word-break:break-word;}
+.task-top .tname.done{text-decoration:line-through;color:var(--text-dim);}
+.task-top .tmeta{font-size:10.5px;color:var(--text-dim);white-space:nowrap;background:var(--surface);border:1px solid var(--border);padding:3px 9px;border-radius:10px;flex-shrink:0;margin-top:1px;}
+.task-fields{
+display:grid;grid-template-columns:60px 96px 18px 96px 1fr;gap:8px;align-items:end;padding-left:27px;
 }
-.task-row .tdates .dur{display:block;font-weight:700;color:var(--text);}
-.task-row .tmeta{font-size:10.5px;color:var(--text-dim);white-space:nowrap;background:var(--surface-alt);border:1px solid var(--border);padding:2px 8px;border-radius:10px;flex-shrink:0;}
+.tf-group{display:flex;flex-direction:column;gap:3px;min-width:0;}
+.tf-group label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text-faint);}
+.tf-group input,.tf-group select{
+width:100%;padding:5px 6px;border:1px solid var(--border);border-radius:6px;font-size:11px;
+font-family:'JetBrains Mono',monospace;background:var(--surface);color:var(--text);
+}
+.tf-group select{font-family:'Inter',sans-serif;font-size:10.5px;}
+.tf-group input:focus,.tf-group select:focus{outline:none;border-color:var(--primary);}
+.tf-arrow{align-self:center;color:var(--text-faint);font-size:12px;text-align:center;padding-bottom:6px;}
+.na-toggle{display:flex;align-items:center;gap:7px;font-size:10.5px;color:var(--text-dim);flex-shrink:0;cursor:pointer;user-select:none;margin-top:1px;}
+.na-toggle .switch{width:30px;height:17px;border-radius:20px;background:var(--border);position:relative;transition:background .15s;flex-shrink:0;}
+.na-toggle .switch::after{content:"";position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:white;transition:left .15s;box-shadow:0 1px 2px rgba(0,0,0,.2);}
+.na-toggle.on{color:var(--text);}
+.na-toggle.on .switch{background:var(--amber);}
+.na-toggle.on .switch::after{left:15px;}
 .empty-state{color:var(--text-faint);font-size:13px;text-align:center;padding:44px 10px;}
 
 /* ---------- Modals ---------- */
@@ -779,29 +793,83 @@ tasks.forEach(t => {
 const row = document.createElement('div');
 row.className = 'task-row';
 const isDone = t.percent_complete_numeric >= 1;
+const predOptions = tasks
+.filter(t2 => t2.id !== t.id)
+.map(t2 => `<option value="${t2.id}" ${t.predecessor_task_id === t2.id ? 'selected' : ''}>${t2.task_name}</option>`)
+.join('');
 row.innerHTML = `
-<input type="checkbox" ${isDone ? 'checked' : ''} ${t.is_not_applicable ? 'disabled' : ''} data-task-id="${t.id}">
-<span class="tname ${t.is_not_applicable ? 'na' : (isDone ? 'done' : '')}">${t.task_name}${t.is_not_applicable ? ' (N/A)' : ''}</span>
-<span class="tdates"><span class="dur">${t.duration_days}d</span>${fmtDate(t.start_date)} → ${fmtDate(t.completion_date_planned)}</span>
+<div class="task-top">
+<input type="checkbox" ${isDone ? 'checked' : ''} ${t.is_not_applicable ? 'disabled' : ''} data-task-id="${t.id}" class="task-done-cb">
+<span class="tname ${isDone ? 'done' : ''}">${t.task_name}</span>
 <span class="tmeta">${t.execution_group || ''}</span>
+<label class="na-toggle ${t.is_not_applicable ? 'on' : ''}" data-task-id="${t.id}">
+<span class="switch"></span>N/A
+</label>
+</div>
+<div class="task-fields">
+<div class="tf-group">
+<label>Days</label>
+<input type="number" step="0.05" min="0" value="${t.duration_days}" data-task-id="${t.id}" data-field="duration_days">
+</div>
+<div class="tf-group">
+<label>Start</label>
+<input type="date" value="${t.start_date || ''}" data-task-id="${t.id}" data-field="start_date">
+</div>
+<span class="tf-arrow">&rarr;</span>
+<div class="tf-group">
+<label>Due</label>
+<input type="date" value="${t.completion_date_planned || ''}" data-task-id="${t.id}" data-field="completion_date_planned">
+</div>
+<div class="tf-group">
+<label>After</label>
+<select data-task-id="${t.id}" data-field="predecessor_task_id">
+<option value="">— none —</option>
+${predOptions}
+</select>
+</div>
+</div>
 `;
 taskListEl.appendChild(row);
 });
 
-taskListEl.querySelectorAll('input[type=checkbox]').forEach(cb => {
-cb.addEventListener('change', async (e) => {
-const taskId = e.target.getAttribute('data-task-id');
-const checked = e.target.checked;
-const { error } = await sb.from('prod_tasks').update({
-percent_complete_numeric: checked ? 1 : 0,
-actual_completion_date: checked ? new Date().toISOString().slice(0,10) : null,
-}).eq('id', taskId);
+async function updateTaskField(taskId, patch){
+const { error } = await sb.from('prod_tasks').update(patch).eq('id', taskId);
 if (error){ alert('Failed to update: ' + error.message); return; }
 const t = allTasksByUnit[unit.id].find(x => x.id === taskId);
-if (t){ t.percent_complete_numeric = checked ? 1 : 0; }
+if (t) Object.assign(t, patch);
 renderStats();
 renderUnitList();
 renderDetail(unit);
+}
+
+taskListEl.querySelectorAll('.task-done-cb').forEach(cb => {
+cb.addEventListener('change', (e) => {
+const taskId = e.target.getAttribute('data-task-id');
+const checked = e.target.checked;
+updateTaskField(taskId, {
+percent_complete_numeric: checked ? 1 : 0,
+actual_completion_date: checked ? new Date().toISOString().slice(0,10) : null,
+});
+});
+});
+
+taskListEl.querySelectorAll('.na-toggle').forEach(toggle => {
+toggle.addEventListener('click', () => {
+const taskId = toggle.getAttribute('data-task-id');
+const t = allTasksByUnit[unit.id].find(x => x.id === taskId);
+updateTaskField(taskId, { is_not_applicable: !t.is_not_applicable });
+});
+});
+
+taskListEl.querySelectorAll('.tf-group input, .tf-group select').forEach(input => {
+input.addEventListener('change', (e) => {
+const taskId = e.target.getAttribute('data-task-id');
+const field = e.target.getAttribute('data-field');
+let value = e.target.value;
+if (field === 'duration_days') value = Number(value) || 0;
+if (field === 'predecessor_task_id') value = value || null;
+if ((field === 'start_date' || field === 'completion_date_planned') && !value) value = null;
+updateTaskField(taskId, { [field]: value });
 });
 });
 }
