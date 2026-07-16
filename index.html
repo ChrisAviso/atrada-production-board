@@ -2540,8 +2540,13 @@ const r = 26, c = 2 * Math.PI * r;
 const dash = c * (p.pct / 100);
 const ringColor = p.status === 'complete' ? 'var(--green)' : (p.overdue ? 'var(--red)' : 'var(--primary)');
 
+// Coverage only counts tasks that are actually enabled — in progress, on hold, done, or with
+// some logged completion — not every task in the chain that's merely been auto-scheduled.
 const allDates = [];
 tasks.forEach(t => {
+if (t.is_not_applicable) return;
+const enabled = t.task_status !== 'not_started' || Number(t.percent_complete_numeric) > 0;
+if (!enabled) return;
 if (t.start_date) allDates.push(new Date(t.start_date));
 if (t.completion_date_planned) allDates.push(new Date(t.completion_date_planned));
 });
