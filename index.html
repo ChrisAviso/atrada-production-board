@@ -365,6 +365,27 @@ display:flex;align-items:center;justify-content:center;font-size:10px;font-weigh
 .reconcile-row-total{font-weight:800;border-bottom:none;background:var(--primary-pale);color:var(--text);}
 .reconcile-row-total .rc-hours{color:var(--primary-dark);}
 .reconcile-empty{font-size:12.5px;color:var(--text-faint);font-style:italic;padding:18px 4px;text-align:center;background:var(--surface-alt);border-radius:10px;}
+.reconcile-person-block{border-bottom:1px solid var(--border);}
+.reconcile-person-block:last-of-type{border-bottom:none;}
+.reconcile-person-block .reconcile-row{border-bottom:none;}
+.rc-day-chips{display:flex;flex-wrap:wrap;gap:5px;padding:2px 12px 12px 44px;background:var(--surface-alt);}
+.rc-day-chip{
+display:inline-flex;align-items:baseline;gap:4px;font-size:9.5px;font-family:'JetBrains Mono',monospace;
+padding:3px 7px;border-radius:6px;background:var(--surface);border:1px solid var(--border);color:var(--text-faint);
+}
+.rc-day-chip .rc-day-dow{font-weight:700;text-transform:uppercase;}
+.rc-day-chip .rc-day-num{font-weight:700;color:var(--text-dim);}
+.rc-day-chip .rc-day-hrs{font-weight:700;}
+.rc-day-chip.rc-day-none{opacity:.55;}
+.rc-day-chip.rc-day-regular{background:var(--primary-pale);border-color:#c7d2fe;color:var(--primary-dark);}
+.rc-day-chip.rc-day-regular .rc-day-num,
+.rc-day-chip.rc-day-regular .rc-day-hrs{color:var(--primary-dark);}
+.rc-day-chip.rc-day-ot15{background:var(--amber-pale);border-color:#f0d090;color:#a3660c;}
+.rc-day-chip.rc-day-ot15 .rc-day-num,
+.rc-day-chip.rc-day-ot15 .rc-day-hrs{color:#a3660c;}
+.rc-day-chip.rc-day-ot20{background:var(--red-pale);border-color:#f3b0ba;color:#a51f34;}
+.rc-day-chip.rc-day-ot20 .rc-day-num,
+.rc-day-chip.rc-day-ot20 .rc-day-hrs{color:#a51f34;}
 
 /* ---------- Stats ---------- */
 .stats-grid{
@@ -1032,6 +1053,24 @@ const yy = String(dt.getFullYear()).slice(-2);
 return `${dd}/${mm}/${yy}`;
 }
 
+// Format a Date using LOCAL calendar fields (never toISOString, which shifts by the UTC offset
+// and silently rolls the date back a day for any timezone ahead of UTC, e.g. Australia).
+function localDateStr(d){
+const y = d.getFullYear();
+const m = String(d.getMonth() + 1).padStart(2,'0');
+const day = String(d.getDate()).padStart(2,'0');
+return `${y}-${m}-${day}`;
+}
+
+function splitDayHours(hours, isWeekend){
+if (isWeekend){
+return { regular: 0, ot15: Math.min(hours, 2), ot20: Math.max(0, hours - 2) };
+}
+const regular = Math.min(hours, 7.6);
+const ot = Math.max(0, hours - 7.6);
+return { regular, ot15: Math.min(ot, 2), ot20: Math.max(0, ot - 2) };
+}
+
 function taskScheduleInfo(t){
 if (!t.completion_date_planned || t.is_not_applicable) return null;
 const planned = new Date(t.completion_date_planned + 'T00:00:00');
@@ -1176,8 +1215,14 @@ if (!el) return;
 
 const start = new Date(fortnightStart);
 const end = new Date(start); end.setDate(end.getDate() + 13);
-const startIso = start.toISOString().slice(0,10);
-const endIso = end.toISOString().slice(0,10);
+const startIso = localDateStr(start);
+const endIso = localDateStr(end);
+
+const fortnightDates = [];
+for (let i = 0; i < 14; i++){
+const d = new Date(start); d.setDate(d.getDate() + i);
+fortnightDates.push(localDateStr(d));
+}
 
 const { data, error } = await sb.from('prod_daily_hours')
 .select('person_email, work_date, hours_worked')
@@ -1196,27 +1241,21 @@ byPersonDay[key] = (byPersonDay[key] || 0) + Number(r.hours_worked || 0);
 });
 
 const totalsByPerson = {};
+const dayMapByPerson = {};
 Object.entries(byPersonDay).forEach(([key, hours]) => {
 const sep = key.lastIndexOf('::');
 const email = key.slice(0, sep);
 const workDate = key.slice(sep + 2);
 const day = new Date(workDate + 'T00:00:00').getDay();
 const isWeekend = day === 0 || day === 6;
-let regular = 0, ot15 = 0, ot20 = 0;
-if (isWeekend){
-ot15 = Math.min(hours, 2);
-ot20 = Math.max(0, hours - 2);
-} else {
-regular = Math.min(hours, 7.6);
-const ot = Math.max(0, hours - 7.6);
-ot15 = Math.min(ot, 2);
-ot20 = Math.max(0, ot - 2);
-}
+const { regular, ot15, ot20 } = splitDayHours(hours, isWeekend);
 if (!totalsByPerson[email]) totalsByPerson[email] = { regular: 0, ot15: 0, ot20: 0, total: 0 };
 totalsByPerson[email].regular += regular;
 totalsByPerson[email].ot15 += ot15;
 totalsByPerson[email].ot20 += ot20;
 totalsByPerson[email].total += hours;
+if (!dayMapByPerson[email]) dayMapByPerson[email] = {};
+dayMapByPerson[email][workDate] = hours;
 });
 
 const people = Object.keys(totalsByPerson).sort((a,b) => formatPersonName(a).localeCompare(formatPersonName(b)));
@@ -1231,6 +1270,24 @@ grand.total += totalsByPerson[p].total;
 const fmtH = (n) => n.toFixed(2) + 'h';
 const rangeLabel = `${fmtDate(startIso)} – ${fmtDate(endIso)}`;
 const initialsOf = (name) => name.split(' ').filter(Boolean).slice(0,2).map(w => w[0].toUpperCase()).join('') || '?';
+const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const dayChipsHtml = (email) => {
+const map = dayMapByPerson[email] || {};
+return fortnightDates.map(dateStr => {
+const hours = map[dateStr] || 0;
+const dow = new Date(dateStr + 'T00:00:00').getDay();
+const isWeekend = dow === 0 || dow === 6;
+const { ot15, ot20 } = splitDayHours(hours, isWeekend);
+let tier = 'none';
+if (hours > 0){
+tier = ot20 > 0 ? 'ot20' : (ot15 > 0 ? 'ot15' : 'regular');
+}
+const dd = String(new Date(dateStr + 'T00:00:00').getDate()).padStart(2,'0');
+return `<span class="rc-day-chip rc-day-${tier}" title="${DOW[dow]} ${fmtDate(dateStr)}${isWeekend ? ' (weekend)' : ''} — ${fmtH(hours)}">
+<span class="rc-day-dow">${DOW[dow]}</span><span class="rc-day-num">${dd}</span><span class="rc-day-hrs">${hours > 0 ? hours.toFixed(1) : '–'}</span>
+</span>`;
+}).join('');
+};
 
 el.innerHTML = `
 <div class="reconcile-panel">
@@ -1265,12 +1322,15 @@ const r = totalsByPerson[p];
 const hasOt = (r.ot15 + r.ot20) > 0;
 const name = formatPersonName(p);
 return `
+<div class="reconcile-person-block">
 <div class="reconcile-row${hasOt ? ' reconcile-row-ot' : ''}">
 <span class="rc-person"><span class="rc-avatar">${initialsOf(name)}</span>${name}</span>
 <span class="rc-hours${r.regular === 0 ? ' rc-zero' : ''}">${fmtH(r.regular)}</span>
 <span class="rc-hours">${r.ot15 > 0 ? `<span class="rc-pill rc-pill-15">${fmtH(r.ot15)}</span>` : '<span class="rc-zero">—</span>'}</span>
 <span class="rc-hours">${r.ot20 > 0 ? `<span class="rc-pill rc-pill-20">${fmtH(r.ot20)}</span>` : '<span class="rc-zero">—</span>'}</span>
 <span class="rc-hours rc-total">${fmtH(r.total)}</span>
+</div>
+<div class="rc-day-chips">${dayChipsHtml(p)}</div>
 </div>
 `;
 }).join('')}
