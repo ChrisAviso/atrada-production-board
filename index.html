@@ -254,10 +254,16 @@ background:var(--surface-alt);border:1px solid var(--border);border-radius:8px;p
 font-family:'JetBrains Mono',monospace;
 }
 .dp-coverage b{color:var(--text);font-weight:700;font-family:'Inter',sans-serif;}
-.dp-progress{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--surface-alt);border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:6px;}
-.dp-ring{flex-shrink:0;}
-.dp-progress-text{font-size:12px;color:var(--text-dim);}
+.dp-progress{display:flex;align-items:flex-start;gap:16px;padding:14px 16px;background:var(--surface-alt);border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:6px;flex-wrap:wrap;}
+.dp-ring{flex-shrink:0;margin-top:2px;}
+.dp-progress-text{font-size:12px;color:var(--text-dim);flex-shrink:0;width:150px;padding-top:4px;}
 .dp-progress-text b{display:block;font-size:14px;color:var(--text);font-weight:700;margin-bottom:2px;}
+.dp-quickstats{flex:1;min-width:280px;display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;}
+.qs-chip{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 10px;min-width:0;}
+.qs-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint);display:block;margin-bottom:3px;}
+.qs-value{font-size:11.5px;font-weight:600;color:var(--text);line-height:1.4;word-break:break-word;}
+.qs-value.qs-warn{color:#a51f34;}
+.qs-value.qs-good{color:#0a7d59;}
 
 .dp-schedule-summary{
 display:flex;flex-direction:column;gap:6px;background:var(--surface-alt);border:1px solid var(--border);
@@ -289,9 +295,11 @@ border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-botto
 .task-row.row-locked .task-assignee,
 .task-row.row-locked .task-timer-btn,
 .task-row.row-locked .task-wrench-btn,
-.task-row.row-locked .task-remarks-wrap,
-.task-row.row-locked .task-sched-badge{
+.task-row.row-locked .task-remarks-wrap{
 opacity:.42;
+}
+.task-row.row-locked .task-sched-badge{
+display:none;
 }
 .task-row.row-locked select:disabled,
 .task-row.row-locked input:disabled,
@@ -934,6 +942,38 @@ ${schedAhead.length ? `<div class="sched-row sd-ahead"><b>Ahead of schedule</b><
 ${schedOnTime.length ? `<div class="sched-row sd-ontime"><b>On schedule</b><span>${schedOnTime.join(', ')}</span></div>` : ''}
 ` : '<div class="sched-row sd-empty">No dated tasks yet.</div>';
 
+let cntNotStarted = 0, cntInProgress = 0, cntOnHold = 0, cntDone = 0;
+tasks.forEach(t => {
+if (t.is_not_applicable) return;
+const st = taskStatusPill(t).value;
+if (st === 'done') cntDone++;
+else if (st === 'in_progress') cntInProgress++;
+else if (st === 'on_hold') cntOnHold++;
+else cntNotStarted++;
+});
+const taskCountText = `${cntDone} done · ${cntInProgress} in progress · ${cntOnHold} on-hold · ${cntNotStarted} not started`;
+
+const estimatedHours = tasks.filter(t => !t.is_not_applicable).reduce((sum, t) => sum + (Number(t.duration_days) || 0), 0) * 8;
+
+const teamSet = new Set();
+tasks.forEach(t => { if (t.assigned_to && t.assigned_to.trim()) teamSet.add(t.assigned_to.trim()); });
+const teamText = teamSet.size ? Array.from(teamSet).join(', ') : 'Unassigned';
+
+let difotValue = 'Not set', difotCls = '';
+if (unit.difot_date){
+const target = new Date(unit.difot_date + 'T00:00:00');
+const today = new Date(); today.setHours(0,0,0,0);
+const diffDays = Math.round((target - today) / 86400000);
+const dateStr = fmtDate(unit.difot_date);
+if (diffDays < 0){ difotValue = `${dateStr} · ${Math.abs(diffDays)}d overdue`; difotCls = 'qs-warn'; }
+else if (diffDays === 0){ difotValue = `${dateStr} · Due today`; difotCls = 'qs-warn'; }
+else { difotValue = `${dateStr} · ${diffDays}d remaining`; difotCls = diffDays <= 5 ? 'qs-warn' : 'qs-good'; }
+if (maxDate && maxDate > target && p.status !== 'complete'){
+difotValue += ' — tasks extend past target';
+difotCls = 'qs-warn';
+}
+}
+
 document.getElementById('detailModal').classList.remove('hidden');
 
 panel.innerHTML = `
@@ -962,6 +1002,24 @@ stroke-dasharray="${dash} ${c}" stroke-linecap="round" transform="rotate(-90 32 
 <div class="dp-progress-text">
 <b>${s.label}</b>
 ${p.pct}% of drafting/production tasks complete
+</div>
+<div class="dp-quickstats">
+<div class="qs-chip">
+<span class="qs-label">DIFOT target</span>
+<span class="qs-value ${difotCls}">${difotValue}</span>
+</div>
+<div class="qs-chip">
+<span class="qs-label">Tasks</span>
+<span class="qs-value">${taskCountText}</span>
+</div>
+<div class="qs-chip">
+<span class="qs-label">Hours logged</span>
+<span class="qs-value" id="dpHoursLogged">…</span>
+</div>
+<div class="qs-chip">
+<span class="qs-label">Team</span>
+<span class="qs-value">${teamText}</span>
+</div>
 </div>
 </div>
 <div class="dp-schedule-summary">
@@ -1216,14 +1274,17 @@ runningTimerTick = setInterval(tick, 1000);
 }
 
 const taskIds = tasks.map(t => t.id);
+const hoursEl = panel.querySelector('#dpHoursLogged');
 if (taskIds.length){
 sb.from('prod_daily_hours').select('task_id, hours_worked, work_date, person_email').in('task_id', taskIds).order('work_date').then(({ data, error }) => {
-if (error || !data) return;
+if (error || !data){ if (hoursEl) hoursEl.textContent = '—'; return; }
 const sums = {};
 const logs = {};
+let totalLogged = 0;
 data.forEach(r => {
 sums[r.task_id] = (sums[r.task_id] || 0) + Number(r.hours_worked || 0);
 (logs[r.task_id] = logs[r.task_id] || []).push(r);
+totalLogged += Number(r.hours_worked || 0);
 });
 taskIds.forEach(id => {
 const el = taskListEl.querySelector(`.task-timer-elapsed[data-task-id="${id}"]`);
@@ -1234,7 +1295,10 @@ el.title = entries.length
 ? 'Log history:\n' + entries.map(r => `${fmtDate(r.work_date)} — ${Number(r.hours_worked).toFixed(2)}h${r.person_email ? ' (' + r.person_email.split('@')[0] + ')' : ''}`).join('\n')
 : 'No logged hours yet';
 });
+if (hoursEl) hoursEl.textContent = `${totalLogged.toFixed(1)}h / ${estimatedHours.toFixed(0)}h est.`;
 });
+} else if (hoursEl){
+hoursEl.textContent = `0h / ${estimatedHours.toFixed(0)}h est.`;
 }
 }
 
