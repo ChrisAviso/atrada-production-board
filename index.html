@@ -810,6 +810,12 @@ position:fixed;inset:0;background:rgba(10,11,20,.5);display:flex;align-items:cen
 background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);
 width:440px;max-width:100%;max-height:88vh;overflow-y:auto;padding:26px 28px;
 }
+.modal-card-wide{width:680px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
+.modal-card .section-lbl{
+margin:22px 0 10px;padding-top:16px;border-top:1px solid var(--border);
+}
+.modal-card .section-lbl:first-of-type{border-top:none;padding-top:0;margin-top:4px;}
 .modal-card h2{font-size:17px;margin:0 0 4px;font-weight:700;letter-spacing:-0.01em;}
 .modal-card p.modal-sub{color:var(--text-dim);font-size:13px;margin:0 0 20px;}
 .modal-close-row{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;}
@@ -935,15 +941,19 @@ display:flex;align-items:center;justify-content:center;
 </div>
 
 <div id="addSoModal" class="modal-overlay hidden">
-<div class="modal-card">
+<div class="modal-card modal-card-wide">
 <div class="modal-icon modal-icon-primary">✦</div>
 <h2>Add SO / unit</h2>
 <p class="modal-sub">Creates the sales order first if it doesn't exist yet, then a production unit with its task checklist cloned from the matching template.</p>
 <div id="addSoMsg"></div>
+
 <div class="field">
 <label>SO number <span class="req-mark">*</span></label>
 <input type="text" id="addSoNumber" placeholder="SOTS12345">
 </div>
+
+<div class="section-lbl">Sales order</div>
+<div class="field-row">
 <div class="field">
 <label>Company name</label>
 <input type="text" id="addSoCompanyName" placeholder="e.g. BHP Iron Ore Pty Ltd">
@@ -952,10 +962,8 @@ display:flex;align-items:center;justify-content:center;
 <label>Sales rep</label>
 <select id="addSoSalesRep"><option value="">Select…</option></select>
 </div>
-<div class="field">
-<label>Project sales ($)</label>
-<input type="number" id="addSoProjectSales" placeholder="e.g. 250000" min="0" step="0.01">
 </div>
+<div class="field-row">
 <div class="field">
 <label>PO received date</label>
 <input type="date" id="addSoPoReceivedDate">
@@ -964,10 +972,18 @@ display:flex;align-items:center;justify-content:center;
 <label>Client approval date</label>
 <input type="date" id="addSoClientApprovalDate">
 </div>
+</div>
+<div class="field">
+<label>Project sales ($)</label>
+<input type="number" id="addSoProjectSales" placeholder="e.g. 250000" min="0" step="0.01">
+</div>
+
+<div class="section-lbl">New unit</div>
 <div class="field">
 <label>Unit name <span class="req-mark">*</span></label>
 <input type="text" id="addSoUnitName" placeholder="e.g. HDWL1D-450 - 1 Door Heavy Duty Workshop Locker">
 </div>
+<div class="field-row">
 <div class="field">
 <label>Class <span class="req-mark">*</span></label>
 <select id="addSoClass"></select>
@@ -976,10 +992,12 @@ display:flex;align-items:center;justify-content:center;
 <label>Qty <span class="req-mark">*</span></label>
 <input type="number" id="addSoQty" value="1" min="1">
 </div>
+</div>
 <div class="field">
 <label>Task template <span class="req-mark">*</span></label>
 <select id="addSoTemplate"></select>
 </div>
+
 <div class="modal-close-row">
 <button class="icon-btn ghost-light" id="addSoCancelBtn">Cancel</button>
 <button class="btn" id="addSoSubmitBtn" style="width:auto;">Create unit</button>
