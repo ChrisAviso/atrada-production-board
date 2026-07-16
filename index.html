@@ -344,18 +344,16 @@ color:var(--text);cursor:pointer;border-radius:6px;font-family:inherit;
 .task-remarks-input{
 width:100%;min-height:42px;padding:7px 9px;border:1px solid var(--border);border-radius:7px;
 font-size:11.5px;font-family:inherit;background:var(--surface);color:var(--text);resize:vertical;box-sizing:border-box;
+position:relative;z-index:1;transition:box-shadow .12s;
 }
 .task-remarks-input:focus{outline:none;border-color:var(--primary);}
-.task-remarks-count{font-size:9.5px;color:var(--text-faint);text-align:right;margin-top:2px;font-family:'JetBrains Mono',monospace;}
-.task-remarks-preview{
-display:none;position:absolute;left:27px;right:0;top:calc(100% + 4px);
-max-height:260px;overflow-y:auto;background:var(--surface);border:1px solid var(--border-strong);
-border-radius:10px;box-shadow:var(--shadow-md);padding:14px 16px;font-size:13.5px;line-height:1.6;
-color:var(--text);white-space:pre-wrap;word-break:break-word;z-index:20;
+.task-remarks-wrap:hover .task-remarks-input,
+.task-remarks-wrap:focus-within .task-remarks-input{
+position:absolute;left:0;top:0;width:100%;min-height:190px;z-index:30;
+font-size:13.5px;line-height:1.6;padding:14px 16px;
+box-shadow:var(--shadow-md);border-color:var(--primary);background:var(--surface);
 }
-.task-remarks-preview .rp-empty{color:var(--text-faint);font-style:italic;}
-.task-remarks-wrap:hover .task-remarks-preview,
-.task-remarks-wrap:focus-within .task-remarks-preview{display:block;}
+.task-remarks-count{font-size:9.5px;color:var(--text-faint);text-align:right;margin-top:2px;font-family:'JetBrains Mono',monospace;}
 #logsModalCard{width:480px;}
 .log-edit-row{display:grid;grid-template-columns:1fr 78px 74px 22px;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);}
 .log-edit-row:last-child{border-bottom:none;}
@@ -984,7 +982,6 @@ ${assigneeOptions}
 <div class="task-remarks-wrap">
 <textarea class="task-remarks-input" data-task-id="${t.id}" placeholder="Remarks…" ${dis}>${remarksVal}</textarea>
 <div class="task-remarks-count" data-task-id="${t.id}">${remarksWords} / 400 words</div>
-<div class="task-remarks-preview" data-task-id="${t.id}">${remarksVal || '<span class="rp-empty">No remarks yet.</span>'}</div>
 </div>
 `;
 taskListEl.appendChild(row);
@@ -1094,11 +1091,6 @@ e.target.value = words.join(' ');
 const taskId = e.target.getAttribute('data-task-id');
 const countEl = taskListEl.querySelector(`.task-remarks-count[data-task-id="${taskId}"]`);
 if (countEl) countEl.textContent = `${words.length} / 400 words`;
-const previewEl = taskListEl.querySelector(`.task-remarks-preview[data-task-id="${taskId}"]`);
-if (previewEl){
-const escaped = e.target.value.replace(/</g,'&lt;').replace(/>/g,'&gt;');
-previewEl.innerHTML = escaped.trim() ? escaped : '<span class="rp-empty">No remarks yet.</span>';
-}
 });
 ta.addEventListener('change', (e) => {
 const taskId = e.target.getAttribute('data-task-id');
