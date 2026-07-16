@@ -267,6 +267,19 @@ letter-spacing:.05em;margin:20px 0 6px;
 border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;background:var(--surface-alt);
 }
 .task-row:last-child{margin-bottom:0;}
+.task-row.row-locked .task-fields,
+.task-row.row-locked .task-assignee,
+.task-row.row-locked .task-timer-btn,
+.task-row.row-locked .task-wrench-btn,
+.task-row.row-locked .task-remarks-wrap{
+opacity:.42;
+}
+.task-row.row-locked select:disabled,
+.task-row.row-locked input:disabled,
+.task-row.row-locked textarea:disabled,
+.task-row.row-locked button:disabled{
+cursor:not-allowed;background-image:none;
+}
 .task-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;}
 .task-top input[type=checkbox]{width:17px;height:17px;accent-color:var(--green);cursor:pointer;flex-shrink:0;margin-top:2px;}
 .task-top .tname{flex:1;min-width:0;line-height:1.4;word-break:break-word;}
@@ -928,13 +941,13 @@ const assigneeOptions = knownAssignees
 .join('');
 const remarksVal = (t.remarks || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const remarksWords = wordCountOf(t.remarks);
-const dis = '';
-row.className = 'task-row';
+const dis = isDone ? '' : 'disabled';
+row.className = 'task-row' + (isDone ? '' : ' row-locked');
 row.innerHTML = `
 <div class="task-top">
 <input type="checkbox" ${isDone ? 'checked' : ''} data-task-id="${t.id}" class="task-done-cb">
 <span class="tname ${isDone ? 'done' : ''}">${t.task_name}</span>
-<select class="task-status-pill ${sp.cls}" data-task-id="${t.id}" data-field="task_status" ${dis}>
+<select class="task-status-pill ${sp.cls}" data-task-id="${t.id}" data-field="task_status">
 <option value="not_started" ${sp.value === 'not_started' ? 'selected' : ''}>Not started</option>
 <option value="in_progress" ${sp.value === 'in_progress' ? 'selected' : ''}>In progress</option>
 <option value="on_hold" ${sp.value === 'on_hold' ? 'selected' : ''}>On-Hold</option>
@@ -1004,14 +1017,11 @@ taskListEl.querySelectorAll('.task-done-cb').forEach(cb => {
 cb.addEventListener('change', (e) => {
 const taskId = e.target.getAttribute('data-task-id');
 const checked = e.target.checked;
-const t = (allTasksByUnit[unit.id] || []).find(x => x.id === taskId);
 const patch = {
 percent_complete_numeric: checked ? 1 : 0,
 actual_completion_date: checked ? new Date().toISOString().slice(0,10) : null,
 is_not_applicable: false,
 };
-if (checked) patch.task_status = 'done';
-else if (t && t.task_status === 'done') patch.task_status = 'not_started';
 updateTaskField(taskId, patch);
 });
 });
@@ -1020,15 +1030,7 @@ taskListEl.querySelectorAll('.task-status-pill').forEach(sel => {
 sel.addEventListener('change', (e) => {
 const taskId = e.target.getAttribute('data-task-id');
 const value = e.target.value;
-const patch = { task_status: value };
-if (value === 'done'){
-patch.percent_complete_numeric = 1;
-patch.actual_completion_date = new Date().toISOString().slice(0,10);
-} else {
-const t = (allTasksByUnit[unit.id] || []).find(x => x.id === taskId);
-if (t && Number(t.percent_complete_numeric) >= 1) patch.percent_complete_numeric = 0;
-}
-updateTaskField(taskId, patch);
+updateTaskField(taskId, { task_status: value });
 });
 });
 
