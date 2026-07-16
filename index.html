@@ -493,6 +493,12 @@ opacity:.42;
 .task-row.row-locked .task-sched-badge{
 display:none;
 }
+.task-row.task-row-late{background:var(--red-pale);border-color:#f3b0ba;}
+.task-row.task-row-ahead{background:#eafaf0;border-color:#a8e0c5;}
+.task-row.task-row-duesoon{background:#fff3b0;border-color:#e8c93b;}
+.task-row.row-locked.task-row-late,
+.task-row.row-locked.task-row-ahead,
+.task-row.row-locked.task-row-duesoon{background:var(--surface-alt);border-color:var(--border);}
 .task-row.row-locked select:disabled,
 .task-row.row-locked input:disabled,
 .task-row.row-locked textarea:disabled,
@@ -2100,7 +2106,13 @@ const assigneeOptions = knownAssignees
 const remarksVal = (t.remarks || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const remarksWords = wordCountOf(t.remarks);
 const dis = isDone ? '' : 'disabled';
-row.className = 'task-row' + (isDone ? '' : ' row-locked');
+let schedRowClass = '';
+if (schedInfo){
+if (schedInfo.status === 'behind') schedRowClass = ' task-row-late';
+else if (schedInfo.diffDays <= -3) schedRowClass = ' task-row-ahead';
+else schedRowClass = ' task-row-duesoon';
+}
+row.className = 'task-row' + (isDone ? '' : ' row-locked') + schedRowClass;
 row.innerHTML = `
 <div class="task-top">
 <input type="checkbox" ${isDone ? 'checked' : ''} data-task-id="${t.id}" class="task-done-cb">
