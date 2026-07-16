@@ -483,6 +483,12 @@ background:var(--surface-alt);transition:background .12s;
 .so-group-head .so-name{font-size:13px;font-weight:800;letter-spacing:.01em;color:var(--text);font-family:'JetBrains Mono',monospace;}
 .so-unit-count{font-size:11px;font-weight:700;color:var(--text-dim);background:var(--border);padding:2px 9px;border-radius:20px;}
 .so-company{font-size:11.5px;color:var(--text-dim);font-weight:600;}
+.so-sales-rep{font-size:11px;color:var(--text-dim);}
+.so-sales-rep::before{content:'Rep: ';color:var(--text-faint);}
+.so-project-sales{
+font-size:11px;font-weight:700;color:#0a7d59;background:var(--green-pale);
+padding:2px 9px;border-radius:20px;font-family:'JetBrains Mono',monospace;
+}
 .so-received{font-size:10.5px;color:var(--text-faint);font-family:'JetBrains Mono',monospace;}
 .so-edit-hint{
 margin-left:auto;font-size:10.5px;font-weight:700;color:var(--text-faint);flex-shrink:0;
@@ -1147,6 +1153,13 @@ const yy = String(dt.getFullYear()).slice(-2);
 return `${dd}/${mm}/${yy}`;
 }
 
+function fmtMoney(n){
+if (n === null || n === undefined || n === '') return null;
+const num = Number(n);
+if (Number.isNaN(num)) return null;
+return '$' + num.toLocaleString('en-AU', { maximumFractionDigits: 0 });
+}
+
 // Format a Date using LOCAL calendar fields (never toISOString, which shifts by the UTC offset
 // and silently rolls the date back a day for any timezone ahead of UTC, e.g. Australia).
 function localDateStr(d){
@@ -1808,7 +1821,7 @@ if (!allTasksByUnit[t.unit_id]) allTasksByUnit[t.unit_id] = [];
 allTasksByUnit[t.unit_id].push(t);
 });
 
-const { data: soRows } = await sb.from('prod_sales_orders').select('so_number, sales_rep, company_name, created_at, client_approval_date');
+const { data: soRows } = await sb.from('prod_sales_orders').select('so_number, sales_rep, company_name, created_at, client_approval_date, project_sales');
 soInfoByNumber = {};
 (soRows || []).forEach(so => { soInfoByNumber[so.so_number] = so; });
 
@@ -2055,6 +2068,8 @@ head.innerHTML = `
 <span class="so-name">${g.label}</span>
 ${so && so.company_name ? `<span class="so-company">${so.company_name}</span>` : ''}
 <span class="so-unit-count">${g.units.length} unit${g.units.length > 1 ? 's' : ''}</span>
+${so && so.sales_rep ? `<span class="so-sales-rep">${so.sales_rep}</span>` : ''}
+${so && fmtMoney(so.project_sales) ? `<span class="so-project-sales">${fmtMoney(so.project_sales)}</span>` : ''}
 ${receivedAge !== null ? `<span class="so-received">SO received ${receivedAge}d ago</span>` : ''}
 ${groupBy === 'so' ? `<span class="so-edit-hint">✎ Edit</span>` : ''}
 ${anyBehind ? '<span class="so-flag-behind">Behind schedule</span>' : ''}
