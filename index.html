@@ -1018,23 +1018,29 @@ display:flex;align-items:center;justify-content:center;
 </div>
 
 <div id="editSoModal" class="modal-overlay hidden">
-<div class="modal-card">
+<div class="modal-card modal-card-wide">
 <div class="modal-icon modal-icon-primary">✎</div>
 <h2>Edit SO details</h2>
 <p class="modal-sub">Renaming the SO number updates it everywhere — the sales order record and every unit filed under it.</p>
 <div id="editSoMsg"></div>
+
 <div class="field">
 <label>SO number <span class="req-mark">*</span></label>
 <input type="text" id="editSoNumberInput" placeholder="SOTS12345">
 </div>
+
+<div class="section-lbl">Sales order</div>
+<div class="field-row">
 <div class="field">
 <label>Company name</label>
 <input type="text" id="editSoCompanyName" placeholder="e.g. BHP Iron Ore Pty Ltd">
 </div>
 <div class="field">
 <label>Sales rep</label>
-<input type="text" id="editSoSalesRep" placeholder="Name">
+<select id="editSoSalesRep"><option value="">Select…</option></select>
 </div>
+</div>
+<div class="field-row">
 <div class="field">
 <label>PO received date</label>
 <input type="date" id="editSoReceivedDate">
@@ -1043,6 +1049,12 @@ display:flex;align-items:center;justify-content:center;
 <label>Client approval date</label>
 <input type="date" id="editSoClientApprovalDate">
 </div>
+</div>
+<div class="field">
+<label>Project sales ($)</label>
+<input type="number" id="editSoProjectSales" placeholder="e.g. 250000" min="0" step="0.01">
+</div>
+
 <div class="modal-danger-row">
 <button type="button" class="modal-danger-link" id="editSoDeleteBtn">Delete this SO…</button>
 </div>
@@ -3416,6 +3428,13 @@ else e.target.value = '';
 });
 
 /* ---------- Edit SO (also covers migrated SOs with no prod_sales_orders row yet) ---------- */
+document.getElementById('editSoSalesRep').addEventListener('change', (e) => {
+if (e.target.value === '__add__'){
+const name = prompt('Add sales rep name:');
+if (name && name.trim()) addCustomSalesRepOption('editSoSalesRep', name.trim());
+else e.target.value = '';
+}
+});
 document.getElementById('editSoCancelBtn').addEventListener('click', closeEditSoModal);
 document.getElementById('editSoSubmitBtn').addEventListener('click', submitEditSo);
 document.getElementById('editSoDeleteBtn').addEventListener('click', () => {
@@ -3486,9 +3505,10 @@ document.getElementById('editSoMsg').innerHTML = '';
 const so = soInfoByNumber[soNumber];
 document.getElementById('editSoNumberInput').value = soNumber;
 document.getElementById('editSoCompanyName').value = so && so.company_name ? so.company_name : '';
-document.getElementById('editSoSalesRep').value = so && so.sales_rep ? so.sales_rep : '';
+populateSalesRepOptions('editSoSalesRep', so && so.sales_rep ? so.sales_rep : '');
 document.getElementById('editSoReceivedDate').value = so && so.created_at ? new Date(so.created_at).toISOString().slice(0,10) : '';
 document.getElementById('editSoClientApprovalDate').value = so && so.client_approval_date ? so.client_approval_date : '';
+document.getElementById('editSoProjectSales').value = so && so.project_sales !== null && so.project_sales !== undefined ? so.project_sales : '';
 document.getElementById('editSoModal').dataset.soNumber = soNumber;
 document.getElementById('editSoModal').classList.remove('hidden');
 }
@@ -3501,9 +3521,12 @@ const originalSoNumber = document.getElementById('editSoModal').dataset.soNumber
 if (!originalSoNumber) return;
 const newSoNumber = document.getElementById('editSoNumberInput').value.trim();
 const companyName = document.getElementById('editSoCompanyName').value.trim();
-const salesRep = document.getElementById('editSoSalesRep').value.trim();
+const salesRepRaw = document.getElementById('editSoSalesRep').value;
+const salesRep = salesRepRaw === '__add__' ? '' : salesRepRaw.trim();
 const receivedDate = document.getElementById('editSoReceivedDate').value;
 const clientApprovalDate = document.getElementById('editSoClientApprovalDate').value;
+const projectSalesRaw = document.getElementById('editSoProjectSales').value;
+const projectSales = projectSalesRaw !== '' ? Number(projectSalesRaw) : null;
 
 if (!newSoNumber){
 msgEl.innerHTML = '<div class="auth-msg error">SO number can\'t be empty.</div>';
@@ -3514,7 +3537,11 @@ const renaming = newSoNumber !== originalSoNumber;
 const submitBtn = document.getElementById('editSoSubmitBtn');
 submitBtn.disabled = true; submitBtn.textContent = 'Saving…';
 
-const patch = { company_name: companyName || null, sales_rep: salesRep || null, client_approval_date: clientApprovalDate || null };
+const patch = {
+company_name: companyName || null, sales_rep: salesRep || null,
+client_approval_date: clientApprovalDate || null,
+project_sales: (projectSales !== null && !Number.isNaN(projectSales)) ? projectSales : null,
+};
 if (receivedDate) patch.created_at = new Date(receivedDate + 'T00:00:00').toISOString();
 
 try {
