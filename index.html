@@ -96,11 +96,33 @@ box-shadow:0 6px 16px rgba(52,87,245,.35);
 .field{margin-bottom:15px;}
 .field label{font-size:12px;font-weight:600;color:var(--text-dim);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;}
 .field-hint{font-size:11px;color:var(--text-faint);margin-top:5px;line-height:1.4;}
-.field input{
+.field input,.field select{
 width:100%;padding:11px 13px;border:1.5px solid var(--border);
-border-radius:9px;font-size:14px;font-family:inherit;background:var(--surface-alt);transition:border-color .15s,background .15s;
+border-radius:9px;font-size:14px;font-family:inherit;background:var(--surface-alt);color:var(--text);
+transition:border-color .15s,background .15s,box-shadow .15s;
 }
-.field input:focus{outline:none;border-color:var(--primary);background:white;box-shadow:0 0 0 3px var(--primary-pale);}
+.field select{
+appearance:none;-webkit-appearance:none;-moz-appearance:none;cursor:pointer;
+background-image:url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='12' height='12'%3E%3Cpath fill='%23686d82' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+background-repeat:no-repeat;background-position:right 13px center;background-size:12px;padding-right:34px;
+}
+.field input:focus,.field select:focus{outline:none;border-color:var(--primary);background-color:white;box-shadow:0 0 0 3px var(--primary-pale);}
+.req-mark{color:var(--primary);font-weight:700;}
+.modal-icon{
+width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;
+font-size:17px;margin-bottom:12px;
+}
+.modal-icon-primary{background:var(--primary-pale);color:var(--primary);}
+.modal-icon-amber{background:var(--amber-pale);color:#a3660c;}
+.field-tint-group{
+background:var(--amber-pale);border:1px solid #f0d090;border-radius:10px;padding:14px 14px 1px;margin-bottom:15px;
+}
+.field-tint-label{
+font-size:10px;font-weight:800;color:#a3660c;text-transform:uppercase;letter-spacing:.05em;margin-bottom:11px;
+}
+.field-tint-group .field label{color:#8a6008;}
+.field-tint-group .field input{background:white;border-color:#f0d090;}
+.field-tint-group .field input:focus{border-color:var(--amber);box-shadow:0 0 0 3px rgba(214,138,18,.16);}
 .btn{
 width:100%;padding:12px;border:none;border-radius:9px;background:var(--primary);color:white;
 font-weight:600;font-size:14px;cursor:pointer;font-family:inherit;transition:background .15s;
@@ -722,35 +744,39 @@ display:flex;align-items:center;justify-content:center;
 
 <div id="addSoModal" class="modal-overlay hidden">
 <div class="modal-card">
+<div class="modal-icon modal-icon-primary">✦</div>
 <h2>Add SO / unit</h2>
 <p class="modal-sub">Creates the sales order first if it doesn't exist yet, then a production unit with its task checklist cloned from the matching template.</p>
 <div id="addSoMsg"></div>
 <div class="field">
-<label>SO number</label>
+<label>SO number <span class="req-mark">*</span></label>
 <input type="text" id="addSoNumber" placeholder="SOTS12345">
 </div>
+<div class="field-tint-group">
+<div class="field-tint-label">Only used if this SO is new</div>
 <div class="field">
-<label>Sales rep (only used if this SO is new)</label>
+<label>Sales rep</label>
 <input type="text" id="addSoSalesRep" placeholder="Name">
 </div>
 <div class="field">
-<label>Company name (only used if this SO is new)</label>
+<label>Company name</label>
 <input type="text" id="addSoCompanyName" placeholder="e.g. BHP Iron Ore Pty Ltd">
 </div>
+</div>
 <div class="field">
-<label>Unit name</label>
+<label>Unit name <span class="req-mark">*</span></label>
 <input type="text" id="addSoUnitName" placeholder="e.g. HDWL1D-450 - 1 Door Heavy Duty Workshop Locker">
 </div>
 <div class="field">
-<label>Class</label>
+<label>Class <span class="req-mark">*</span></label>
 <select id="addSoClass"></select>
 </div>
 <div class="field">
-<label>Qty</label>
+<label>Qty <span class="req-mark">*</span></label>
 <input type="number" id="addSoQty" value="1" min="1">
 </div>
 <div class="field">
-<label>Task template</label>
+<label>Task template <span class="req-mark">*</span></label>
 <select id="addSoTemplate"></select>
 </div>
 <div class="modal-close-row">
@@ -762,11 +788,12 @@ display:flex;align-items:center;justify-content:center;
 
 <div id="editSoModal" class="modal-overlay hidden">
 <div class="modal-card">
+<div class="modal-icon modal-icon-primary">✎</div>
 <h2>Edit SO details</h2>
 <p class="modal-sub">Renaming the SO number updates it everywhere — the sales order record and every unit filed under it.</p>
 <div id="editSoMsg"></div>
 <div class="field">
-<label>SO number</label>
+<label>SO number <span class="req-mark">*</span></label>
 <input type="text" id="editSoNumberInput" placeholder="SOTS12345">
 </div>
 <div class="field">
@@ -790,31 +817,35 @@ display:flex;align-items:center;justify-content:center;
 
 <div id="editUnitModal" class="modal-overlay hidden">
 <div class="modal-card">
+<div class="modal-icon modal-icon-primary">✎</div>
 <h2>Edit unit</h2>
-<p class="modal-sub">Reassign this unit to a different SO, or update its details. Sales rep / company name are only used if the SO number is new.</p>
+<p class="modal-sub">Reassign this unit to a different SO, or update its details.</p>
 <div id="editUnitMsg"></div>
 <div class="field">
-<label>SO number</label>
+<label>SO number <span class="req-mark">*</span></label>
 <input type="text" id="editUnitSoNumber" placeholder="SOTS12345">
 </div>
+<div class="field-tint-group">
+<div class="field-tint-label">Only used if this SO is new</div>
 <div class="field">
-<label>Sales rep (only used if this SO is new)</label>
+<label>Sales rep</label>
 <input type="text" id="editUnitSalesRep" placeholder="Name">
 </div>
 <div class="field">
-<label>Company name (only used if this SO is new)</label>
+<label>Company name</label>
 <input type="text" id="editUnitCompanyName" placeholder="e.g. BHP Iron Ore Pty Ltd">
 </div>
+</div>
 <div class="field">
-<label>Unit name</label>
+<label>Unit name <span class="req-mark">*</span></label>
 <input type="text" id="editUnitName" placeholder="e.g. HDWL1D-450 - 1 Door Heavy Duty Workshop Locker">
 </div>
 <div class="field">
-<label>Class</label>
+<label>Class <span class="req-mark">*</span></label>
 <select id="editUnitClass"></select>
 </div>
 <div class="field">
-<label>Qty</label>
+<label>Qty <span class="req-mark">*</span></label>
 <input type="number" id="editUnitQty" value="1" min="1">
 </div>
 <div class="field">
