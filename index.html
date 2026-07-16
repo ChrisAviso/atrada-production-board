@@ -267,6 +267,20 @@ letter-spacing:.05em;margin:20px 0 6px;
 border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;background:var(--surface-alt);
 }
 .task-row:last-child{margin-bottom:0;}
+.task-row.row-locked .task-status-pill,
+.task-row.row-locked .task-fields,
+.task-row.row-locked .task-assignee,
+.task-row.row-locked .task-timer-btn,
+.task-row.row-locked .task-wrench-btn,
+.task-row.row-locked .task-remarks-wrap{
+opacity:.42;
+}
+.task-row.row-locked select:disabled,
+.task-row.row-locked input:disabled,
+.task-row.row-locked textarea:disabled,
+.task-row.row-locked button:disabled{
+cursor:not-allowed;background-image:none;
+}
 .task-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;}
 .task-top input[type=checkbox]{width:17px;height:17px;accent-color:var(--green);cursor:pointer;flex-shrink:0;margin-top:2px;}
 .task-top .tname{flex:1;min-width:0;line-height:1.4;word-break:break-word;}
@@ -906,11 +920,13 @@ const assigneeOptions = knownAssignees
 .join('');
 const remarksVal = (t.remarks || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const remarksWords = wordCountOf(t.remarks);
+const dis = isDone ? '' : 'disabled';
+row.className = 'task-row' + (isDone ? '' : ' row-locked');
 row.innerHTML = `
 <div class="task-top">
 <input type="checkbox" ${isDone ? 'checked' : ''} data-task-id="${t.id}" class="task-done-cb">
 <span class="tname ${isDone ? 'done' : ''}">${t.task_name}</span>
-<select class="task-status-pill ${sp.cls}" data-task-id="${t.id}" data-field="task_status">
+<select class="task-status-pill ${sp.cls}" data-task-id="${t.id}" data-field="task_status" ${dis}>
 <option value="not_started" ${sp.value === 'not_started' ? 'selected' : ''}>Not started</option>
 <option value="in_progress" ${sp.value === 'in_progress' ? 'selected' : ''}>In progress</option>
 <option value="on_hold" ${sp.value === 'on_hold' ? 'selected' : ''}>On-Hold</option>
@@ -921,20 +937,20 @@ row.innerHTML = `
 <div class="task-fields">
 <div class="tf-group">
 <label>Days</label>
-<input type="number" step="0.05" min="0" value="${t.duration_days}" data-task-id="${t.id}" data-field="duration_days">
+<input type="number" step="0.05" min="0" value="${t.duration_days}" data-task-id="${t.id}" data-field="duration_days" ${dis}>
 </div>
 <div class="tf-group">
 <label>Start</label>
-<input type="date" value="${t.start_date || ''}" data-task-id="${t.id}" data-field="start_date">
+<input type="date" value="${t.start_date || ''}" data-task-id="${t.id}" data-field="start_date" ${dis}>
 </div>
 <span class="tf-arrow">&rarr;</span>
 <div class="tf-group">
 <label>Due</label>
-<input type="date" value="${t.completion_date_planned || ''}" data-task-id="${t.id}" data-field="completion_date_planned">
+<input type="date" value="${t.completion_date_planned || ''}" data-task-id="${t.id}" data-field="completion_date_planned" ${dis}>
 </div>
 <div class="tf-group">
 <label>After</label>
-<select data-task-id="${t.id}" data-field="predecessor_task_id">
+<select data-task-id="${t.id}" data-field="predecessor_task_id" ${dis}>
 <option value="">— none —</option>
 ${predOptions}
 </select>
@@ -942,14 +958,14 @@ ${predOptions}
 </div>
 <div class="task-track">
 <div class="task-bar-wrap"><div class="task-bar" style="left:${barLeft}%;width:${barWidth}%;"></div></div>
-<select class="task-assignee" data-task-id="${t.id}">
+<select class="task-assignee" data-task-id="${t.id}" ${dis}>
 <option value="">Unassigned</option>
 ${assigneeOptions}
 <option value="__add__">+ Add name…</option>
 </select>
-<button class="task-timer-btn" data-task-id="${t.id}" data-unit-id="${unit.id}">Start</button>
+<button class="task-timer-btn" data-task-id="${t.id}" data-unit-id="${unit.id}" ${dis}>Start</button>
 <span class="task-timer-elapsed" data-task-id="${t.id}" title="No logged hours yet">00:00:00</span>
-<button class="task-wrench-btn" data-task-id="${t.id}" title="More actions">&#9881;</button>
+<button class="task-wrench-btn" data-task-id="${t.id}" title="More actions" ${dis}>&#9881;</button>
 <div class="task-wrench-menu hidden">
 <label><input type="checkbox" class="task-na-cb" data-task-id="${t.id}" ${t.is_not_applicable ? 'checked' : ''}> Mark not applicable</label>
 <div class="wrench-divider"></div>
@@ -957,7 +973,7 @@ ${assigneeOptions}
 </div>
 </div>
 <div class="task-remarks-wrap">
-<textarea class="task-remarks-input" data-task-id="${t.id}" placeholder="Remarks…">${remarksVal}</textarea>
+<textarea class="task-remarks-input" data-task-id="${t.id}" placeholder="Remarks…" ${dis}>${remarksVal}</textarea>
 <div class="task-remarks-count" data-task-id="${t.id}">${remarksWords} / 400 words</div>
 </div>
 `;
