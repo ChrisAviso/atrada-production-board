@@ -293,6 +293,37 @@ padding:14px 16px;margin-bottom:4px;
 .tsched-dates{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-faint);white-space:nowrap;}
 .tsched-row.tsched-empty{color:var(--text-faint);font-style:italic;grid-template-columns:1fr;}
 
+/* ---------- Attendance & reconciliation (fortnightly timesheet) ---------- */
+.reconcile-panel{
+background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);
+box-shadow:var(--shadow-sm);padding:16px 18px;margin-bottom:22px;
+}
+.reconcile-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:6px;}
+.reconcile-title{font-size:14px;font-weight:800;color:var(--text);}
+.reconcile-nav{display:flex;align-items:center;gap:8px;}
+.reconcile-nav-btn{
+border:1px solid var(--border);background:var(--surface-alt);color:var(--text-dim);border-radius:16px;
+padding:5px 12px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;
+}
+.reconcile-nav-btn:hover{border-color:var(--primary);color:var(--primary);}
+.reconcile-range{font-size:12px;font-weight:700;color:var(--text);font-family:'JetBrains Mono',monospace;white-space:nowrap;}
+.reconcile-rules{font-size:11px;color:var(--text-faint);margin-bottom:12px;line-height:1.5;}
+.reconcile-table{border-top:1px solid var(--border);}
+.reconcile-row{
+display:grid;grid-template-columns:minmax(0,1.6fr) repeat(4, 90px);gap:12px;align-items:center;
+padding:9px 4px;border-bottom:1px solid var(--border);font-size:12.5px;
+}
+.reconcile-row-head{
+font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint);
+}
+.reconcile-row-head span:not(:first-child),
+.rc-hours{text-align:right;font-family:'JetBrains Mono',monospace;}
+.rc-person{font-weight:600;color:var(--text);}
+.reconcile-row-ot{background:var(--amber-pale);}
+.rc-ot15,.rc-ot20{color:#a3660c;font-weight:700;}
+.reconcile-row-total{font-weight:800;border-bottom:none;border-top:1.5px solid var(--border-strong);color:var(--text);}
+.reconcile-empty{font-size:12.5px;color:var(--text-faint);font-style:italic;padding:10px 2px 2px;}
+
 /* ---------- Stats ---------- */
 .stats-grid{
 display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:22px;
@@ -354,8 +385,14 @@ transition:background .12s;
 .unit-cov{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);white-space:nowrap;}
 .unit-cov-days{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);text-align:right;white-space:nowrap;}
 .unit-row:last-child{border-bottom:none;}
+.unit-row.unit-row-late{background:var(--red-pale);}
+.unit-row.unit-row-ahead{background:#eafaf0;}
+.unit-row.unit-row-duesoon{background:#fff3b0;}
 .unit-row:hover{background:var(--primary-pale);}
-.unit-row.active{background:var(--primary-pale);box-shadow:inset 3px 0 0 var(--primary);}
+.unit-row.active,
+.unit-row.active.unit-row-late,
+.unit-row.active.unit-row-ahead,
+.unit-row.active.unit-row-duesoon{background:var(--primary-pale);box-shadow:inset 3px 0 0 var(--primary);}
 
 .class-badge{
 display:inline-flex;align-items:center;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.03em;
@@ -743,6 +780,8 @@ display:flex;align-items:center;justify-content:center;
 <div id="pausedPanel"></div>
 </div>
 
+<div id="attendanceReconciliation"></div>
+
 <div class="layout">
 <div id="unitList" style="min-width:0;"></div>
 </div>
@@ -923,6 +962,15 @@ let runningTimer = null;
 let runningTimerTick = null;
 let taskFocusTick = null;
 let taskFocusTeamTick = null;
+const FORTNIGHT_EPOCH = new Date('2024-01-01T00:00:00'); // a Monday; every fortnight is a 14-day block from here
+function getFortnightStart(date){
+const diffDays = Math.floor((date - FORTNIGHT_EPOCH) / 86400000);
+const idx = Math.floor(diffDays / 14);
+const start = new Date(FORTNIGHT_EPOCH);
+start.setDate(start.getDate() + idx * 14);
+return start;
+}
+let fortnightStart = getFortnightStart(new Date());
 
 const CLASS_ORDER = ['Containers','Manufactured','Real Ezy','Modulate','Imported','Lubestation','Buy & Sell'];
 const CLASS_SLUG = {
@@ -1001,6 +1049,18 @@ const overdue = next && next.completion_date_planned && new Date(next.completion
 return { pct, currentStage, status: overdue ? 'overdue' : status, overdue };
 }
 
+function computeUnitScheduleTier(unitId){
+const hl2 = (allTasksByUnit[unitId] || []).filter(t => t.hierarchy_level === 2 && !t.is_not_applicable);
+const ordered = orderTasksByChain(hl2);
+const next = ordered.find(t => t.percent_complete_numeric < 1);
+if (!next) return null;
+const info = taskScheduleInfo(next);
+if (!info) return null;
+if (info.status === 'behind') return 'late';
+if (info.diffDays <= -3) return 'ahead';
+return 'duesoon';
+}
+
 function computeUnitCoverage(unitId){
 const tasks = (allTasksByUnit[unitId] || []).filter(t => t.hierarchy_level === 2 && !t.is_not_applicable);
 const dates = [];
@@ -1061,6 +1121,130 @@ const unitIndex = {};
 Object.values(allTasksByUnit).forEach(list => { list.forEach(t => { taskIndex[t.id] = t; }); });
 allUnits.forEach(u => { unitIndex[u.id] = u; });
 return { taskIndex, unitIndex };
+}
+
+/* ---------- Fortnightly attendance & reconciliation timesheet ----------
+Rules (no bank hours):
+- Weekdays: hours over 7.6 in a day are OT. First 2 OT hours/day at 1.5x, remainder at 2x.
+- Weekends: every hour is OT from the 1st hour. First 2 hours/day at 1.5x, remainder at 2x.
+Always visible on the board (not hidden by task filtering). */
+async function renderAttendanceReconciliation(){
+const el = document.getElementById('attendanceReconciliation');
+if (!el) return;
+
+const start = new Date(fortnightStart);
+const end = new Date(start); end.setDate(end.getDate() + 13);
+const startIso = start.toISOString().slice(0,10);
+const endIso = end.toISOString().slice(0,10);
+
+const { data, error } = await sb.from('prod_daily_hours')
+.select('person_email, work_date, hours_worked')
+.gte('work_date', startIso).lte('work_date', endIso);
+
+if (error){
+el.innerHTML = `<div class="reconcile-panel"><div class="auth-msg error">${error.message}</div></div>`;
+return;
+}
+
+const byPersonDay = {};
+(data || []).forEach(r => {
+if (!r.person_email || !r.work_date) return;
+const key = r.person_email + '::' + r.work_date;
+byPersonDay[key] = (byPersonDay[key] || 0) + Number(r.hours_worked || 0);
+});
+
+const totalsByPerson = {};
+Object.entries(byPersonDay).forEach(([key, hours]) => {
+const sep = key.lastIndexOf('::');
+const email = key.slice(0, sep);
+const workDate = key.slice(sep + 2);
+const day = new Date(workDate + 'T00:00:00').getDay();
+const isWeekend = day === 0 || day === 6;
+let regular = 0, ot15 = 0, ot20 = 0;
+if (isWeekend){
+ot15 = Math.min(hours, 2);
+ot20 = Math.max(0, hours - 2);
+} else {
+regular = Math.min(hours, 7.6);
+const ot = Math.max(0, hours - 7.6);
+ot15 = Math.min(ot, 2);
+ot20 = Math.max(0, ot - 2);
+}
+if (!totalsByPerson[email]) totalsByPerson[email] = { regular: 0, ot15: 0, ot20: 0, total: 0 };
+totalsByPerson[email].regular += regular;
+totalsByPerson[email].ot15 += ot15;
+totalsByPerson[email].ot20 += ot20;
+totalsByPerson[email].total += hours;
+});
+
+const people = Object.keys(totalsByPerson).sort((a,b) => formatPersonName(a).localeCompare(formatPersonName(b)));
+const grand = { regular: 0, ot15: 0, ot20: 0, total: 0 };
+people.forEach(p => {
+grand.regular += totalsByPerson[p].regular;
+grand.ot15 += totalsByPerson[p].ot15;
+grand.ot20 += totalsByPerson[p].ot20;
+grand.total += totalsByPerson[p].total;
+});
+
+const fmtH = (n) => n.toFixed(2) + 'h';
+const rangeLabel = `${fmtDate(startIso)} – ${fmtDate(endIso)}`;
+
+el.innerHTML = `
+<div class="reconcile-panel">
+<div class="reconcile-head">
+<div class="reconcile-title">\u{1F9FE} Team Attendance &amp; Reconciliation</div>
+<div class="reconcile-nav">
+<button type="button" class="reconcile-nav-btn" id="fnPrevBtn">&larr; Prior</button>
+<span class="reconcile-range">${rangeLabel}</span>
+<button type="button" class="reconcile-nav-btn" id="fnNextBtn">Next &rarr;</button>
+<button type="button" class="reconcile-nav-btn" id="fnTodayBtn">This fortnight</button>
+</div>
+</div>
+<div class="reconcile-rules">Weekday OT starts after 7.6h/day. Weekends are OT from the 1st hour. First 2 OT hours/day at 1.5&times;, beyond that at 2&times;. No bank hours.</div>
+${people.length ? `
+<div class="reconcile-table">
+<div class="reconcile-row reconcile-row-head">
+<span>Person</span><span>Regular</span><span>OT &times;1.5</span><span>OT &times;2</span><span>Total</span>
+</div>
+${people.map(p => {
+const r = totalsByPerson[p];
+const hasOt = (r.ot15 + r.ot20) > 0;
+return `
+<div class="reconcile-row${hasOt ? ' reconcile-row-ot' : ''}">
+<span class="rc-person">${formatPersonName(p)}</span>
+<span class="rc-hours">${fmtH(r.regular)}</span>
+<span class="rc-hours rc-ot15">${r.ot15 > 0 ? fmtH(r.ot15) : '—'}</span>
+<span class="rc-hours rc-ot20">${r.ot20 > 0 ? fmtH(r.ot20) : '—'}</span>
+<span class="rc-hours rc-total">${fmtH(r.total)}</span>
+</div>
+`;
+}).join('')}
+<div class="reconcile-row reconcile-row-total">
+<span>Total</span>
+<span class="rc-hours">${fmtH(grand.regular)}</span>
+<span class="rc-hours">${fmtH(grand.ot15)}</span>
+<span class="rc-hours">${fmtH(grand.ot20)}</span>
+<span class="rc-hours">${fmtH(grand.total)}</span>
+</div>
+</div>
+` : '<div class="reconcile-empty">No hours logged for this fortnight yet.</div>'}
+</div>
+`;
+
+document.getElementById('fnPrevBtn').addEventListener('click', () => {
+const d = new Date(fortnightStart); d.setDate(d.getDate() - 14);
+fortnightStart = d;
+renderAttendanceReconciliation();
+});
+document.getElementById('fnNextBtn').addEventListener('click', () => {
+const d = new Date(fortnightStart); d.setDate(d.getDate() + 14);
+fortnightStart = d;
+renderAttendanceReconciliation();
+});
+document.getElementById('fnTodayBtn').addEventListener('click', () => {
+fortnightStart = getFortnightStart(new Date());
+renderAttendanceReconciliation();
+});
 }
 
 let teamStatusTick = null;
@@ -1191,6 +1375,7 @@ const startedAt = btn.getAttribute('data-started-at');
 btn.disabled = true; btn.textContent = '…';
 await stopTimerFor(email, taskId, unitId, startedAt);
 renderTeamStatus();
+renderAttendanceReconciliation();
 });
 });
 document.querySelectorAll('.ts-resume-btn').forEach(btn => {
@@ -1375,6 +1560,7 @@ populateTaskFilter();
 renderStats();
 renderUnitList();
 renderTeamStatus();
+renderAttendanceReconciliation();
 }
 
 function populateClassFilter(){
@@ -1510,7 +1696,7 @@ const leadColLabel = groupBy === 'so' ? 'Class' : 'SO#';
 const stageColLabel = 'Stage';
 const rowHead = document.createElement('div');
 rowHead.className = 'unit-row-head';
-rowHead.innerHTML = `<span>${leadColLabel}</span><span>Unit</span><span>Start</span><span>Finish</span><span style="text-align:right;">Days</span><span style="text-align:right;">Since Approval</span><span style="text-align:right;">Qty</span><span>${stageColLabel}</span>`;
+rowHead.innerHTML = `<span>${leadColLabel}</span><span>Unit</span><span>Start</span><span>Finish</span><span style="text-align:right;">Since PO</span><span style="text-align:right;">Since Approval</span><span style="text-align:right;">Qty</span><span>${stageColLabel}</span>`;
 group.appendChild(rowHead);
 
 g.units.forEach(u => {
@@ -1518,8 +1704,10 @@ const p = computeUnitProgress(u.id);
 const s = statusInfo(p);
 const cov = computeUnitCoverage(u.id);
 const approvalAge = computeApprovalAge(u.id);
+const sincePo = soReceivedAge(u.so_number);
+const schedTier = computeUnitScheduleTier(u.id);
 const row = document.createElement('div');
-row.className = 'unit-row' + (u.id === selectedUnitId ? ' active' : '');
+row.className = 'unit-row' + (u.id === selectedUnitId ? ' active' : '') + (schedTier ? ' unit-row-' + schedTier : '');
 const leadBadge = groupBy === 'so'
 ? `<span class="class-badge cls-${classSlug(u.class)}">${classLabel(u.class)}</span>`
 : `<span class="class-badge" style="font-family:'JetBrains Mono',monospace;">${u.so_number}</span>`;
@@ -1532,7 +1720,7 @@ ${leadBadge}
 </div>
 <span class="unit-cov">${cov.start ? fmtDate(cov.start) : '—'}</span>
 <span class="unit-cov">${cov.finish ? fmtDate(cov.finish) : '—'}</span>
-<span class="unit-cov-days">${cov.days || '—'}</span>
+<span class="unit-cov-days">${sincePo !== null ? sincePo + 'd' : '—'}</span>
 <span class="unit-cov-days">${approvalAge !== null ? approvalAge + 'd' : '—'}</span>
 <span class="unit-qty">Qty ${u.qty}</span>
 ${stageCell}
@@ -2665,6 +2853,7 @@ hours_worked: hoursThisSession, source: 'manual_adjustment',
 }
 logTaskActivity(taskId, unitId, `Timer stopped — logged ${hoursThisSession.toFixed(2)}h`, 'timer');
 runningTimer = null;
+renderAttendanceReconciliation();
 }
 
 /* ---------- Manual log editor ---------- */
@@ -2719,6 +2908,7 @@ rowEl.querySelector('.log-del-btn').addEventListener('click', async () => {
 if (r.id){
 await sb.from('prod_daily_hours').delete().eq('id', r.id);
 logTaskActivity(taskId, unitId, `Deleted log entry (${Number(r.hours_worked).toFixed(2)}h on ${fmtDate(r.work_date)})`, 'log');
+renderAttendanceReconciliation();
 }
 rows.splice(idx, 1);
 drawRows();
@@ -2751,6 +2941,7 @@ person_email: session.user.email, source: 'manual_adjustment',
 if (!error && data) r.id = data.id;
 logTaskActivity(taskId, unitId, `Manually logged ${Number(r.hours_worked).toFixed(2)}h on ${fmtDate(r.work_date)}`, 'log');
 }
+renderAttendanceReconciliation();
 }
 
 function closeLogsModal(){
