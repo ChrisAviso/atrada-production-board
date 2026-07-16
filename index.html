@@ -248,6 +248,12 @@ box-shadow:var(--shadow-md);padding:22px 24px;position:sticky;top:86px;min-width
 .dp-title{font-size:16px;font-weight:700;letter-spacing:-0.01em;line-height:1.3;}
 .dp-sub{font-size:12.5px;color:var(--text-dim);margin:6px 0 18px;font-family:'JetBrains Mono',monospace;}
 
+.dp-coverage{
+display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--text-dim);flex-wrap:wrap;
+background:var(--surface-alt);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:12px;
+font-family:'JetBrains Mono',monospace;
+}
+.dp-coverage b{color:var(--text);font-weight:700;font-family:'Inter',sans-serif;}
 .dp-progress{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--surface-alt);border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:6px;}
 .dp-ring{flex-shrink:0;}
 .dp-progress-text{font-size:12px;color:var(--text-dim);}
@@ -266,10 +272,17 @@ border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-botto
 .task-top .tname{flex:1;min-width:0;line-height:1.4;word-break:break-word;}
 .task-top .tname.done{color:var(--text-dim);}
 .task-top .tmeta{font-size:10.5px;color:var(--text-dim);white-space:nowrap;background:var(--surface);border:1px solid var(--border);padding:3px 9px;border-radius:10px;flex-shrink:0;margin-top:1px;}
-.task-status-pill{font-size:10px;font-weight:700;white-space:nowrap;padding:3px 9px;border-radius:10px;flex-shrink:0;margin-top:1px;}
-.task-status-pill.ts-done{background:var(--green-pale);color:#0a7d59;}
-.task-status-pill.ts-progress{background:var(--primary-pale);color:var(--primary-dark);}
-.task-status-pill.ts-notstarted{background:var(--border);color:var(--text-dim);}
+.task-status-pill{
+font-size:10px;font-weight:700;white-space:nowrap;padding:3px 20px 3px 9px;border-radius:10px;flex-shrink:0;margin-top:1px;
+border:none;cursor:pointer;font-family:'Inter',sans-serif;appearance:none;-webkit-appearance:none;-moz-appearance:none;
+background-image:url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='10' height='10'%3E%3Cpath fill='%23686d82' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+background-repeat:no-repeat;background-position:right 6px center;background-size:10px;
+}
+.task-status-pill:focus{outline:none;box-shadow:0 0 0 2px var(--primary-pale);}
+.task-status-pill.ts-done{background-color:var(--green-pale);color:#0a7d59;}
+.task-status-pill.ts-progress{background-color:var(--primary-pale);color:var(--primary-dark);}
+.task-status-pill.ts-onhold{background-color:var(--amber-pale);color:#a3660c;}
+.task-status-pill.ts-notstarted{background-color:var(--border);color:var(--text-dim);}
 .task-fields{
 display:grid;grid-template-columns:60px 96px 18px 96px 1fr;gap:8px;align-items:end;padding-left:27px;
 }
@@ -286,8 +299,8 @@ font-family:'JetBrains Mono',monospace;background:var(--surface);color:var(--tex
 .task-bar-wrap{flex:1;min-width:60px;height:6px;background:var(--border);border-radius:3px;position:relative;overflow:hidden;}
 .task-bar{position:absolute;top:0;height:100%;background:var(--primary);border-radius:3px;min-width:2px;}
 .task-assignee{
-width:100px;flex-shrink:0;padding:5px 7px;border:1px solid var(--border);border-radius:6px;font-size:10.5px;
-background:var(--surface);color:var(--text);font-family:inherit;
+width:110px;flex-shrink:0;padding:5px 7px;border:1px solid var(--border);border-radius:6px;font-size:10.5px;
+background:var(--surface);color:var(--text);font-family:inherit;cursor:pointer;
 }
 .task-assignee:focus{outline:none;border-color:var(--primary);}
 .task-timer-btn{
@@ -307,6 +320,30 @@ box-shadow:var(--shadow-md);padding:6px;z-index:5;min-width:170px;
 }
 .task-wrench-menu label{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);padding:6px 8px;cursor:pointer;border-radius:6px;}
 .task-wrench-menu label:hover{background:var(--surface-alt);}
+.wrench-divider{height:1px;background:var(--border);margin:4px 2px;}
+.wrench-action{
+display:block;width:100%;text-align:left;background:none;border:none;padding:7px 8px;font-size:12px;
+color:var(--text);cursor:pointer;border-radius:6px;font-family:inherit;
+}
+.wrench-action:hover{background:var(--surface-alt);}
+.task-remarks-wrap{padding-left:27px;margin-top:9px;}
+.task-remarks-input{
+width:100%;min-height:42px;padding:7px 9px;border:1px solid var(--border);border-radius:7px;
+font-size:11.5px;font-family:inherit;background:var(--surface);color:var(--text);resize:vertical;box-sizing:border-box;
+}
+.task-remarks-input:focus{outline:none;border-color:var(--primary);}
+.task-remarks-count{font-size:9.5px;color:var(--text-faint);text-align:right;margin-top:2px;font-family:'JetBrains Mono',monospace;}
+#logsModalCard{width:480px;}
+.log-edit-row{display:grid;grid-template-columns:1fr 78px 74px 22px;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);}
+.log-edit-row:last-child{border-bottom:none;}
+.log-date,.log-hours{
+padding:6px 7px;border:1px solid var(--border);border-radius:6px;font-size:11px;
+font-family:'JetBrains Mono',monospace;background:var(--surface-alt);color:var(--text);
+}
+.log-date:focus,.log-hours:focus{outline:none;border-color:var(--primary);}
+.log-person{font-size:10px;color:var(--text-dim);text-transform:capitalize;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.log-del-btn{border:none;background:none;color:var(--text-faint);cursor:pointer;font-size:16px;line-height:1;padding:0;}
+.log-del-btn:hover{color:var(--red);}
 .empty-state{color:var(--text-faint);font-size:13px;text-align:center;padding:44px 10px;}
 
 /* ---------- Modals ---------- */
@@ -482,6 +519,10 @@ display:flex;align-items:center;justify-content:center;
 </div>
 </div>
 </div>
+
+<div id="logsModal" class="modal-overlay hidden">
+<div class="modal-card" id="logsModalCard"></div>
+</div>
 </div>
 
 <script>
@@ -555,6 +596,14 @@ const overdue = next && next.completion_date_planned && new Date(next.completion
 return { pct, currentStage, status: overdue ? 'overdue' : status, overdue };
 }
 
+function allKnownAssignees(){
+const names = new Set();
+Object.values(allTasksByUnit).forEach(list => {
+list.forEach(t => { if (t.assigned_to && t.assigned_to.trim()) names.add(t.assigned_to.trim()); });
+});
+return Array.from(names).sort((a,b) => a.localeCompare(b));
+}
+
 async function checkSession(){
 const { data: { session } } = await sb.auth.getSession();
 if (session){
@@ -608,6 +657,9 @@ document.getElementById('groupBySelect').addEventListener('change', (e) => { gro
 document.getElementById('detailModal').addEventListener('click', (e) => {
 if (e.target.id === 'detailModal') e.target.classList.add('hidden');
 });
+document.getElementById('logsModal').addEventListener('click', (e) => {
+if (e.target.id === 'logsModal') closeLogsModal();
+});
 
 async function fetchAllRows(query){
 const pageSize = 1000;
@@ -634,7 +686,7 @@ allUnits = units || [];
 
 const { data: tasks, error: taskErr } = await fetchAllRows(
 sb.from('prod_tasks')
-.select('id, unit_id, task_name, execution_group, hierarchy_level, duration_days, start_date, completion_date_planned, percent_complete_numeric, is_not_applicable, predecessor_task_id, assigned_to')
+.select('id, unit_id, task_name, execution_group, hierarchy_level, duration_days, start_date, completion_date_planned, percent_complete_numeric, is_not_applicable, predecessor_task_id, assigned_to, task_status, remarks')
 );
 if (taskErr){ console.error(taskErr); return; }
 
@@ -777,6 +829,16 @@ const r = 26, c = 2 * Math.PI * r;
 const dash = c * (p.pct / 100);
 const ringColor = p.status === 'complete' ? 'var(--green)' : (p.overdue ? 'var(--red)' : 'var(--primary)');
 
+const allDates = [];
+tasks.forEach(t => {
+if (t.start_date) allDates.push(new Date(t.start_date));
+if (t.completion_date_planned) allDates.push(new Date(t.completion_date_planned));
+});
+const minDate = allDates.length ? new Date(Math.min(...allDates)) : null;
+const maxDate = allDates.length ? new Date(Math.max(...allDates)) : null;
+const totalSpan = (minDate && maxDate) ? Math.max(1, maxDate - minDate) : 1;
+const totalSpanDays = (minDate && maxDate) ? Math.round((maxDate - minDate) / 86400000) + 1 : 0;
+
 document.getElementById('detailModal').classList.remove('hidden');
 
 panel.innerHTML = `
@@ -787,6 +849,13 @@ panel.innerHTML = `
 <div class="dp-sub">${unit.so_number} &middot; Qty ${unit.qty}</div>
 </div>
 <span class="class-badge cls-${classSlug(unit.class)}">${classLabel(unit.class)}</span>
+</div>
+<div class="dp-coverage">
+<span>Coverage:</span>
+<b>${minDate ? fmtDate(minDate.toISOString().slice(0,10)) : '—'}</b>
+<span>&rarr;</span>
+<b>${maxDate ? fmtDate(maxDate.toISOString().slice(0,10)) : '—'}</b>
+<span style="margin-left:auto;">${totalSpanDays} day${totalSpanDays === 1 ? '' : 's'} total</span>
 </div>
 <div class="dp-progress">
 <svg class="dp-ring" width="64" height="64" viewBox="0 0 64 64">
@@ -814,14 +883,7 @@ taskListEl.innerHTML = '<div class="empty-state">No tasks recorded for this unit
 return;
 }
 
-const allDates = [];
-tasks.forEach(t => {
-if (t.start_date) allDates.push(new Date(t.start_date));
-if (t.completion_date_planned) allDates.push(new Date(t.completion_date_planned));
-});
-const minDate = allDates.length ? new Date(Math.min(...allDates)) : null;
-const maxDate = allDates.length ? new Date(Math.max(...allDates)) : null;
-const totalSpan = (minDate && maxDate) ? Math.max(1, maxDate - minDate) : 1;
+const knownAssignees = allKnownAssignees();
 
 tasks.forEach(t => {
 const row = document.createElement('div');
@@ -839,11 +901,21 @@ barLeft = Math.max(0, Math.min(100, ((new Date(t.start_date) - minDate) / totalS
 if (minDate && t.start_date && t.completion_date_planned){
 barWidth = Math.max(2, ((new Date(t.completion_date_planned) - new Date(t.start_date)) / totalSpan) * 100);
 }
+const assigneeOptions = knownAssignees
+.map(name => `<option value="${name}" ${t.assigned_to === name ? 'selected' : ''}>${name}</option>`)
+.join('');
+const remarksVal = (t.remarks || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const remarksWords = wordCountOf(t.remarks);
 row.innerHTML = `
 <div class="task-top">
 <input type="checkbox" ${isDone ? 'checked' : ''} data-task-id="${t.id}" class="task-done-cb">
 <span class="tname ${isDone ? 'done' : ''}">${t.task_name}</span>
-<span class="task-status-pill ${sp.cls}">${sp.label}</span>
+<select class="task-status-pill ${sp.cls}" data-task-id="${t.id}" data-field="task_status">
+<option value="not_started" ${sp.value === 'not_started' ? 'selected' : ''}>Not started</option>
+<option value="in_progress" ${sp.value === 'in_progress' ? 'selected' : ''}>In progress</option>
+<option value="on_hold" ${sp.value === 'on_hold' ? 'selected' : ''}>On-Hold</option>
+<option value="done" ${sp.value === 'done' ? 'selected' : ''}>Done</option>
+</select>
 <span class="tmeta">${t.execution_group || ''}</span>
 </div>
 <div class="task-fields">
@@ -870,13 +942,23 @@ ${predOptions}
 </div>
 <div class="task-track">
 <div class="task-bar-wrap"><div class="task-bar" style="left:${barLeft}%;width:${barWidth}%;"></div></div>
-<input type="text" class="task-assignee" placeholder="Unassigned" value="${t.assigned_to || ''}" data-task-id="${t.id}">
+<select class="task-assignee" data-task-id="${t.id}">
+<option value="">Unassigned</option>
+${assigneeOptions}
+<option value="__add__">+ Add name…</option>
+</select>
 <button class="task-timer-btn" data-task-id="${t.id}" data-unit-id="${unit.id}">Start</button>
-<span class="task-timer-elapsed" data-task-id="${t.id}">00:00:00</span>
+<span class="task-timer-elapsed" data-task-id="${t.id}" title="No logged hours yet">00:00:00</span>
 <button class="task-wrench-btn" data-task-id="${t.id}" title="More actions">&#9881;</button>
 <div class="task-wrench-menu hidden">
 <label><input type="checkbox" class="task-na-cb" data-task-id="${t.id}" ${t.is_not_applicable ? 'checked' : ''}> Mark not applicable</label>
+<div class="wrench-divider"></div>
+<button type="button" class="wrench-action" data-task-id="${t.id}" data-action="logs">Edit time logs…</button>
 </div>
+</div>
+<div class="task-remarks-wrap">
+<textarea class="task-remarks-input" data-task-id="${t.id}" placeholder="Remarks…">${remarksVal}</textarea>
+<div class="task-remarks-count" data-task-id="${t.id}">${remarksWords} / 400 words</div>
 </div>
 `;
 taskListEl.appendChild(row);
@@ -896,11 +978,31 @@ taskListEl.querySelectorAll('.task-done-cb').forEach(cb => {
 cb.addEventListener('change', (e) => {
 const taskId = e.target.getAttribute('data-task-id');
 const checked = e.target.checked;
-updateTaskField(taskId, {
+const t = (allTasksByUnit[unit.id] || []).find(x => x.id === taskId);
+const patch = {
 percent_complete_numeric: checked ? 1 : 0,
 actual_completion_date: checked ? new Date().toISOString().slice(0,10) : null,
 is_not_applicable: false,
+};
+if (checked) patch.task_status = 'done';
+else if (t && t.task_status === 'done') patch.task_status = 'not_started';
+updateTaskField(taskId, patch);
 });
+});
+
+taskListEl.querySelectorAll('.task-status-pill').forEach(sel => {
+sel.addEventListener('change', (e) => {
+const taskId = e.target.getAttribute('data-task-id');
+const value = e.target.value;
+const patch = { task_status: value };
+if (value === 'done'){
+patch.percent_complete_numeric = 1;
+patch.actual_completion_date = new Date().toISOString().slice(0,10);
+} else {
+const t = (allTasksByUnit[unit.id] || []).find(x => x.id === taskId);
+if (t && Number(t.percent_complete_numeric) >= 1) patch.percent_complete_numeric = 0;
+}
+updateTaskField(taskId, patch);
 });
 });
 
@@ -916,10 +1018,16 @@ updateTaskField(taskId, { [field]: value });
 });
 });
 
-taskListEl.querySelectorAll('.task-assignee').forEach(input => {
-input.addEventListener('change', (e) => {
+taskListEl.querySelectorAll('.task-assignee').forEach(sel => {
+sel.addEventListener('change', (e) => {
 const taskId = e.target.getAttribute('data-task-id');
-updateTaskField(taskId, { assigned_to: e.target.value.trim() || null });
+let value = e.target.value;
+if (value === '__add__'){
+const name = prompt('Add name:');
+if (!name || !name.trim()){ renderDetail(unit); return; }
+value = name.trim();
+}
+updateTaskField(taskId, { assigned_to: value || null });
 });
 });
 
@@ -937,6 +1045,32 @@ const menu = btn.nextElementSibling;
 const isOpen = !menu.classList.contains('hidden');
 taskListEl.querySelectorAll('.task-wrench-menu').forEach(m => m.classList.add('hidden'));
 if (!isOpen) menu.classList.remove('hidden');
+});
+});
+
+taskListEl.querySelectorAll('.wrench-action[data-action="logs"]').forEach(btn => {
+btn.addEventListener('click', (e) => {
+e.stopPropagation();
+const taskId = btn.getAttribute('data-task-id');
+const t = (allTasksByUnit[unit.id] || []).find(x => x.id === taskId);
+taskListEl.querySelectorAll('.task-wrench-menu').forEach(m => m.classList.add('hidden'));
+openLogsModal(taskId, t ? t.task_name : '', unit.id);
+});
+});
+
+taskListEl.querySelectorAll('.task-remarks-input').forEach(ta => {
+ta.addEventListener('input', (e) => {
+let words = e.target.value.trim().split(/\s+/).filter(Boolean);
+if (words.length > 400){
+words = words.slice(0, 400);
+e.target.value = words.join(' ');
+}
+const countEl = taskListEl.querySelector(`.task-remarks-count[data-task-id="${e.target.getAttribute('data-task-id')}"]`);
+if (countEl) countEl.textContent = `${words.length} / 400 words`;
+});
+ta.addEventListener('change', (e) => {
+const taskId = e.target.getAttribute('data-task-id');
+updateTaskField(taskId, { remarks: e.target.value || null });
 });
 });
 
@@ -968,24 +1102,45 @@ runningTimerTick = setInterval(tick, 1000);
 
 const taskIds = tasks.map(t => t.id);
 if (taskIds.length){
-sb.from('prod_daily_hours').select('task_id, hours_worked').in('task_id', taskIds).then(({ data, error }) => {
+sb.from('prod_daily_hours').select('task_id, hours_worked, work_date, person_email').in('task_id', taskIds).order('work_date').then(({ data, error }) => {
 if (error || !data) return;
 const sums = {};
-data.forEach(r => { sums[r.task_id] = (sums[r.task_id] || 0) + Number(r.hours_worked || 0); });
+const logs = {};
+data.forEach(r => {
+sums[r.task_id] = (sums[r.task_id] || 0) + Number(r.hours_worked || 0);
+(logs[r.task_id] = logs[r.task_id] || []).push(r);
+});
 taskIds.forEach(id => {
-if (runningTimer && runningTimer.taskId === id) return;
 const el = taskListEl.querySelector(`.task-timer-elapsed[data-task-id="${id}"]`);
-if (el) el.textContent = formatHMS(sums[id] || 0);
+if (!el) return;
+if (!(runningTimer && runningTimer.taskId === id)) el.textContent = formatHMS(sums[id] || 0);
+const entries = logs[id] || [];
+el.title = entries.length
+? 'Log history:\n' + entries.map(r => `${fmtDate(r.work_date)} — ${Number(r.hours_worked).toFixed(2)}h${r.person_email ? ' (' + r.person_email.split('@')[0] + ')' : ''}`).join('\n')
+: 'No logged hours yet';
 });
 });
 }
 }
 
 function taskStatusPill(t){
+let value = t.task_status;
+if (!value){
 const pct = Number(t.percent_complete_numeric) || 0;
-if (pct >= 1) return { cls: 'ts-done', label: 'Done' };
-if (pct > 0) return { cls: 'ts-progress', label: 'In Progress' };
-return { cls: 'ts-notstarted', label: 'Not Started' };
+value = pct >= 1 ? 'done' : (pct > 0 ? 'in_progress' : 'not_started');
+}
+const map = {
+not_started: { cls: 'ts-notstarted', label: 'Not Started' },
+in_progress: { cls: 'ts-progress', label: 'In Progress' },
+on_hold: { cls: 'ts-onhold', label: 'On-Hold' },
+done: { cls: 'ts-done', label: 'Done' },
+};
+const m = map[value] || map.not_started;
+return { value, cls: m.cls, label: m.label };
+}
+
+function wordCountOf(str){
+return (str || '').trim().split(/\s+/).filter(Boolean).length;
 }
 
 function formatHMS(totalHours){
@@ -1034,6 +1189,95 @@ hours_worked: hoursThisSession, source: 'manual_adjustment',
 });
 }
 runningTimer = null;
+}
+
+/* ---------- Manual log editor ---------- */
+async function openLogsModal(taskId, taskName, unitId){
+const modal = document.getElementById('logsModal');
+const card = document.getElementById('logsModalCard');
+card.innerHTML = '<div class="empty-state">Loading…</div>';
+modal.classList.remove('hidden');
+const { data, error } = await sb.from('prod_daily_hours')
+.select('id, work_date, hours_worked, person_email')
+.eq('task_id', taskId).order('work_date');
+if (error){ card.innerHTML = `<div class="auth-msg error">${error.message}</div>`; return; }
+renderLogsModal(taskId, taskName, unitId, data || []);
+}
+
+function renderLogsModal(taskId, taskName, unitId, rows){
+const card = document.getElementById('logsModalCard');
+card.innerHTML = `
+<button class="modal-x-btn" id="logsCloseBtn">&times;</button>
+<h2>Time log</h2>
+<p class="modal-sub">${taskName} — add or revise logged hours.</p>
+<div id="logsRows"></div>
+<button class="icon-btn ghost-light" id="logsAddRowBtn" style="margin-top:10px;width:100%;">+ Add entry</button>
+<div class="modal-close-row">
+<button class="icon-btn ghost-light" id="logsDoneBtn">Done</button>
+</div>
+`;
+const rowsEl = card.querySelector('#logsRows');
+
+function drawRows(){
+rowsEl.innerHTML = rows.length ? rows.map((r, i) => `
+<div class="log-edit-row" data-idx="${i}">
+<input type="date" class="log-date" value="${r.work_date || ''}">
+<input type="number" step="0.05" min="0" class="log-hours" value="${r.hours_worked || 0}">
+<span class="log-person">${r.person_email ? r.person_email.split('@')[0] : '—'}</span>
+<button type="button" class="log-del-btn" title="Delete">&times;</button>
+</div>
+`).join('') : '<div class="empty-state" style="padding:14px;">No entries yet.</div>';
+
+rowsEl.querySelectorAll('.log-edit-row').forEach(rowEl => {
+const idx = Number(rowEl.getAttribute('data-idx'));
+const r = rows[idx];
+rowEl.querySelector('.log-date').addEventListener('change', async (e) => {
+r.work_date = e.target.value;
+await saveLogRow(taskId, unitId, r);
+});
+rowEl.querySelector('.log-hours').addEventListener('change', async (e) => {
+r.hours_worked = Number(e.target.value) || 0;
+await saveLogRow(taskId, unitId, r);
+});
+rowEl.querySelector('.log-del-btn').addEventListener('click', async () => {
+if (r.id){ await sb.from('prod_daily_hours').delete().eq('id', r.id); }
+rows.splice(idx, 1);
+drawRows();
+});
+});
+}
+drawRows();
+
+card.querySelector('#logsAddRowBtn').addEventListener('click', () => {
+rows.push({ id: null, work_date: new Date().toISOString().slice(0,10), hours_worked: 0, person_email: null });
+drawRows();
+});
+card.querySelector('#logsCloseBtn').addEventListener('click', closeLogsModal);
+card.querySelector('#logsDoneBtn').addEventListener('click', closeLogsModal);
+}
+
+async function saveLogRow(taskId, unitId, r){
+if (!r.work_date) return;
+if (r.id){
+await sb.from('prod_daily_hours').update({
+work_date: r.work_date, hours_worked: r.hours_worked, source: 'manual_adjustment',
+}).eq('id', r.id);
+} else {
+const { data: { session } } = await sb.auth.getSession();
+const { data, error } = await sb.from('prod_daily_hours').insert({
+task_id: taskId, unit_id: unitId, work_date: r.work_date, hours_worked: r.hours_worked,
+person_email: session.user.email, source: 'manual_adjustment',
+}).select().single();
+if (!error && data) r.id = data.id;
+}
+}
+
+function closeLogsModal(){
+document.getElementById('logsModal').classList.add('hidden');
+if (selectedUnitId){
+const u = allUnits.find(x => x.id === selectedUnitId);
+if (u) renderDetail(u);
+}
 }
 
 /* ---------- Add SO ---------- */
