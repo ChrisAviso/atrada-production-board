@@ -300,17 +300,19 @@ box-shadow:var(--shadow-sm);margin-bottom:14px;overflow:hidden;
 }
 .so-group-head{
 display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--border);
-background:var(--surface-alt);
+background:var(--surface-alt);transition:background .12s;
 }
+.so-group-head.so-group-head-editable{cursor:pointer;}
+.so-group-head.so-group-head-editable:hover{background:var(--primary-pale);}
 .so-group-head .so-name{font-size:13px;font-weight:800;letter-spacing:.01em;color:var(--text);font-family:'JetBrains Mono',monospace;}
 .so-unit-count{font-size:11px;font-weight:700;color:var(--text-dim);background:var(--border);padding:2px 9px;border-radius:20px;}
 .so-company{font-size:11.5px;color:var(--text-dim);font-weight:600;}
 .so-received{font-size:10.5px;color:var(--text-faint);font-family:'JetBrains Mono',monospace;}
-.so-edit-btn{
-margin-left:auto;font-size:10.5px;font-weight:700;color:var(--text-dim);background:var(--surface);
-border:1px solid var(--border);padding:4px 11px;border-radius:16px;cursor:pointer;font-family:inherit;flex-shrink:0;
+.so-edit-hint{
+margin-left:auto;font-size:10.5px;font-weight:700;color:var(--text-faint);flex-shrink:0;
+opacity:0;transition:opacity .12s;
 }
-.so-edit-btn:hover{border-color:var(--primary);color:var(--primary);}
+.so-group-head-editable:hover .so-edit-hint{opacity:1;color:var(--primary);}
 .so-flag-behind{
 font-size:11px;font-weight:700;color:var(--red);background:var(--red-pale);padding:3px 10px;border-radius:20px;flex-shrink:0;
 }
@@ -1394,18 +1396,20 @@ const so = groupBy === 'so' ? soInfoByNumber[g.label] : null;
 const receivedAge = groupBy === 'so' ? soReceivedAge(g.label) : null;
 
 const head = document.createElement('div');
-head.className = 'so-group-head';
+head.className = 'so-group-head' + (groupBy === 'so' ? ' so-group-head-editable' : '');
+if (groupBy === 'so') head.title = 'Click to edit SO details';
 head.innerHTML = `
 <span class="so-name">${g.label}</span>
 ${so && so.company_name ? `<span class="so-company">${so.company_name}</span>` : ''}
 <span class="so-unit-count">${g.units.length} unit${g.units.length > 1 ? 's' : ''}</span>
 ${receivedAge !== null ? `<span class="so-received">SO received ${receivedAge}d ago</span>` : ''}
-${groupBy === 'so' ? `<button type="button" class="so-edit-btn" data-so="${g.label}" title="Edit SO details">✎ Edit SO</button>` : ''}
+${groupBy === 'so' ? `<span class="so-edit-hint">✎ Edit</span>` : ''}
 ${anyBehind ? '<span class="so-flag-behind">Behind schedule</span>' : ''}
 `;
 group.appendChild(head);
-const editBtn = head.querySelector('.so-edit-btn');
-if (editBtn) editBtn.addEventListener('click', (e) => { e.stopPropagation(); openEditSoModal(g.label); });
+if (groupBy === 'so'){
+head.addEventListener('click', () => openEditSoModal(g.label));
+}
 
 const leadColLabel = groupBy === 'so' ? 'Class' : 'SO#';
 const stageColLabel = 'Stage';
