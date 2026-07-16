@@ -1138,6 +1138,15 @@ if (!isWeekendDate(d)) count++;
 return Math.max(1, count);
 }
 
+// Where the next chained task should start. A whole-number Days value fully uses up its last
+// day, so the next task starts the following business day. A fractional Days value (e.g. 1.5)
+// only partially uses its last day — the next task can continue in that same day's leftover time.
+function successorStart(predDueStr, predDuration){
+const dur = Number(predDuration) || 0;
+const isWhole = Math.abs(dur - Math.round(dur)) < 0.001;
+return isWhole ? nextBusinessDay(predDueStr) : predDueStr;
+}
+
 function splitDayHours(hours, isWeekend){
 if (isWeekend){
 return { regular: 0, ot15: Math.min(hours, 2), ot20: Math.max(0, hours - 2) };
@@ -2451,6 +2460,7 @@ const minDate = allDates.length ? new Date(Math.min(...allDates)) : null;
 const maxDate = allDates.length ? new Date(Math.max(...allDates)) : null;
 const totalSpan = (minDate && maxDate) ? Math.max(1, maxDate - minDate) : 1;
 const totalSpanDays = (minDate && maxDate) ? Math.round((maxDate - minDate) / 86400000) + 1 : 0;
+const totalSpanWorkingDays = (minDate && maxDate) ? businessDaySpan(localDateStr(minDate), localDateStr(maxDate)) : 0;
 
 const scheduleMap = new Map();
 tasks.forEach(t => {
@@ -2522,7 +2532,7 @@ panel.innerHTML = `
 <b>${minDate ? fmtDate(minDate.toISOString().slice(0,10)) : '—'}</b>
 <span>&rarr;</span>
 <b>${maxDate ? fmtDate(maxDate.toISOString().slice(0,10)) : '—'}</b>
-<span style="margin-left:auto;">${totalSpanDays} day${totalSpanDays === 1 ? '' : 's'} total</span>
+<span style="margin-left:auto;">${totalSpanWorkingDays} working day${totalSpanWorkingDays === 1 ? '' : 's'} &middot; ${totalSpanDays} calendar day${totalSpanDays === 1 ? '' : 's'}</span>
 </div>
 <div class="dp-progress">
 <svg class="dp-ring" width="64" height="64" viewBox="0 0 64 64">
@@ -2687,8 +2697,9 @@ renderDetail(unit);
 
 // When a task's Due date changes (however it changed), push the schedule forward into every
 // task chained after it via the "After" field: next Start = the next business day after this
-// task's Due, next Due = next Start + next task's own Days (business days, weekends skipped).
-// Continues recursively down the whole chain.
+// task's Due, unless this task's own Days was fractional (e.g. 1.5), in which case its last day
+// still has leftover capacity and the next task starts that same day. Next Due = next Start +
+// next task's own Days (business days, weekends skipped). Continues recursively down the chain.
 async function cascadeScheduleFrom(taskId, unitId, visited){
 visited = visited || new Set();
 if (visited.has(taskId)) return;
@@ -2698,7 +2709,7 @@ const pred = tasks.find(x => x.id === taskId);
 if (!pred || !pred.completion_date_planned) return;
 const followers = tasks.filter(t => t.predecessor_task_id === taskId && t.id !== taskId);
 for (const ft of followers){
-const newStart = nextBusinessDay(pred.completion_date_planned);
+const newStart = successorStart(pred.completion_date_planned, pred.duration_days);
 const dur = Math.max(0, Math.round(Number(ft.duration_days) || 0) - 1);
 const newDue = addBusinessDays(newStart, dur);
 if (ft.start_date !== newStart || ft.completion_date_planned !== newDue){
@@ -2828,11 +2839,12 @@ patch.completion_date_planned = addBusinessDays(value, dur);
 } else if (field === 'completion_date_planned' && value && t.start_date){
 patch.duration_days = businessDaySpan(t.start_date, value);
 } else if (field === 'predecessor_task_id'){
-// Picking an "After" task starts this one the next business day after that task's Due,
+// Picking an "After" task starts this one the next business day after that task's Due
+// (or that same day, if the predecessor's Days was fractional and left leftover capacity),
 // then computes this task's own Due from its Days.
 const pred = value ? (allTasksByUnit[unit.id] || []).find(x => x.id === value) : null;
 if (pred && pred.completion_date_planned){
-const newStart = nextBusinessDay(pred.completion_date_planned);
+const newStart = successorStart(pred.completion_date_planned, pred.duration_days);
 const dur = Math.max(0, Math.round(Number(t.duration_days) || 0) - 1);
 patch.start_date = newStart;
 patch.completion_date_planned = addBusinessDays(newStart, dur);
