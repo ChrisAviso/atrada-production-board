@@ -175,7 +175,7 @@ padding:16px 18px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;
 
 /* ---------- Layout ---------- */
 .layout{display:block;}
-#detailPanel.modal-card{width:660px;position:relative;padding:26px 28px;}
+#detailPanel.modal-card{width:820px;position:relative;padding:26px 28px;}
 
 /* ---------- SO group cards ---------- */
 .so-group{
@@ -298,7 +298,7 @@ background-repeat:no-repeat;background-position:right 6px center;background-size
 .task-status-pill.ts-onhold{background-color:var(--amber-pale);color:#a3660c;}
 .task-status-pill.ts-notstarted{background-color:var(--border);color:var(--text-dim);}
 .task-fields{
-display:grid;grid-template-columns:60px 96px 18px 96px 1fr;gap:8px;align-items:end;padding-left:27px;
+display:grid;grid-template-columns:64px 140px 18px 140px 1fr;gap:10px;align-items:end;padding-left:27px;
 }
 .tf-group{display:flex;flex-direction:column;gap:3px;min-width:0;}
 .tf-group label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text-faint);}
@@ -313,7 +313,7 @@ font-family:'JetBrains Mono',monospace;background:var(--surface);color:var(--tex
 .task-bar-wrap{flex:1;min-width:60px;height:6px;background:var(--border);border-radius:3px;position:relative;overflow:hidden;}
 .task-bar{position:absolute;top:0;height:100%;background:var(--primary);border-radius:3px;min-width:2px;}
 .task-assignee{
-width:110px;flex-shrink:0;padding:5px 7px;border:1px solid var(--border);border-radius:6px;font-size:10.5px;
+width:160px;flex-shrink:0;padding:5px 7px;border:1px solid var(--border);border-radius:6px;font-size:10.5px;
 background:var(--surface);color:var(--text);font-family:inherit;cursor:pointer;
 }
 .task-assignee:focus{outline:none;border-color:var(--primary);}
@@ -355,6 +355,14 @@ box-shadow:var(--shadow-md);border-color:var(--primary);background:var(--surface
 }
 .task-remarks-count{font-size:9.5px;color:var(--text-faint);text-align:right;margin-top:2px;font-family:'JetBrains Mono',monospace;}
 #logsModalCard{width:480px;}
+#activityModalCard{width:480px;}
+.activity-list{max-height:380px;overflow-y:auto;margin-top:4px;}
+.activity-row{display:flex;gap:10px;padding:9px 2px;border-bottom:1px solid var(--border);}
+.activity-row:last-child{border-bottom:none;}
+.activity-dot{width:8px;height:8px;border-radius:50%;background:var(--primary);margin-top:5px;flex-shrink:0;}
+.activity-body{min-width:0;}
+.activity-desc{font-size:12.5px;color:var(--text);line-height:1.4;}
+.activity-meta{font-size:10.5px;color:var(--text-faint);margin-top:2px;font-family:'JetBrains Mono',monospace;}
 .log-edit-row{display:grid;grid-template-columns:1fr 78px 74px 22px;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);}
 .log-edit-row:last-child{border-bottom:none;}
 .log-date,.log-hours{
@@ -544,6 +552,10 @@ display:flex;align-items:center;justify-content:center;
 <div id="logsModal" class="modal-overlay hidden">
 <div class="modal-card" id="logsModalCard"></div>
 </div>
+
+<div id="activityModal" class="modal-overlay hidden">
+<div class="modal-card" id="activityModalCard"></div>
+</div>
 </div>
 
 <script>
@@ -680,6 +692,9 @@ if (e.target.id === 'detailModal') e.target.classList.add('hidden');
 });
 document.getElementById('logsModal').addEventListener('click', (e) => {
 if (e.target.id === 'logsModal') closeLogsModal();
+});
+document.getElementById('activityModal').addEventListener('click', (e) => {
+if (e.target.id === 'activityModal') e.target.classList.add('hidden');
 });
 
 async function fetchAllRows(query){
@@ -977,6 +992,7 @@ ${assigneeOptions}
 <label><input type="checkbox" class="task-na-cb" data-task-id="${t.id}" ${t.is_not_applicable ? 'checked' : ''}> Mark not applicable</label>
 <div class="wrench-divider"></div>
 <button type="button" class="wrench-action" data-task-id="${t.id}" data-action="logs">Edit time logs…</button>
+<button type="button" class="wrench-action" data-task-id="${t.id}" data-action="activity">View activity log…</button>
 </div>
 </div>
 <div class="task-remarks-wrap">
@@ -992,6 +1008,7 @@ const { error } = await sb.from('prod_tasks').update(patch).eq('id', taskId);
 if (error){ alert('Failed to update: ' + error.message); return; }
 const t = allTasksByUnit[unit.id].find(x => x.id === taskId);
 if (t) Object.assign(t, patch);
+logTaskActivity(taskId, unit.id, describeTaskPatch(patch));
 renderStats();
 renderUnitList();
 renderDetail(unit);
@@ -1081,6 +1098,16 @@ openLogsModal(taskId, t ? t.task_name : '', unit.id);
 });
 });
 
+taskListEl.querySelectorAll('.wrench-action[data-action="activity"]').forEach(btn => {
+btn.addEventListener('click', (e) => {
+e.stopPropagation();
+const taskId = btn.getAttribute('data-task-id');
+const t = (allTasksByUnit[unit.id] || []).find(x => x.id === taskId);
+taskListEl.querySelectorAll('.task-wrench-menu').forEach(m => m.classList.add('hidden'));
+openActivityModal(taskId, t ? t.task_name : '');
+});
+});
+
 taskListEl.querySelectorAll('.task-remarks-input').forEach(ta => {
 ta.addEventListener('input', (e) => {
 let words = e.target.value.trim().split(/\s+/).filter(Boolean);
@@ -1167,6 +1194,80 @@ function wordCountOf(str){
 return (str || '').trim().split(/\s+/).filter(Boolean).length;
 }
 
+function fmtDateTime(iso){
+if (!iso) return '—';
+const d = new Date(iso);
+return d.toLocaleString('en-AU', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit' });
+}
+
+function describeTaskPatch(patch){
+const lines = [];
+const statusMap = { not_started:'Not started', in_progress:'In progress', on_hold:'On-Hold', done:'Done' };
+if ('task_status' in patch){
+lines.push(`Status changed to ${statusMap[patch.task_status] || patch.task_status}`);
+} else if ('percent_complete_numeric' in patch){
+lines.push(Number(patch.percent_complete_numeric) >= 1 ? 'Marked complete' : 'Marked incomplete');
+}
+if ('duration_days' in patch) lines.push(`Duration set to ${patch.duration_days} day(s)`);
+if ('start_date' in patch) lines.push(`Start date set to ${patch.start_date ? fmtDate(patch.start_date) : '—'}`);
+if ('completion_date_planned' in patch) lines.push(`Due date set to ${patch.completion_date_planned ? fmtDate(patch.completion_date_planned) : '—'}`);
+if ('predecessor_task_id' in patch) lines.push('Predecessor changed');
+if ('assigned_to' in patch) lines.push(`Assigned to ${patch.assigned_to || 'Unassigned'}`);
+if ('is_not_applicable' in patch && !('task_status' in patch) && !('percent_complete_numeric' in patch)){
+lines.push(patch.is_not_applicable ? 'Marked not applicable' : 'Marked applicable');
+}
+if ('remarks' in patch) lines.push('Remarks updated');
+return lines.length ? lines.join('; ') : 'Task updated';
+}
+
+async function logTaskActivity(taskId, unitId, description, eventType){
+try {
+const { data: { session } } = await sb.auth.getSession();
+await sb.from('prod_task_activity').insert({
+task_id: taskId, unit_id: unitId, event_type: eventType || 'update', description,
+changed_by: session && session.user ? session.user.email : null,
+});
+} catch (e){ /* non-fatal: activity logging should never block the main action */ }
+}
+
+async function openActivityModal(taskId, taskName){
+const modal = document.getElementById('activityModal');
+const card = document.getElementById('activityModalCard');
+card.innerHTML = '<div class="empty-state">Loading…</div>';
+modal.classList.remove('hidden');
+const { data, error } = await sb.from('prod_task_activity')
+.select('id, description, changed_by, created_at')
+.eq('task_id', taskId).order('created_at', { ascending: true });
+if (error){ card.innerHTML = `<div class="auth-msg error">${error.message}</div>`; return; }
+renderActivityModal(taskName, data || []);
+}
+
+function renderActivityModal(taskName, rows){
+const card = document.getElementById('activityModalCard');
+card.innerHTML = `
+<button class="modal-x-btn" id="activityCloseBtn">&times;</button>
+<h2>Activity log</h2>
+<p class="modal-sub">${taskName} — everything logged from creation to now.</p>
+<div class="activity-list">
+${rows.length ? rows.map(r => `
+<div class="activity-row">
+<div class="activity-dot"></div>
+<div class="activity-body">
+<div class="activity-desc">${r.description}</div>
+<div class="activity-meta">${fmtDateTime(r.created_at)}${r.changed_by ? ' · ' + r.changed_by.split('@')[0] : ''}</div>
+</div>
+</div>
+`).join('') : '<div class="empty-state" style="padding:20px;">No activity recorded yet.</div>'}
+</div>
+<div class="modal-close-row">
+<button class="icon-btn ghost-light" id="activityDoneBtn">Close</button>
+</div>
+`;
+const close = () => document.getElementById('activityModal').classList.add('hidden');
+card.querySelector('#activityCloseBtn').addEventListener('click', close);
+card.querySelector('#activityDoneBtn').addEventListener('click', close);
+}
+
 function formatHMS(totalHours){
 const totalSeconds = Math.max(0, Math.round((totalHours || 0) * 3600));
 const hh = Math.floor(totalSeconds / 3600);
@@ -1185,6 +1286,7 @@ event_type: 'clock_in', event_time: startedAt.toISOString(),
 });
 if (error){ alert('Failed to start timer: ' + error.message); return; }
 runningTimer = { taskId, unitId, startedAt };
+logTaskActivity(taskId, unitId, 'Timer started', 'timer');
 }
 
 async function stopTaskTimer(){
@@ -1212,6 +1314,7 @@ person_email: email, work_date: workDate, task_id: taskId, unit_id: unitId,
 hours_worked: hoursThisSession, source: 'manual_adjustment',
 });
 }
+logTaskActivity(taskId, unitId, `Timer stopped — logged ${hoursThisSession.toFixed(2)}h`, 'timer');
 runningTimer = null;
 }
 
@@ -1264,7 +1367,10 @@ r.hours_worked = Number(e.target.value) || 0;
 await saveLogRow(taskId, unitId, r);
 });
 rowEl.querySelector('.log-del-btn').addEventListener('click', async () => {
-if (r.id){ await sb.from('prod_daily_hours').delete().eq('id', r.id); }
+if (r.id){
+await sb.from('prod_daily_hours').delete().eq('id', r.id);
+logTaskActivity(taskId, unitId, `Deleted log entry (${Number(r.hours_worked).toFixed(2)}h on ${fmtDate(r.work_date)})`, 'log');
+}
 rows.splice(idx, 1);
 drawRows();
 });
@@ -1286,6 +1392,7 @@ if (r.id){
 await sb.from('prod_daily_hours').update({
 work_date: r.work_date, hours_worked: r.hours_worked, source: 'manual_adjustment',
 }).eq('id', r.id);
+logTaskActivity(taskId, unitId, `Revised log entry to ${Number(r.hours_worked).toFixed(2)}h on ${fmtDate(r.work_date)}`, 'log');
 } else {
 const { data: { session } } = await sb.auth.getSession();
 const { data, error } = await sb.from('prod_daily_hours').insert({
@@ -1293,6 +1400,7 @@ task_id: taskId, unit_id: unitId, work_date: r.work_date, hours_worked: r.hours_
 person_email: session.user.email, source: 'manual_adjustment',
 }).select().single();
 if (!error && data) r.id = data.id;
+logTaskActivity(taskId, unitId, `Manually logged ${Number(r.hours_worked).toFixed(2)}h on ${fmtDate(r.work_date)}`, 'log');
 }
 }
 
@@ -1395,6 +1503,7 @@ percent_complete_numeric: 0,
 }).select().single();
 if (taskErr) throw taskErr;
 seqToId[t.seq] = inserted.id;
+logTaskActivity(inserted.id, newUnit.id, 'Task created', 'created');
 }
 
 msgEl.innerHTML = `<div class="auth-msg ok">Created ${soNumber} with ${(templateRows||[]).length} tasks.</div>`;
