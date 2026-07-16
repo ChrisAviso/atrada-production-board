@@ -1100,6 +1100,44 @@ const day = String(d.getDate()).padStart(2,'0');
 return `${y}-${m}-${day}`;
 }
 
+// ---------- Business-day scheduling helpers (Mon–Fri only; used for auto-scheduling — never
+// overrides a date the user typed directly, only the counterpart the app derives from it). ----------
+function isWeekendDate(d){ const day = d.getDay(); return day === 0 || day === 6; }
+
+// Steps forward `days` business days from dateStr, skipping Sat/Sun. days=0 returns dateStr as-is,
+// which gives the "1 day duration = starts and finishes the same day" convention.
+function addBusinessDays(dateStr, days){
+const d = new Date(dateStr + 'T00:00:00');
+let remaining = Math.max(0, Math.round(days) || 0);
+while (remaining > 0){
+d.setDate(d.getDate() + 1);
+if (!isWeekendDate(d)) remaining--;
+}
+return localDateStr(d);
+}
+
+// First business day strictly after dateStr — used for the predecessor→successor Start transition.
+function nextBusinessDay(dateStr){
+const d = new Date(dateStr + 'T00:00:00');
+d.setDate(d.getDate() + 1);
+while (isWeekendDate(d)) d.setDate(d.getDate() + 1);
+return localDateStr(d);
+}
+
+// Inclusive count of business days from start to due — used to derive a Days value when the
+// Due field itself is edited directly.
+function businessDaySpan(startStr, dueStr){
+let d = new Date(startStr + 'T00:00:00');
+const end = new Date(dueStr + 'T00:00:00');
+if (end < d) return 1;
+let count = isWeekendDate(d) ? 0 : 1;
+while (d < end){
+d.setDate(d.getDate() + 1);
+if (!isWeekendDate(d)) count++;
+}
+return Math.max(1, count);
+}
+
 function splitDayHours(hours, isWeekend){
 if (isWeekend){
 return { regular: 0, ot15: Math.min(hours, 2), ot20: Math.max(0, hours - 2) };
@@ -2648,8 +2686,9 @@ renderDetail(unit);
 }
 
 // When a task's Due date changes (however it changed), push the schedule forward into every
-// task chained after it via the "After" field: next Start = this task's Due, next Due = next
-// Start + next task's own Days. Continues recursively down the whole chain.
+// task chained after it via the "After" field: next Start = the next business day after this
+// task's Due, next Due = next Start + next task's own Days (business days, weekends skipped).
+// Continues recursively down the whole chain.
 async function cascadeScheduleFrom(taskId, unitId, visited){
 visited = visited || new Set();
 if (visited.has(taskId)) return;
@@ -2659,11 +2698,9 @@ const pred = tasks.find(x => x.id === taskId);
 if (!pred || !pred.completion_date_planned) return;
 const followers = tasks.filter(t => t.predecessor_task_id === taskId && t.id !== taskId);
 for (const ft of followers){
-const dur = Math.round(Number(ft.duration_days) || 0);
-const due = new Date(pred.completion_date_planned + 'T00:00:00');
-due.setDate(due.getDate() + dur);
-const newStart = pred.completion_date_planned;
-const newDue = due.toISOString().slice(0,10);
+const newStart = nextBusinessDay(pred.completion_date_planned);
+const dur = Math.max(0, Math.round(Number(ft.duration_days) || 0) - 1);
+const newDue = addBusinessDays(newStart, dur);
 if (ft.start_date !== newStart || ft.completion_date_planned !== newDue){
 await updateTaskField(ft.id, { start_date: newStart, completion_date_planned: newDue }, visited);
 } else {
@@ -2780,31 +2817,25 @@ if ((field === 'start_date' || field === 'completion_date_planned') && !value) v
 const patch = { [field]: value };
 const t = (allTasksByUnit[unit.id] || []).find(x => x.id === taskId);
 if (t){
-// Keep Days / Start / Due mutually consistent whichever one gets edited.
+// Keep Days / Start / Due mutually consistent whichever one gets edited. Work Mon–Fri only —
+// Days is inclusive (1 day = starts and finishes the same business day), and weekends are
+// skipped when the app derives a date; a date the user typed directly is never overridden.
 if (field === 'duration_days' && t.start_date){
-const due = new Date(t.start_date + 'T00:00:00');
-due.setDate(due.getDate() + Math.round(value));
-patch.completion_date_planned = due.toISOString().slice(0,10);
+patch.completion_date_planned = addBusinessDays(t.start_date, Math.max(0, Math.round(value) - 1));
 } else if (field === 'start_date' && value){
-const dur = Math.round(Number(t.duration_days) || 0);
-const due = new Date(value + 'T00:00:00');
-due.setDate(due.getDate() + dur);
-patch.completion_date_planned = due.toISOString().slice(0,10);
+const dur = Math.max(0, Math.round(Number(t.duration_days) || 0) - 1);
+patch.completion_date_planned = addBusinessDays(value, dur);
 } else if (field === 'completion_date_planned' && value && t.start_date){
-const start = new Date(t.start_date + 'T00:00:00');
-const due = new Date(value + 'T00:00:00');
-const diffDays = Math.round((due - start) / 86400000);
-patch.duration_days = Math.max(0, diffDays);
+patch.duration_days = businessDaySpan(t.start_date, value);
 } else if (field === 'predecessor_task_id'){
-// Picking an "After" task reads that task's own Start/Due and applies the next
-// correct date, then computes this task's Due from its own Days.
+// Picking an "After" task starts this one the next business day after that task's Due,
+// then computes this task's own Due from its Days.
 const pred = value ? (allTasksByUnit[unit.id] || []).find(x => x.id === value) : null;
 if (pred && pred.completion_date_planned){
-const dur = Math.round(Number(t.duration_days) || 0);
-const due = new Date(pred.completion_date_planned + 'T00:00:00');
-due.setDate(due.getDate() + dur);
-patch.start_date = pred.completion_date_planned;
-patch.completion_date_planned = due.toISOString().slice(0,10);
+const newStart = nextBusinessDay(pred.completion_date_planned);
+const dur = Math.max(0, Math.round(Number(t.duration_days) || 0) - 1);
+patch.start_date = newStart;
+patch.completion_date_planned = addBusinessDays(newStart, dur);
 }
 }
 }
@@ -2817,9 +2848,8 @@ btn.addEventListener('click', () => {
 const taskId = btn.getAttribute('data-task-id');
 const t = (allTasksByUnit[unit.id] || []).find(x => x.id === taskId);
 if (!t || !t.start_date){ alert('Set a Start date first.'); return; }
-const due = new Date(t.start_date + 'T00:00:00');
-due.setDate(due.getDate() + Math.round(Number(t.duration_days) || 0));
-updateTaskField(taskId, { completion_date_planned: due.toISOString().slice(0,10) });
+const dur = Math.max(0, Math.round(Number(t.duration_days) || 0) - 1);
+updateTaskField(taskId, { completion_date_planned: addBusinessDays(t.start_date, dur) });
 });
 });
 
