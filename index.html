@@ -516,7 +516,7 @@ background-repeat:no-repeat;background-position:right 6px center;background-size
 .task-status-pill.ts-onhold{background-color:var(--amber-pale);color:#a3660c;}
 .task-status-pill.ts-notstarted{background-color:var(--border);color:var(--text-dim);}
 .task-fields{
-display:grid;grid-template-columns:64px 140px 18px 140px 1fr;gap:10px;align-items:end;padding-left:27px;
+display:grid;grid-template-columns:64px 140px 18px 140px 24px 1fr;gap:10px;align-items:end;padding-left:27px;
 }
 .tf-group{display:flex;flex-direction:column;gap:3px;min-width:0;}
 .tf-group label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text-faint);}
@@ -527,6 +527,12 @@ font-family:'JetBrains Mono',monospace;background:var(--surface);color:var(--tex
 .tf-group select{font-family:'Inter',sans-serif;font-size:10.5px;}
 .tf-group input:focus,.tf-group select:focus{outline:none;border-color:var(--primary);}
 .tf-arrow{align-self:center;color:var(--text-faint);font-size:12px;text-align:center;padding-bottom:6px;}
+.tf-recalc-btn{
+width:24px;height:24px;border:1px solid var(--border);border-radius:6px;background:var(--surface);
+color:var(--text-dim);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.tf-recalc-btn:hover{border-color:var(--primary);color:var(--primary);}
+.tf-recalc-btn:disabled{cursor:not-allowed;opacity:.42;}
 .task-track{display:flex;align-items:center;gap:8px;padding-left:27px;margin-top:10px;position:relative;}
 .task-bar-wrap{flex:1;min-width:60px;height:6px;background:var(--border);border-radius:3px;position:relative;overflow:hidden;}
 .task-bar{position:absolute;top:0;height:100%;background:var(--primary);border-radius:3px;min-width:2px;}
@@ -2122,6 +2128,7 @@ ${schedInfo ? `<span class="task-sched-badge sched-${schedInfo.status}">${schedI
 <label>Due</label>
 <input type="date" value="${t.completion_date_planned || ''}" data-task-id="${t.id}" data-field="completion_date_planned" ${dis}>
 </div>
+<button type="button" class="tf-recalc-btn" data-task-id="${t.id}" title="Recalculate Due = Start + Days" ${dis}>&#8635;</button>
 <div class="tf-group">
 <label>After</label>
 <select data-task-id="${t.id}" data-field="predecessor_task_id" ${dis}>
@@ -2276,7 +2283,39 @@ let value = e.target.value;
 if (field === 'duration_days') value = Number(value) || 0;
 if (field === 'predecessor_task_id') value = value || null;
 if ((field === 'start_date' || field === 'completion_date_planned') && !value) value = null;
-updateTaskField(taskId, { [field]: value });
+
+const patch = { [field]: value };
+const t = (allTasksByUnit[unit.id] || []).find(x => x.id === taskId);
+if (t){
+// Keep Days / Start / Due mutually consistent whichever one gets edited.
+if (field === 'duration_days' && t.start_date){
+const due = new Date(t.start_date + 'T00:00:00');
+due.setDate(due.getDate() + Math.round(value));
+patch.completion_date_planned = due.toISOString().slice(0,10);
+} else if (field === 'start_date' && value){
+const dur = Math.round(Number(t.duration_days) || 0);
+const due = new Date(value + 'T00:00:00');
+due.setDate(due.getDate() + dur);
+patch.completion_date_planned = due.toISOString().slice(0,10);
+} else if (field === 'completion_date_planned' && value && t.start_date){
+const start = new Date(t.start_date + 'T00:00:00');
+const due = new Date(value + 'T00:00:00');
+const diffDays = Math.round((due - start) / 86400000);
+patch.duration_days = Math.max(0, diffDays);
+}
+}
+updateTaskField(taskId, patch);
+});
+});
+
+taskListEl.querySelectorAll('.tf-recalc-btn').forEach(btn => {
+btn.addEventListener('click', () => {
+const taskId = btn.getAttribute('data-task-id');
+const t = (allTasksByUnit[unit.id] || []).find(x => x.id === taskId);
+if (!t || !t.start_date){ alert('Set a Start date first.'); return; }
+const due = new Date(t.start_date + 'T00:00:00');
+due.setDate(due.getDate() + Math.round(Number(t.duration_days) || 0));
+updateTaskField(taskId, { completion_date_planned: due.toISOString().slice(0,10) });
 });
 });
 
