@@ -967,6 +967,18 @@ display:flex;align-items:center;justify-content:center;
 </div>
 </div>
 
+<div id="addAnotherModal" class="modal-overlay hidden">
+<div class="modal-card" style="max-width:380px;">
+<div class="modal-icon modal-icon-primary">&check;</div>
+<h2>Unit saved</h2>
+<p class="modal-sub" id="addAnotherMsg">Add another unit to this sales order?</p>
+<div class="modal-close-row">
+<button class="icon-btn ghost-light" id="addAnotherSaveBtn">Save now</button>
+<button class="btn" id="addAnotherYesBtn" style="width:auto;">+ Add another unit</button>
+</div>
+</div>
+</div>
+
 <div id="editSoModal" class="modal-overlay hidden">
 <div class="modal-card">
 <div class="modal-icon modal-icon-primary">✎</div>
@@ -2588,13 +2600,8 @@ panel.querySelector('#dpSaveBtn').addEventListener('click', () => {
 // Fields already write to the database live as they're edited — Save just closes this
 // view and offers to add another unit to the same sales order.
 document.getElementById('detailModal').classList.add('hidden');
-const addAnother = confirm(`Add another unit to SO ${unit.so_number}?`);
-if (addAnother){
-openAddSoModal();
-const soInput = document.getElementById('addSoNumber');
-soInput.value = unit.so_number;
-soInput.disabled = true;
-}
+const so = soInfoByNumber[unit.so_number] || {};
+openAddAnotherModal(unit.so_number, so.company_name, so.sales_rep);
 });
 
 const taskListEl = panel.querySelector('#taskListEl');
@@ -3432,6 +3439,25 @@ document.getElementById('addSoModal').classList.remove('hidden');
 loadAddSoTemplateOptions();
 }
 function closeAddSoModal(){ document.getElementById('addSoModal').classList.add('hidden'); }
+
+// After saving a unit, offer to add another one to the same SO (pre-filling SO number,
+// company name and sales rep so only the new unit's own details need typing), or finish up.
+function openAddAnotherModal(soNumber, companyName, salesRep){
+document.getElementById('addAnotherMsg').textContent = `Add another unit to SO ${soNumber}?`;
+document.getElementById('addAnotherModal').classList.remove('hidden');
+document.getElementById('addAnotherSaveBtn').onclick = () => {
+document.getElementById('addAnotherModal').classList.add('hidden');
+};
+document.getElementById('addAnotherYesBtn').onclick = () => {
+document.getElementById('addAnotherModal').classList.add('hidden');
+openAddSoModal();
+const soInput = document.getElementById('addSoNumber');
+soInput.value = soNumber;
+soInput.disabled = true;
+document.getElementById('addSoCompanyName').value = companyName || '';
+populateSalesRepOptions('addSoSalesRep', salesRep || '');
+};
+}
 
 async function populateSalesRepOptions(selectId, selectedValue){
 const sel = document.getElementById(selectId);
