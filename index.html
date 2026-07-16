@@ -155,31 +155,53 @@ font-size:13.5px;background:var(--surface-alt);font-family:inherit;color:var(--t
 .toolbar-clear{margin-left:auto;}
 
 /* ---------- Team status ---------- */
-.team-panel{
-background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);
-box-shadow:var(--shadow-sm);margin-bottom:18px;padding:16px 18px;
+.attn-banner{
+background:linear-gradient(180deg,#fff8ea,#fff1d6);border:1.5px solid #f0b429;border-radius:var(--radius-md);
+padding:14px 18px;margin-bottom:14px;
 }
-.team-panel-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);display:block;margin-bottom:12px;}
-.team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;}
-.team-card{border:1px solid var(--border);border-radius:10px;padding:12px 14px;background:var(--surface-alt);}
-.team-card-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px;flex-wrap:wrap;}
-.team-name{font-size:13px;font-weight:700;color:var(--text);}
-.clock-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;}
-.clock-badge .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-.clock-badge.cb-in{background:var(--green-pale);color:#0a7d59;}
-.clock-badge.cb-in .dot{background:var(--green);}
-.clock-badge.cb-out{background:var(--border);color:var(--text-dim);}
-.clock-badge.cb-out .dot{background:var(--text-faint);}
-.clock-badge.cb-break{background:var(--amber-pale);color:#a3660c;}
-.clock-badge.cb-break .dot{background:var(--amber);}
-.clock-badge.cb-unknown{background:var(--slate-pale);color:var(--slate);}
-.clock-badge.cb-unknown .dot{background:var(--slate);}
-.team-tasks{display:flex;flex-direction:column;gap:5px;}
-.team-task-row{font-size:11px;color:var(--text-dim);display:flex;justify-content:space-between;gap:6px;}
-.team-task-row b{color:var(--text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
-.team-task-row span{flex-shrink:0;font-family:'JetBrains Mono',monospace;}
-.team-task-row.tt-behind span{color:#a51f34;font-weight:700;}
-.team-empty{font-size:11px;color:var(--text-faint);font-style:italic;}
+.attn-title{font-size:13.5px;font-weight:800;color:#92610a;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.attn-chips{display:flex;flex-wrap:wrap;gap:10px;}
+.attn-chip{
+display:inline-flex;align-items:center;gap:10px;border:1.5px solid var(--red);border-radius:20px;
+padding:6px 8px 6px 14px;background:white;font-size:12.5px;font-weight:700;color:var(--text);
+}
+.attn-chip button{
+border:none;background:var(--red-pale);color:#a51f34;font-size:10.5px;font-weight:700;
+padding:5px 10px;border-radius:14px;cursor:pointer;font-family:inherit;
+}
+.attn-chip button:hover{background:var(--red);color:white;}
+.attn-chip button:disabled{opacity:.5;cursor:not-allowed;}
+
+.status-panel{border-radius:var(--radius-md);padding:14px 18px;margin-bottom:14px;border:1.5px solid;}
+.status-panel.sp-in{background:#eefaf3;border-color:#8fd9b6;}
+.status-panel.sp-paused{background:#fff8ea;border-color:#f0d090;}
+.status-panel-head{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
+.status-panel.sp-in .status-panel-head{color:#0a7d59;}
+.status-panel.sp-paused .status-panel-head{color:#a3660c;}
+.status-panel-head .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.status-panel.sp-in .dot{background:var(--green);}
+.status-panel.sp-paused .dot{background:var(--amber);}
+.status-row{
+display:grid;grid-template-columns:100px minmax(0,1.3fr) minmax(0,1fr) 130px 92px 92px;
+gap:14px;align-items:center;padding:8px 4px;border-bottom:1px solid rgba(0,0,0,.06);font-size:12.5px;
+}
+.status-row:last-child{border-bottom:none;}
+.status-row .sr-so{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.status-row .sr-unit{color:var(--primary-dark);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.status-row .sr-task{color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.status-row .sr-person{color:var(--text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.status-row .sr-time{font-family:'JetBrains Mono',monospace;font-weight:700;text-align:right;white-space:nowrap;}
+.status-panel.sp-in .sr-time{color:#0a7d59;}
+.status-panel.sp-paused .sr-time{color:#a3660c;font-size:10.5px;}
+.status-row button{
+border:1.5px solid;border-radius:16px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;
+font-family:inherit;background:white;justify-self:end;
+}
+.sp-in .status-row button{border-color:var(--red);color:var(--red);}
+.sp-in .status-row button:hover{background:var(--red);color:white;}
+.sp-paused .status-row button{border-color:var(--amber);color:#a3660c;}
+.sp-paused .status-row button:hover{background:var(--amber);color:white;}
+.status-panel-empty{font-size:12px;color:var(--text-faint);font-style:italic;padding:6px 4px;}
 
 /* ---------- Stats ---------- */
 .stats-grid{
@@ -544,9 +566,10 @@ display:flex;align-items:center;justify-content:center;
 <button class="icon-btn ghost-light toolbar-clear" id="clearFiltersBtn">Clear filters</button>
 </div>
 
-<div class="team-panel" id="teamPanel">
-<span class="team-panel-title">Team status</span>
-<div class="team-grid" id="teamGrid"><div class="team-empty">Loading…</div></div>
+<div id="teamPanel">
+<div id="attnBanner"></div>
+<div id="clockedInPanel"></div>
+<div id="pausedPanel"></div>
 </div>
 
 <div class="layout">
@@ -742,82 +765,218 @@ list.forEach(t => { if (t.assigned_to && t.assigned_to.trim()) names.add(t.assig
 return Array.from(names).sort((a,b) => a.localeCompare(b));
 }
 
-function nameMatchesEmail(name, email){
-const local = email.split('@')[0].toLowerCase();
-const parts = name.toLowerCase().split(/[\s/]+/).filter(p => p.length > 2);
-return parts.some(p => local.includes(p));
+function formatPersonName(email){
+const local = (email || '').split('@')[0];
+return local.split(/[.\-_]+/).filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || email;
 }
+
+function taskUnitIndex(){
+const taskIndex = {};
+const unitIndex = {};
+Object.values(allTasksByUnit).forEach(list => { list.forEach(t => { taskIndex[t.id] = t; }); });
+allUnits.forEach(u => { unitIndex[u.id] = u; });
+return { taskIndex, unitIndex };
+}
+
+let teamStatusTick = null;
 
 async function renderTeamStatus(){
-const container = document.getElementById('teamGrid');
-if (!container) return;
-const names = allKnownAssignees();
-if (!names.length){ container.innerHTML = '<div class="team-empty">No one assigned to tasks yet.</div>'; return; }
+const attnEl = document.getElementById('attnBanner');
+const inEl = document.getElementById('clockedInPanel');
+const pauseEl = document.getElementById('pausedPanel');
+if (!attnEl || !inEl || !pauseEl) return;
 
-const byName = {};
-names.forEach(n => byName[n] = []);
-Object.values(allTasksByUnit).forEach(list => {
-list.forEach(t => {
-if (t.hierarchy_level !== 2 || t.is_not_applicable) return;
-if (Number(t.percent_complete_numeric) >= 1) return;
-if (!t.assigned_to || !byName[t.assigned_to]) return;
-byName[t.assigned_to].push(t);
-});
-});
-Object.keys(byName).forEach(n => {
-byName[n].sort((a, b) => {
-const da = a.completion_date_planned ? new Date(a.completion_date_planned) : null;
-const db = b.completion_date_planned ? new Date(b.completion_date_planned) : null;
-if (da && db) return da - db;
-if (da) return -1;
-if (db) return 1;
-return 0;
-});
-});
+const { taskIndex, unitIndex } = taskUnitIndex();
+const todayIso = todayStartIso();
 
-const { data: events, error } = await sb.from('prod_clock_events')
-.select('person_email, event_type, event_time')
-.gte('event_time', todayStartIso())
-.order('event_time');
-const latestByEmail = {};
-if (!error && events){
-events.forEach(e => { latestByEmail[e.person_email] = e; });
-}
+const [{ data: rosterRows }, { data: todayEvents }, { data: decisions }, { data: recentHours }] = await Promise.all([
+sb.from('prod_clock_events').select('person_email').order('event_time', { ascending: false }).limit(500),
+sb.from('prod_clock_events').select('person_email, unit_id, task_id, event_type, event_time').gte('event_time', todayIso).order('event_time'),
+sb.from('prod_attendance_decisions').select('person_email, decision').eq('work_date', todayIso.slice(0,10)),
+sb.from('prod_daily_hours').select('task_id, unit_id, person_email, work_date, hours_worked, updated_at').order('updated_at', { ascending: false }).limit(200),
+]);
 
-container.innerHTML = names.map(name => {
-let ev = null;
-for (const email in latestByEmail){
-if (nameMatchesEmail(name, email)){ ev = latestByEmail[email]; break; }
-}
-let badge;
-if (!ev){
-badge = { cls: 'cb-unknown', label: 'No clock data' };
-} else if (ev.event_type === 'clock_out'){
-badge = { cls: 'cb-out', label: 'Not clocked in' };
-} else if (ev.event_type === 'break_start'){
-badge = { cls: 'cb-break', label: 'On break' };
-} else if (ev.event_type === 'break_end'){
-badge = { cls: 'cb-in', label: 'Resumed' };
+const roster = Array.from(new Set((rosterRows || []).map(r => r.person_email))).sort();
+const decisionByEmail = {};
+(decisions || []).forEach(d => { decisionByEmail[d.person_email] = d.decision; });
+
+const dailyLatest = {};
+const taskLatest = {};
+(todayEvents || []).forEach(e => {
+if (e.task_id){
+const key = e.person_email + '::' + e.task_id;
+taskLatest[key] = e;
 } else {
-badge = { cls: 'cb-in', label: 'Clocked in' };
+dailyLatest[e.person_email] = e;
 }
-const top3 = byName[name].slice(0, 3);
-const taskRows = top3.length ? top3.map(t => {
-const info = taskScheduleInfo(t);
-const isBehind = info && info.status === 'behind';
-const dueLabel = t.completion_date_planned ? fmtDate(t.completion_date_planned) : '—';
-return `<div class="team-task-row ${isBehind ? 'tt-behind' : ''}"><b>${t.task_name}</b><span>${isBehind ? info.label : dueLabel}</span></div>`;
-}).join('') : '<div class="team-empty">No open tasks</div>';
-return `
-<div class="team-card">
-<div class="team-card-head">
-<span class="team-name">${name}</span>
-<span class="clock-badge ${badge.cls}"><span class="dot"></span>${badge.label}</span>
+});
+
+const notClockedIn = roster.filter(email => {
+const last = dailyLatest[email];
+const isIn = last && last.event_type !== 'clock_out';
+const decided = decisionByEmail[email] && decisionByEmail[email] !== 'pending';
+return !isIn && !decided;
+});
+
+attnEl.innerHTML = notClockedIn.length ? `
+<div class="attn-banner">
+<div class="attn-title">🔔 Not Clocked In — Please Start Your Timer!</div>
+<div class="attn-chips">
+${notClockedIn.map(email => `
+<span class="attn-chip">${formatPersonName(email)}
+<button type="button" class="attn-absent-btn" data-email="${email}">Mark absent</button>
+</span>
+`).join('')}
 </div>
-<div class="team-tasks">${taskRows}</div>
+</div>
+` : '';
+
+const activeRows = [];
+Object.keys(taskLatest).forEach(key => {
+const ev = taskLatest[key];
+if (ev.event_type !== 'clock_in') return;
+const t = taskIndex[ev.task_id];
+const u = t ? unitIndex[t.unit_id] : null;
+activeRows.push({ email: ev.person_email, task: t, unit: u, startedAt: ev.event_time });
+});
+
+inEl.innerHTML = `
+<div class="status-panel sp-in">
+<div class="status-panel-head"><span class="dot"></span>Clocked In Now (${activeRows.length})</div>
+${activeRows.length ? activeRows.map(r => `
+<div class="status-row" data-started-at="${r.startedAt}">
+<span class="sr-so">${r.unit ? r.unit.so_number : '—'}</span>
+<span class="sr-unit">${r.unit ? (r.unit.unit_name || 'Untitled unit') : '—'}</span>
+<span class="sr-task">${r.task ? r.task.task_name : '—'}</span>
+<span class="sr-person">${formatPersonName(r.email)}</span>
+<span class="sr-time sr-live">00:00:00</span>
+<button type="button" class="ts-stop-btn" data-email="${r.email}" data-task-id="${r.task ? r.task.id : ''}" data-unit-id="${r.unit ? r.unit.id : ''}" data-started-at="${r.startedAt}">Stop</button>
+</div>
+`).join('') : '<div class="status-panel-empty">No one is currently clocked into a task.</div>'}
 </div>
 `;
-}).join('');
+
+const activeKeySet = new Set(activeRows.map(r => r.email + '::' + (r.task ? r.task.id : '')));
+const seenTask = new Set();
+const pausedRows = [];
+(recentHours || []).forEach(h => {
+if (!h.task_id) return;
+const key = h.person_email + '::' + h.task_id;
+if (activeKeySet.has(key)) return;
+if (seenTask.has(key)) return;
+const t = taskIndex[h.task_id];
+if (!t || Number(t.percent_complete_numeric) >= 1) return;
+seenTask.add(key);
+const u = t ? unitIndex[t.unit_id] : null;
+pausedRows.push({ email: h.person_email, task: t, unit: u, pausedAt: h.updated_at });
+});
+pausedRows.sort((a, b) => new Date(b.pausedAt) - new Date(a.pausedAt));
+const pausedTop = pausedRows.slice(0, 6);
+
+pauseEl.innerHTML = `
+<div class="status-panel sp-paused">
+<div class="status-panel-head"><span class="dot"></span>Paused — Resume Where You Left Off (${pausedTop.length})</div>
+${pausedTop.length ? pausedTop.map(r => `
+<div class="status-row">
+<span class="sr-so">${r.unit ? r.unit.so_number : '—'}</span>
+<span class="sr-unit">${r.unit ? (r.unit.unit_name || 'Untitled unit') : '—'}</span>
+<span class="sr-task">${r.task ? r.task.task_name : '—'}</span>
+<span class="sr-person">${formatPersonName(r.email)}</span>
+<span class="sr-time">${fmtDateTime(r.pausedAt)}</span>
+<button type="button" class="ts-resume-btn" data-task-id="${r.task ? r.task.id : ''}" data-unit-id="${r.unit ? r.unit.id : ''}">Resume</button>
+</div>
+`).join('') : '<div class="status-panel-empty">Nothing paused right now.</div>'}
+</div>
+`;
+
+document.querySelectorAll('.attn-absent-btn').forEach(btn => {
+btn.addEventListener('click', async () => {
+const email = btn.getAttribute('data-email');
+btn.disabled = true; btn.textContent = 'Saving…';
+await markAttendanceDecision(email, 'absent');
+renderTeamStatus();
+});
+});
+document.querySelectorAll('.ts-stop-btn').forEach(btn => {
+btn.addEventListener('click', async () => {
+const email = btn.getAttribute('data-email');
+const taskId = btn.getAttribute('data-task-id');
+const unitId = btn.getAttribute('data-unit-id');
+const startedAt = btn.getAttribute('data-started-at');
+btn.disabled = true; btn.textContent = '…';
+await stopTimerFor(email, taskId, unitId, startedAt);
+renderTeamStatus();
+});
+});
+document.querySelectorAll('.ts-resume-btn').forEach(btn => {
+btn.addEventListener('click', async () => {
+const taskId = btn.getAttribute('data-task-id');
+const unitId = btn.getAttribute('data-unit-id');
+if (!taskId || !unitId) return;
+btn.disabled = true; btn.textContent = '…';
+await startTaskTimer(taskId, unitId);
+if (selectedUnitId === unitId){
+const u = allUnits.find(x => x.id === unitId);
+if (u) renderDetail(u);
+}
+renderTeamStatus();
+});
+});
+
+if (teamStatusTick){ clearInterval(teamStatusTick); teamStatusTick = null; }
+const tick = () => {
+document.querySelectorAll('.status-row[data-started-at]').forEach(row => {
+const startedAt = new Date(row.getAttribute('data-started-at'));
+const secs = Math.floor((Date.now() - startedAt.getTime()) / 1000);
+const el = row.querySelector('.sr-live');
+if (el) el.textContent = formatHMS(secs / 3600);
+});
+};
+tick();
+teamStatusTick = setInterval(tick, 1000);
+}
+
+async function markAttendanceDecision(personEmail, decision){
+const workDate = todayStartIso().slice(0,10);
+const { data: existing } = await sb.from('prod_attendance_decisions')
+.select('id').eq('person_email', personEmail).eq('work_date', workDate).maybeSingle();
+const { data: { session } } = await sb.auth.getSession();
+if (existing){
+await sb.from('prod_attendance_decisions').update({
+decision, resolved_by: session.user.email, resolved_at: new Date().toISOString(),
+}).eq('id', existing.id);
+} else {
+await sb.from('prod_attendance_decisions').insert({
+person_email: personEmail, work_date: workDate, decision,
+resolved_by: session.user.email, resolved_at: new Date().toISOString(),
+});
+}
+}
+
+async function stopTimerFor(personEmail, taskId, unitId, startedAtIso){
+if (!taskId) return;
+const startedAt = new Date(startedAtIso);
+const endedAt = new Date();
+await sb.from('prod_clock_events').insert({
+person_email: personEmail, unit_id: unitId || null, task_id: taskId,
+event_type: 'clock_out', event_time: endedAt.toISOString(),
+});
+const hoursThisSession = (endedAt - startedAt) / 3600000;
+const workDate = startedAt.toISOString().slice(0,10);
+const { data: existing } = await sb.from('prod_daily_hours')
+.select('id, hours_worked').eq('person_email', personEmail).eq('task_id', taskId).eq('work_date', workDate).maybeSingle();
+if (existing){
+await sb.from('prod_daily_hours').update({
+hours_worked: Number(existing.hours_worked || 0) + hoursThisSession, source: 'manual_adjustment',
+}).eq('id', existing.id);
+} else {
+await sb.from('prod_daily_hours').insert({
+person_email: personEmail, work_date: workDate, task_id: taskId, unit_id: unitId || null,
+hours_worked: hoursThisSession, source: 'manual_adjustment',
+});
+}
+logTaskActivity(taskId, unitId || null, `Timer stopped by supervisor — logged ${hoursThisSession.toFixed(2)}h`, 'timer');
+if (runningTimer && runningTimer.taskId === taskId){ runningTimer = null; }
 }
 
 async function checkSession(){
@@ -1275,8 +1434,9 @@ async function updateTaskField(taskId, patch){
 const { error } = await sb.from('prod_tasks').update(patch).eq('id', taskId);
 if (error){ alert('Failed to update: ' + error.message); return; }
 const t = allTasksByUnit[unit.id].find(x => x.id === taskId);
+const taskNameBefore = t ? t.task_name : '';
 if (t) Object.assign(t, patch);
-logTaskActivity(taskId, unit.id, describeTaskPatch(patch));
+logTaskActivity(taskId, unit.id, describeTaskPatch(patch, taskNameBefore));
 renderStats();
 renderUnitList();
 renderDetail(unit);
@@ -1503,13 +1663,14 @@ const d = new Date(iso);
 return d.toLocaleString('en-AU', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit' });
 }
 
-function describeTaskPatch(patch){
+function describeTaskPatch(patch, taskName){
 const lines = [];
 const statusMap = { not_started:'Not started', in_progress:'In progress', on_hold:'On-Hold', done:'Done' };
 if ('task_status' in patch){
 lines.push(`Status changed to ${statusMap[patch.task_status] || patch.task_status}`);
 } else if ('percent_complete_numeric' in patch){
-lines.push(Number(patch.percent_complete_numeric) >= 1 ? 'Checkbox checked' : 'Checkbox unchecked');
+const verb = Number(patch.percent_complete_numeric) >= 1 ? 'Enabled' : 'Disabled';
+lines.push(taskName ? `${verb} - ${taskName}` : verb);
 }
 if ('duration_days' in patch) lines.push(`Duration set to ${patch.duration_days} day(s)`);
 if ('start_date' in patch) lines.push(`Start date set to ${patch.start_date ? fmtDate(patch.start_date) : '—'}`);
