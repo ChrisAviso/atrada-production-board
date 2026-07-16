@@ -292,13 +292,41 @@ border-radius:20px;padding:5px 12px 5px 10px;justify-self:start;max-width:100%;o
 .unit-status.st-notstarted{background:var(--border);color:var(--text-dim);}
 .unit-status.st-notstarted .dot{background:var(--text-faint);}
 
-.unit-task-focus{display:flex;flex-direction:column;gap:3px;min-width:0;}
-.utf-pill{font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:9px;white-space:nowrap;display:inline-block;width:fit-content;}
-.utf-pill.ts-done{background:var(--green-pale);color:#0a7d59;}
-.utf-pill.ts-progress{background:var(--primary-pale);color:var(--primary-dark);}
-.utf-pill.ts-onhold{background:var(--amber-pale);color:#a3660c;}
-.utf-pill.ts-notstarted{background:var(--border);color:var(--text-dim);}
-.utf-meta{font-size:10px;color:var(--text-faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'JetBrains Mono',monospace;}
+.task-focus-list{display:flex;flex-direction:column;gap:10px;}
+.task-focus-row{
+background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);
+box-shadow:var(--shadow-sm);padding:14px 16px;cursor:pointer;transition:background .12s,border-color .12s;
+}
+.task-focus-row:hover{border-color:var(--primary);}
+.tfr-top{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.tfr-unit{flex:1;min-width:0;}
+.tfr-unit-name{font-size:13.5px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tfr-so-line{font-size:11px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tfr-details{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding-left:0;margin-bottom:10px;}
+.tfr-field{font-size:11px;color:var(--text-dim);}
+.tfr-field b{color:var(--text);font-family:'JetBrains Mono',monospace;font-weight:600;}
+.tfr-field.sched-badge{font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:9px;white-space:nowrap;}
+.tfr-field.sched-behind{background:var(--red-pale);color:#a51f34;}
+.tfr-field.sched-ahead{background:var(--green-pale);color:#0a7d59;}
+.tfr-field.sched-ontime{background:var(--slate-pale);color:var(--slate);}
+.tfr-assignees{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.tfr-assignee-chip{
+font-size:10.5px;font-weight:600;color:var(--text-dim);background:var(--surface-alt);border:1px solid var(--border);
+padding:3px 9px;border-radius:20px;white-space:nowrap;
+}
+.tfr-assignee-chip.empty{color:var(--text-faint);font-style:italic;font-weight:400;}
+.tfr-timer{display:flex;align-items:center;gap:8px;}
+.tf-timer-btn{
+flex-shrink:0;padding:4px 12px;border:1px solid var(--border);border-radius:20px;font-size:10.5px;font-weight:700;
+background:var(--surface-alt);color:var(--text-dim);cursor:pointer;font-family:inherit;
+}
+.tf-timer-btn.running{background:var(--red-pale);border-color:transparent;color:#a51f34;}
+.tf-timer-elapsed{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-dim);white-space:nowrap;}
+.tf-logs-btn{
+margin-left:auto;flex-shrink:0;padding:4px 11px;border:1px solid var(--border);border-radius:20px;font-size:10.5px;font-weight:700;
+background:var(--surface);color:var(--text-dim);cursor:pointer;font-family:inherit;
+}
+.tf-logs-btn:hover{border-color:var(--primary);color:var(--primary);}
 
 /* ---------- Detail panel ---------- */
 .detail-panel{
@@ -700,6 +728,7 @@ let groupBy = 'so';
 let clockEvents = [];
 let runningTimer = null;
 let runningTimerTick = null;
+let taskFocusTick = null;
 
 const CLASS_ORDER = ['Containers','Manufactured','Real Ezy','Modulate','Imported','Lubestation','Buy & Sell'];
 const CLASS_SLUG = {
@@ -1170,17 +1199,6 @@ if (stats) stats.classList.toggle('hidden', hide);
 if (team) team.classList.toggle('hidden', hide);
 }
 
-function taskFocusInfo(unitId, taskName){
-const t = (allTasksByUnit[unitId] || []).find(x => x.hierarchy_level === 2 && x.task_name === taskName);
-if (!t) return null;
-const sp = taskStatusPill(t);
-return {
-cls: sp.cls, label: sp.label,
-assignee: t.assigned_to || 'Unassigned',
-due: t.completion_date_planned ? fmtDate(t.completion_date_planned) : '—',
-};
-}
-
 function filteredUnits(){
 return allUnits.filter(u => {
 if (activeClass && u.class !== activeClass) return false;
@@ -1244,7 +1262,14 @@ return Object.keys(groups).sort().map(k => ({ label: k, units: groups[k] }));
 function renderUnitList(){
 const el = document.getElementById('unitList');
 el.innerHTML = '';
+if (!taskFilterValue && taskFocusTick){ clearInterval(taskFocusTick); taskFocusTick = null; }
 const filtered = filteredUnits();
+
+if (taskFilterValue){
+renderTaskFilterView(el, filtered);
+return;
+}
+
 const groups = groupUnits(filtered);
 
 if (groups.length === 0){
@@ -1272,7 +1297,7 @@ ${anyBehind ? '<span class="so-flag-behind">Behind schedule</span>' : ''}
 group.appendChild(head);
 
 const leadColLabel = groupBy === 'so' ? 'Class' : 'SO#';
-const stageColLabel = taskFilterValue ? 'Task Status' : 'Stage';
+const stageColLabel = 'Stage';
 const rowHead = document.createElement('div');
 rowHead.className = 'unit-row-head';
 rowHead.innerHTML = `<span>${leadColLabel}</span><span>Unit</span><span>Start</span><span>Finish</span><span style="text-align:right;">Days</span><span style="text-align:right;">Since Approval</span><span style="text-align:right;">Qty</span><span>${stageColLabel}</span>`;
@@ -1288,14 +1313,7 @@ row.className = 'unit-row' + (u.id === selectedUnitId ? ' active' : '');
 const leadBadge = groupBy === 'so'
 ? `<span class="class-badge cls-${classSlug(u.class)}">${classLabel(u.class)}</span>`
 : `<span class="class-badge" style="font-family:'JetBrains Mono',monospace;">${u.so_number}</span>`;
-const stageCell = taskFilterValue
-? (() => {
-const info = taskFocusInfo(u.id, taskFilterValue);
-return info
-? `<div class="unit-task-focus"><span class="utf-pill ${info.cls}">${info.label}</span><span class="utf-meta">${info.assignee} · ${info.due}</span></div>`
-: '<span class="unit-status st-notstarted"><span class="dot"></span>N/A</span>';
-})()
-: `<span class="unit-status ${s.badge}"><span class="dot"></span>${s.label}</span>`;
+const stageCell = `<span class="unit-status ${s.badge}"><span class="dot"></span>${s.label}</span>`;
 row.innerHTML = `
 ${leadBadge}
 <div class="unit-main">
@@ -1313,6 +1331,167 @@ row.addEventListener('click', () => { selectedUnitId = u.id; renderUnitList(); r
 group.appendChild(row);
 });
 el.appendChild(group);
+});
+}
+
+/* ---------- Rich line-by-line task-filter view ---------- */
+function renderTaskFocusRowHtml(u, t){
+const sp = taskStatusPill(t);
+const so = soInfoByNumber[u.so_number];
+const sched = taskScheduleInfo(t);
+const isRunning = runningTimer && runningTimer.taskId === t.id;
+const taskNameAttr = (t.task_name || '').replace(/"/g, '&quot;');
+return `
+<div class="task-focus-row" data-task-id="${t.id}" data-unit-id="${u.id}">
+<div class="tfr-top">
+<span class="class-badge cls-${classSlug(u.class)}">${classLabel(u.class)}</span>
+<div class="tfr-unit">
+<div class="tfr-unit-name">${u.unit_name || 'Untitled unit'}</div>
+<div class="tfr-so-line">${u.so_number || '—'}${so && so.company_name ? ' · ' + so.company_name : ''}</div>
+</div>
+<select class="task-status-pill ${sp.cls}" data-task-id="${t.id}" data-unit-id="${u.id}">
+<option value="not_started" ${sp.value === 'not_started' ? 'selected' : ''}>Not Started</option>
+<option value="in_progress" ${sp.value === 'in_progress' ? 'selected' : ''}>In Progress</option>
+<option value="on_hold" ${sp.value === 'on_hold' ? 'selected' : ''}>On-Hold</option>
+<option value="done" ${sp.value === 'done' ? 'selected' : ''}>Done</option>
+</select>
+</div>
+<div class="tfr-details">
+<span class="tfr-field">Start <b>${t.start_date ? fmtDate(t.start_date) : '—'}</b></span>
+<span class="tfr-field">Due <b>${t.completion_date_planned ? fmtDate(t.completion_date_planned) : '—'}</b></span>
+${sched ? `<span class="tfr-field sched-badge sched-${sched.status}">${sched.label}</span>` : ''}
+</div>
+<div class="tfr-assignees" data-task-id="${t.id}"><span class="tfr-assignee-chip empty">Loading…</span></div>
+<div class="tfr-timer">
+<button type="button" class="tf-timer-btn ${isRunning ? 'running' : ''}" data-task-id="${t.id}" data-unit-id="${u.id}">${isRunning ? 'Stop' : 'Start'}</button>
+<span class="tf-timer-elapsed" data-task-id="${t.id}">00:00:00</span>
+<button type="button" class="tf-logs-btn" data-task-id="${t.id}" data-task-name="${taskNameAttr}" data-unit-id="${u.id}">Logs</button>
+</div>
+</div>
+`;
+}
+
+function wireTaskFocusListeners(list, rows){
+list.querySelectorAll('.task-focus-row').forEach(rowEl => {
+rowEl.addEventListener('click', (e) => {
+if (e.target.closest('select, button, input')) return;
+const unitId = rowEl.getAttribute('data-unit-id');
+const u = allUnits.find(x => x.id === unitId);
+if (!u) return;
+selectedUnitId = unitId;
+renderDetail(u);
+});
+});
+
+list.querySelectorAll('.task-status-pill').forEach(sel => {
+sel.addEventListener('change', async (e) => {
+const taskId = e.target.getAttribute('data-task-id');
+const unitId = e.target.getAttribute('data-unit-id');
+const value = e.target.value;
+const row = rows.find(r => r.t.id === taskId);
+const taskName = row ? row.t.task_name : '';
+const { error } = await sb.from('prod_tasks').update({ task_status: value }).eq('id', taskId);
+if (error){ alert('Failed to update: ' + error.message); return; }
+const localTask = (allTasksByUnit[unitId] || []).find(x => x.id === taskId);
+if (localTask) localTask.task_status = value;
+logTaskActivity(taskId, unitId, describeTaskPatch({ task_status: value }, taskName));
+renderStats();
+renderUnitList();
+if (selectedUnitId === unitId){
+const u = allUnits.find(x => x.id === unitId);
+if (u) renderDetail(u);
+}
+});
+});
+
+list.querySelectorAll('.tf-timer-btn').forEach(btn => {
+btn.addEventListener('click', async (e) => {
+e.stopPropagation();
+const taskId = btn.getAttribute('data-task-id');
+const unitId = btn.getAttribute('data-unit-id');
+if (runningTimer && runningTimer.taskId === taskId){
+await stopTaskTimer();
+} else {
+await startTaskTimer(taskId, unitId);
+}
+renderUnitList();
+if (selectedUnitId === unitId){
+const u = allUnits.find(x => x.id === unitId);
+if (u) renderDetail(u);
+}
+});
+});
+
+list.querySelectorAll('.tf-logs-btn').forEach(btn => {
+btn.addEventListener('click', (e) => {
+e.stopPropagation();
+const taskId = btn.getAttribute('data-task-id');
+const taskName = btn.getAttribute('data-task-name');
+const unitId = btn.getAttribute('data-unit-id');
+openLogsModal(taskId, taskName, unitId);
+});
+});
+}
+
+function renderTaskFilterView(el, filtered){
+if (taskFocusTick){ clearInterval(taskFocusTick); taskFocusTick = null; }
+el.innerHTML = '';
+
+const rows = [];
+filtered.forEach(u => {
+const t = (allTasksByUnit[u.id] || []).find(x => x.hierarchy_level === 2 && x.task_name === taskFilterValue && !x.is_not_applicable);
+if (t) rows.push({ u, t });
+});
+
+if (!rows.length){
+el.innerHTML = '<div class="empty-state">No units have this task.</div>';
+return;
+}
+
+const list = document.createElement('div');
+list.className = 'task-focus-list';
+list.innerHTML = rows.map(({ u, t }) => renderTaskFocusRowHtml(u, t)).join('');
+el.appendChild(list);
+
+wireTaskFocusListeners(list, rows);
+
+const tickFn = () => {
+if (!runningTimer) return;
+const elapsedEl = list.querySelector(`.tf-timer-elapsed[data-task-id="${runningTimer.taskId}"]`);
+if (!elapsedEl) return;
+const secs = Math.floor((Date.now() - runningTimer.startedAt.getTime()) / 1000);
+elapsedEl.textContent = formatHMS(secs / 3600);
+};
+tickFn();
+taskFocusTick = setInterval(tickFn, 1000);
+
+const taskIds = rows.map(r => r.t.id);
+Promise.all([
+sb.from('prod_task_assignees').select('id, task_id, assignee_name, start_date, due_date').in('task_id', taskIds).order('created_at'),
+sb.from('prod_daily_hours').select('task_id, hours_worked, person_email').in('task_id', taskIds),
+]).then(([assigneesRes, hoursRes]) => {
+const assigneesByTask = {};
+(assigneesRes.data || []).forEach(a => {
+(assigneesByTask[a.task_id] = assigneesByTask[a.task_id] || []).push(a);
+if (a.assignee_name && a.assignee_name.trim()) extraAssigneeNames.add(a.assignee_name.trim());
+});
+const hoursByTask = {};
+(hoursRes.data || []).forEach(h => {
+hoursByTask[h.task_id] = (hoursByTask[h.task_id] || 0) + Number(h.hours_worked || 0);
+});
+rows.forEach(({ t }) => {
+const wrap = list.querySelector(`.tfr-assignees[data-task-id="${t.id}"]`);
+if (wrap){
+const names = assigneesByTask[t.id] || [];
+wrap.innerHTML = names.length
+? names.map(a => `<span class="tfr-assignee-chip">${a.assignee_name || 'Unassigned'}${a.due_date ? ' · due ' + fmtDate(a.due_date) : ''}</span>`).join('')
+: (t.assigned_to ? `<span class="tfr-assignee-chip">${t.assigned_to}</span>` : '<span class="tfr-assignee-chip empty">Unassigned</span>');
+}
+const elapsedEl = list.querySelector(`.tf-timer-elapsed[data-task-id="${t.id}"]`);
+if (elapsedEl && !(runningTimer && runningTimer.taskId === t.id)){
+elapsedEl.textContent = formatHMS(hoursByTask[t.id] || 0);
+}
+});
 });
 }
 
