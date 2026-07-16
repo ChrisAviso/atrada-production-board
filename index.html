@@ -391,6 +391,61 @@ padding:3px 7px;border-radius:6px;background:var(--surface);border:1px solid var
 .rc-day-chip.rc-day-ot20 .rc-day-num,
 .rc-day-chip.rc-day-ot20 .rc-day-hrs{color:#a51f34;}
 
+/* ---------- Final Totals — All Projects (bottom summary) ---------- */
+.final-totals-panel{
+background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+box-shadow:var(--shadow-md);padding:20px 22px;margin-top:22px;overflow:hidden;position:relative;
+}
+.final-totals-panel::before{
+content:'';position:absolute;top:0;left:0;right:0;height:3px;
+background:linear-gradient(90deg, var(--primary), var(--green), var(--amber), var(--red));
+}
+.ft-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-top:3px;}
+.ft-icon{
+width:34px;height:34px;border-radius:10px;background:var(--primary-pale);color:var(--primary);
+display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;
+}
+.ft-title-wrap{display:flex;flex-direction:column;gap:1px;}
+.ft-title{font-size:14.5px;font-weight:800;color:var(--text);}
+.ft-subtitle{font-size:11px;color:var(--text-faint);}
+.ft-summary-grid{
+display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:18px;
+}
+.ft-stat{
+background:var(--surface-alt);border:1px solid var(--border);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden;
+}
+.ft-stat::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent,var(--border-strong));}
+.ft-stat.ft-total{--accent:var(--text-faint);}
+.ft-stat.ft-ontrack{--accent:var(--green);}
+.ft-stat.ft-duesoon{--accent:var(--amber);}
+.ft-stat.ft-behind{--accent:var(--red);}
+.ft-stat.ft-complete{--accent:var(--primary);}
+.ft-stat-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim);margin-bottom:6px;}
+.ft-stat-value{font-size:22px;font-weight:800;letter-spacing:-0.02em;line-height:1;color:var(--text);}
+.ft-stat.ft-ontrack .ft-stat-value{color:#0a7d59;}
+.ft-stat.ft-duesoon .ft-stat-value{color:#a3660c;}
+.ft-stat.ft-behind .ft-stat-value{color:var(--red);}
+.ft-stat.ft-complete .ft-stat-value{color:var(--primary-dark);}
+.ft-stat-sub{font-size:10px;color:var(--text-faint);margin-top:3px;}
+.ft-table{border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.ft-row{
+display:grid;grid-template-columns:minmax(0,1.4fr) repeat(5, 88px);gap:10px;align-items:center;
+padding:10px 12px;border-bottom:1px solid var(--border);font-size:12px;
+}
+.ft-row:last-child{border-bottom:none;}
+.ft-row:not(.ft-row-head):not(.ft-row-total):hover{background:var(--surface-alt);}
+.ft-row-head{
+font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint);
+background:var(--surface-alt);
+}
+.ft-row-head span:not(:first-child), .ft-num{text-align:right;font-family:'JetBrains Mono',monospace;}
+.ft-class-name{font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;}
+.ft-num.ft-num-behind{color:var(--red);font-weight:700;}
+.ft-num.ft-num-zero{color:var(--text-faint);}
+.ft-row-total{font-weight:800;background:var(--primary-pale);border-bottom:none;}
+.ft-row-total .ft-num{color:var(--primary-dark);}
+.ft-empty{font-size:12.5px;color:var(--text-faint);font-style:italic;padding:18px 4px;text-align:center;background:var(--surface-alt);border-radius:10px;}
+
 /* ---------- Stats ---------- */
 .stats-grid{
 display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:22px;
@@ -802,7 +857,6 @@ display:flex;align-items:center;justify-content:center;
 </div>
 <div class="topbar-right">
 <span class="user-chip" id="userChip"></span>
-<button class="icon-btn" id="clockBtn">Clock in/out</button>
 <button class="icon-btn" id="addSoBtn">+ Add SO</button>
 <button class="icon-btn" id="refreshBtn">&#8635; Refresh</button>
 <button class="icon-btn" id="signOutBtn">Sign out</button>
@@ -852,6 +906,8 @@ display:flex;align-items:center;justify-content:center;
 <div class="layout">
 <div id="unitList" style="min-width:0;"></div>
 </div>
+
+<div id="finalTotalsPanel"></div>
 </main>
 
 <div id="detailModal" class="modal-overlay hidden">
@@ -870,16 +926,17 @@ display:flex;align-items:center;justify-content:center;
 <label>SO number <span class="req-mark">*</span></label>
 <input type="text" id="addSoNumber" placeholder="SOTS12345">
 </div>
-<div class="field-tint-group">
-<div class="field-tint-label">Only used if this SO is new</div>
-<div class="field">
-<label>Sales rep</label>
-<input type="text" id="addSoSalesRep" placeholder="Name">
-</div>
 <div class="field">
 <label>Company name</label>
 <input type="text" id="addSoCompanyName" placeholder="e.g. BHP Iron Ore Pty Ltd">
 </div>
+<div class="field">
+<label>Sales rep</label>
+<select id="addSoSalesRep"><option value="">Select…</option></select>
+</div>
+<div class="field">
+<label>Project sales ($)</label>
+<input type="number" id="addSoProjectSales" placeholder="e.g. 250000" min="0" step="0.01">
 </div>
 <div class="field">
 <label>Unit name <span class="req-mark">*</span></label>
@@ -978,28 +1035,6 @@ display:flex;align-items:center;justify-content:center;
 </div>
 </div>
 
-<div id="clockModal" class="modal-overlay hidden">
-<div class="modal-card">
-<h2>Time clock</h2>
-<p class="modal-sub" id="clockDateLabel"></p>
-<div class="clock-state state-out" id="clockStateBox">
-<span class="dot"></span>
-<span id="clockStateText">Loading…</span>
-</div>
-<div class="clock-actions">
-<button class="clock-btn-in" id="clockInBtn">Clock in</button>
-<button class="clock-btn-break" id="breakStartBtn">Start break</button>
-<button class="clock-btn-break" id="breakEndBtn">End break</button>
-<button class="clock-btn-out" id="clockOutBtn">Clock out</button>
-</div>
-<div class="section-lbl">Today</div>
-<div class="clock-log" id="clockLog"></div>
-<div class="modal-close-row">
-<button class="icon-btn ghost-light" id="clockCloseBtn">Close</button>
-</div>
-</div>
-</div>
-
 <div id="logsModal" class="modal-overlay hidden">
 <div class="modal-card" id="logsModalCard"></div>
 </div>
@@ -1024,7 +1059,6 @@ let searchText = '';
 let selectedUnitId = null;
 let isSignUpMode = false;
 let groupBy = 'so';
-let clockEvents = [];
 let runningTimer = null;
 let runningTimerTick = null;
 let taskFocusTick = null;
@@ -1388,20 +1422,19 @@ const roster = Array.from(new Set((rosterRows || []).map(r => r.person_email))).
 const decisionByEmail = {};
 (decisions || []).forEach(d => { decisionByEmail[d.person_email] = d.decision; });
 
-const dailyLatest = {};
 const taskLatest = {};
 (todayEvents || []).forEach(e => {
 if (e.task_id){
 const key = e.person_email + '::' + e.task_id;
 taskLatest[key] = e;
-} else {
-dailyLatest[e.person_email] = e;
 }
 });
 
+const activeEmailSet = new Set();
+Object.values(taskLatest).forEach(ev => { if (ev.event_type === 'clock_in') activeEmailSet.add(ev.person_email); });
+
 const notClockedIn = roster.filter(email => {
-const last = dailyLatest[email];
-const isIn = last && last.event_type !== 'clock_out';
+const isIn = activeEmailSet.has(email);
 const decided = decisionByEmail[email] && decisionByEmail[email] !== 'pending';
 return !isIn && !decided;
 });
@@ -1770,6 +1803,121 @@ filtered.forEach(u => { (groups[u.so_number] = groups[u.so_number] || []).push(u
 return Object.keys(groups).sort().map(k => ({ label: k, units: groups[k] }));
 }
 
+/* ---------- Final Totals — All Projects (bottom summary, live from board data) ---------- */
+function renderFinalTotals(){
+const el = document.getElementById('finalTotalsPanel');
+if (!el) return;
+if (!allUnits.length){ el.innerHTML = ''; return; }
+
+const today = new Date(); today.setHours(0,0,0,0);
+let complete = 0, inProgress = 0, notStarted = 0;
+let behind = 0, dueSoon = 0, ahead = 0;
+const difotDiffs = [];
+let difotOverdue = 0;
+const byClass = {};
+
+allUnits.forEach(u => {
+const p = computeUnitProgress(u.id);
+if (p.status === 'complete') complete++;
+else if (p.status === 'in_progress' || p.status === 'overdue') inProgress++;
+else notStarted++;
+
+const tier = computeUnitScheduleTier(u.id);
+if (tier === 'late') behind++;
+else if (tier === 'duesoon') dueSoon++;
+else if (tier === 'ahead') ahead++;
+
+let diffDays = null;
+if (u.difot_date){
+diffDays = Math.round((new Date(u.difot_date + 'T00:00:00') - today) / 86400000);
+difotDiffs.push(diffDays);
+if (diffDays < 0) difotOverdue++;
+}
+
+const clsKey = classLabel(u.class);
+if (!byClass[clsKey]) byClass[clsKey] = { count: 0, complete: 0, behind: 0, difotDiffs: [] };
+byClass[clsKey].count++;
+if (p.status === 'complete') byClass[clsKey].complete++;
+if (tier === 'late') byClass[clsKey].behind++;
+if (diffDays !== null) byClass[clsKey].difotDiffs.push(diffDays);
+});
+
+const totalUnits = allUnits.length;
+const totalSos = new Set(allUnits.map(u => u.so_number).filter(Boolean)).size;
+const avgOf = arr => arr.length ? arr.reduce((a,b) => a + b, 0) / arr.length : null;
+const avgDifot = avgOf(difotDiffs);
+const difotLabel = d => d === null ? '—' : (d >= 0 ? d.toFixed(1) + 'd left' : Math.abs(d).toFixed(1) + 'd over');
+
+const classNames = Array.from(new Set([...CLASS_ORDER.filter(c => byClass[c]), ...Object.keys(byClass).filter(c => !CLASS_ORDER.includes(c))]));
+const classRows = classNames.map(name => {
+const d = byClass[name];
+return { name, count: d.count, complete: d.complete, behind: d.behind, avg: avgOf(d.difotDiffs) };
+});
+
+el.innerHTML = `
+<div class="final-totals-panel">
+<div class="ft-head">
+<div class="ft-icon">&#931;</div>
+<div class="ft-title-wrap">
+<div class="ft-title">Final Totals — All Projects</div>
+<div class="ft-subtitle">${totalUnits} unit${totalUnits === 1 ? '' : 's'} across ${totalSos} sales order${totalSos === 1 ? '' : 's'} · live from the board</div>
+</div>
+</div>
+<div class="ft-summary-grid">
+<div class="ft-stat ft-total">
+<div class="ft-stat-label">Total Units</div>
+<div class="ft-stat-value">${totalUnits}</div>
+<div class="ft-stat-sub">${totalSos} sales orders</div>
+</div>
+<div class="ft-stat ft-complete">
+<div class="ft-stat-label">Dispatch Ready</div>
+<div class="ft-stat-value">${complete}</div>
+<div class="ft-stat-sub">${inProgress} in progress · ${notStarted} not started</div>
+</div>
+<div class="ft-stat ft-behind">
+<div class="ft-stat-label">Behind Schedule</div>
+<div class="ft-stat-value">${behind}</div>
+<div class="ft-stat-sub">${difotOverdue} past DIFOT target</div>
+</div>
+<div class="ft-stat ft-duesoon">
+<div class="ft-stat-label">Due Soon (&le;2d)</div>
+<div class="ft-stat-value">${dueSoon}</div>
+</div>
+<div class="ft-stat ft-ontrack">
+<div class="ft-stat-label">Ahead of Schedule</div>
+<div class="ft-stat-value">${ahead}</div>
+</div>
+<div class="ft-stat">
+<div class="ft-stat-label">Avg DIFOT Days</div>
+<div class="ft-stat-value">${difotLabel(avgDifot)}</div>
+<div class="ft-stat-sub">${difotDiffs.length} unit${difotDiffs.length === 1 ? '' : 's'} with a target set</div>
+</div>
+</div>
+<div class="ft-table">
+<div class="ft-row ft-row-head"><span>Class</span><span>Units</span><span>Complete</span><span>Behind</span><span>Avg DIFOT</span><span>% Done</span></div>
+${classRows.map(c => `
+<div class="ft-row">
+<span class="ft-class-name"><span class="class-badge cls-${classSlug(c.name)}">${c.name}</span></span>
+<span class="ft-num">${c.count}</span>
+<span class="ft-num${c.complete === 0 ? ' ft-num-zero' : ''}">${c.complete}</span>
+<span class="ft-num${c.behind > 0 ? ' ft-num-behind' : ' ft-num-zero'}">${c.behind}</span>
+<span class="ft-num">${difotLabel(c.avg)}</span>
+<span class="ft-num">${c.count ? Math.round((c.complete / c.count) * 100) : 0}%</span>
+</div>
+`).join('')}
+<div class="ft-row ft-row-total">
+<span>All classes</span>
+<span class="ft-num">${totalUnits}</span>
+<span class="ft-num">${complete}</span>
+<span class="ft-num">${behind}</span>
+<span class="ft-num">${difotLabel(avgDifot)}</span>
+<span class="ft-num">${totalUnits ? Math.round((complete / totalUnits) * 100) : 0}%</span>
+</div>
+</div>
+</div>
+`;
+}
+
 function renderUnitList(){
 const el = document.getElementById('unitList');
 el.innerHTML = '';
@@ -1851,6 +1999,7 @@ group.appendChild(row);
 });
 el.appendChild(group);
 });
+renderFinalTotals();
 }
 
 /* ---------- Rich line-by-line task-filter view ---------- */
@@ -1988,14 +2137,11 @@ involvedNames.forEach(name => { nameToEmail[name] = roster.find(email => nameMat
 const decisionByEmail = {};
 (decisions || []).forEach(d => { decisionByEmail[d.person_email] = d.decision; });
 
-const dailyLatestByEmail = {};
 const activeByEmail = {};
 (todayEvents || []).forEach(e => {
 if (e.task_id){
 if (e.event_type === 'clock_in') activeByEmail[e.person_email] = e;
 else if (activeByEmail[e.person_email] && activeByEmail[e.person_email].task_id === e.task_id) delete activeByEmail[e.person_email];
-} else {
-dailyLatestByEmail[e.person_email] = e;
 }
 });
 
@@ -2013,15 +2159,11 @@ const email = nameToEmail[name];
 let status = 'not_clocked';
 let active = null;
 if (email){
-const lastDaily = dailyLatestByEmail[email];
-const isIn = lastDaily && lastDaily.event_type !== 'clock_out';
-if (isIn){
-status = 'in';
 const ev = activeByEmail[email];
 if (ev){
+status = 'in';
 const t = (allTasksByUnit[ev.unit_id] || []).find(x => x.id === ev.task_id);
 active = { taskId: ev.task_id, unitId: ev.unit_id, taskName: t ? t.task_name : '—', startedAt: ev.event_time };
-}
 } else if (decisionByEmail[email] === 'absent'){
 status = 'absent';
 } else if (pausedByEmail[email]){
@@ -3080,6 +3222,13 @@ document.getElementById('addSoBtn').addEventListener('click', openAddSoModal);
 document.getElementById('addSoCancelBtn').addEventListener('click', closeAddSoModal);
 document.getElementById('addSoClass').addEventListener('change', loadAddSoTemplateOptions);
 document.getElementById('addSoSubmitBtn').addEventListener('click', submitAddSo);
+document.getElementById('addSoSalesRep').addEventListener('change', (e) => {
+if (e.target.value === '__add__'){
+const name = prompt('Add sales rep name:');
+if (name && name.trim()) addCustomSalesRepOption('addSoSalesRep', name.trim());
+else e.target.value = '';
+}
+});
 
 /* ---------- Edit SO (also covers migrated SOs with no prod_sales_orders row yet) ---------- */
 document.getElementById('editSoCancelBtn').addEventListener('click', closeEditSoModal);
@@ -3169,16 +3318,42 @@ submitBtn.disabled = false; submitBtn.textContent = 'Save';
 function openAddSoModal(){
 document.getElementById('addSoMsg').innerHTML = '';
 document.getElementById('addSoNumber').value = '';
-document.getElementById('addSoSalesRep').value = '';
 document.getElementById('addSoCompanyName').value = '';
+document.getElementById('addSoProjectSales').value = '';
 document.getElementById('addSoUnitName').value = '';
 document.getElementById('addSoQty').value = 1;
+populateSalesRepOptions('addSoSalesRep', '');
 const clsEl = document.getElementById('addSoClass');
 clsEl.innerHTML = CLASS_ORDER.map(c => `<option value="${c}">${c}</option>`).join('');
 document.getElementById('addSoModal').classList.remove('hidden');
 loadAddSoTemplateOptions();
 }
 function closeAddSoModal(){ document.getElementById('addSoModal').classList.add('hidden'); }
+
+async function populateSalesRepOptions(selectId, selectedValue){
+const sel = document.getElementById(selectId);
+if (!sel) return;
+const { data } = await sb.from('prod_sales_orders').select('sales_rep');
+const names = Array.from(new Set((data || []).map(r => (r.sales_rep || '').trim()).filter(Boolean))).sort((a,b) => a.localeCompare(b));
+sel.innerHTML = '<option value="">Select…</option>' + names.map(n => `<option value="${n}">${n}</option>`).join('') + '<option value="__add__">+ Add new…</option>';
+if (selectedValue){
+if (!names.includes(selectedValue)){
+const opt = document.createElement('option');
+opt.value = selectedValue; opt.textContent = selectedValue;
+sel.insertBefore(opt, sel.querySelector('option[value="__add__"]'));
+}
+sel.value = selectedValue;
+}
+}
+
+function addCustomSalesRepOption(selectId, name){
+const sel = document.getElementById(selectId);
+const addOpt = sel.querySelector('option[value="__add__"]');
+const opt = document.createElement('option');
+opt.value = name; opt.textContent = name;
+sel.insertBefore(opt, addOpt);
+sel.value = name;
+}
 
 async function loadTemplateOptionsInto(classSelectId, templateSelectId, includeBlankOption){
 const cls = document.getElementById(classSelectId).value;
@@ -3307,8 +3482,11 @@ async function submitAddSo(){
 const msgEl = document.getElementById('addSoMsg');
 msgEl.innerHTML = '';
 const soNumber = document.getElementById('addSoNumber').value.trim();
-const salesRep = document.getElementById('addSoSalesRep').value.trim();
+const salesRepRaw = document.getElementById('addSoSalesRep').value;
+const salesRep = salesRepRaw === '__add__' ? '' : salesRepRaw.trim();
 const companyName = document.getElementById('addSoCompanyName').value.trim();
+const projectSalesRaw = document.getElementById('addSoProjectSales').value;
+const projectSales = projectSalesRaw !== '' ? Number(projectSalesRaw) : null;
 const unitName = document.getElementById('addSoUnitName').value.trim();
 const cls = document.getElementById('addSoClass').value;
 const qty = Number(document.getElementById('addSoQty').value) || 1;
@@ -3324,8 +3502,15 @@ submitBtn.disabled = true; submitBtn.textContent = 'Creating…';
 
 try {
 const { data: existingSo } = await sb.from('prod_sales_orders').select('so_number').eq('so_number', soNumber).maybeSingle();
+const soPatch = {};
+if (salesRep) soPatch.sales_rep = salesRep;
+if (companyName) soPatch.company_name = companyName;
+if (projectSales !== null && !Number.isNaN(projectSales)) soPatch.project_sales = projectSales;
 if (!existingSo){
-const { error: soErr } = await sb.from('prod_sales_orders').insert({ so_number: soNumber, sales_rep: salesRep || null, company_name: companyName || null });
+const { error: soErr } = await sb.from('prod_sales_orders').insert({ so_number: soNumber, ...soPatch });
+if (soErr) throw soErr;
+} else if (Object.keys(soPatch).length){
+const { error: soErr } = await sb.from('prod_sales_orders').update(soPatch).eq('so_number', soNumber);
 if (soErr) throw soErr;
 }
 
@@ -3371,83 +3556,12 @@ submitBtn.disabled = false; submitBtn.textContent = 'Create unit';
 }
 }
 
-/* ---------- Clock in/out ---------- */
-document.getElementById('clockBtn').addEventListener('click', openClockModal);
-document.getElementById('clockCloseBtn').addEventListener('click', () => document.getElementById('clockModal').classList.add('hidden'));
-document.getElementById('clockInBtn').addEventListener('click', () => recordClockEvent('clock_in'));
-document.getElementById('breakStartBtn').addEventListener('click', () => recordClockEvent('break_start'));
-document.getElementById('breakEndBtn').addEventListener('click', () => recordClockEvent('break_end'));
-document.getElementById('clockOutBtn').addEventListener('click', () => recordClockEvent('clock_out'));
-
 function todayStartIso(){
 const d = new Date(); d.setHours(0,0,0,0);
 return d.toISOString();
 }
 function fmtTime(iso){
 return new Date(iso).toLocaleTimeString('en-AU', { hour:'2-digit', minute:'2-digit' });
-}
-function clockEventLabel(t){
-return { clock_in:'Clocked in', break_start:'Break started', break_end:'Break ended', clock_out:'Clocked out' }[t] || t;
-}
-
-async function openClockModal(){
-document.getElementById('clockModal').classList.remove('hidden');
-document.getElementById('clockDateLabel').textContent = new Date().toLocaleDateString('en-AU', { weekday:'long', day:'numeric', month:'long' });
-await refreshClockState();
-}
-
-async function refreshClockState(){
-const { data: { session } } = await sb.auth.getSession();
-const email = session.user.email;
-const { data, error } = await sb.from('prod_clock_events')
-.select('id, event_type, event_time')
-.eq('person_email', email)
-.gte('event_time', todayStartIso())
-.order('event_time');
-
-const stateBox = document.getElementById('clockStateBox');
-const stateText = document.getElementById('clockStateText');
-const inBtn = document.getElementById('clockInBtn');
-const outBtn = document.getElementById('clockOutBtn');
-const breakStartBtn = document.getElementById('breakStartBtn');
-const breakEndBtn = document.getElementById('breakEndBtn');
-
-if (error){ stateText.textContent = 'Failed to load: ' + error.message; return; }
-clockEvents = data || [];
-const last = clockEvents[clockEvents.length - 1];
-
-stateBox.className = 'clock-state';
-if (!last || last.event_type === 'clock_out'){
-stateBox.classList.add('state-out');
-stateText.textContent = last ? 'Clocked out for the day' : 'Not clocked in yet';
-inBtn.disabled = false; outBtn.disabled = true; breakStartBtn.disabled = true; breakEndBtn.disabled = true;
-} else if (last.event_type === 'break_start'){
-stateBox.classList.add('state-break');
-stateText.textContent = 'On break since ' + fmtTime(last.event_time);
-inBtn.disabled = true; outBtn.disabled = true; breakStartBtn.disabled = true; breakEndBtn.disabled = false;
-} else {
-stateBox.classList.add('state-in');
-const clockInEvent = clockEvents.find(e => e.event_type === 'clock_in');
-stateText.textContent = 'Clocked in since ' + fmtTime(clockInEvent ? clockInEvent.event_time : last.event_time);
-inBtn.disabled = true; outBtn.disabled = false; breakStartBtn.disabled = false; breakEndBtn.disabled = true;
-}
-
-const logEl = document.getElementById('clockLog');
-logEl.innerHTML = clockEvents.length === 0
-? '<div class="empty-state" style="padding:16px 0;">No events yet today.</div>'
-: clockEvents.map(e => `<div class="clock-log-row"><span>${clockEventLabel(e.event_type)}</span><b>${fmtTime(e.event_time)}</b></div>`).join('');
-}
-
-async function recordClockEvent(eventType){
-const { data: { session } } = await sb.auth.getSession();
-const { error } = await sb.from('prod_clock_events').insert({
-person_email: session.user.email,
-event_type: eventType,
-event_time: new Date().toISOString(),
-});
-if (error){ alert('Failed to record: ' + error.message); return; }
-await refreshClockState();
-renderTeamStatus();
 }
 
 checkSession();
