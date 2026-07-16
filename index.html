@@ -382,6 +382,15 @@ font-size:13.5px;line-height:1.6;padding:14px 16px;
 box-shadow:var(--shadow-md);border-color:var(--primary);background:var(--surface);
 }
 .task-remarks-count{font-size:9.5px;color:var(--text-faint);text-align:right;margin-top:2px;font-family:'JetBrains Mono',monospace;}
+.task-activity-wrap{padding-left:27px;margin-top:10px;}
+.task-activity-toggle{
+background:none;border:none;padding:2px 0;font-size:10px;font-weight:700;color:var(--text-dim);
+cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;text-transform:uppercase;letter-spacing:.04em;
+}
+.task-activity-toggle:hover{color:var(--primary);}
+.tat-chevron{font-size:8px;display:inline-block;width:9px;color:var(--text-faint);}
+.task-activity-body{margin-top:6px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:2px 12px;max-height:220px;overflow-y:auto;}
+.task-activity-body.hidden{display:none;}
 #logsModalCard{width:480px;}
 #activityModalCard{width:480px;}
 .activity-list{max-height:380px;overflow-y:auto;margin-top:4px;}
@@ -1141,6 +1150,12 @@ ${assigneeOptions}
 <textarea class="task-remarks-input" data-task-id="${t.id}" placeholder="Remarks…" ${dis}>${remarksVal}</textarea>
 <div class="task-remarks-count" data-task-id="${t.id}">${remarksWords} / 400 words</div>
 </div>
+<div class="task-activity-wrap">
+<button type="button" class="task-activity-toggle" data-task-id="${t.id}">
+<span class="tat-chevron">&#9656;</span> Activity log
+</button>
+<div class="task-activity-body hidden" data-task-id="${t.id}"></div>
+</div>
 `;
 taskListEl.appendChild(row);
 });
@@ -1236,6 +1251,35 @@ const taskId = btn.getAttribute('data-task-id');
 const t = (allTasksByUnit[unit.id] || []).find(x => x.id === taskId);
 taskListEl.querySelectorAll('.task-wrench-menu').forEach(m => m.classList.add('hidden'));
 openActivityModal(taskId, t ? t.task_name : '');
+});
+});
+
+taskListEl.querySelectorAll('.task-activity-toggle').forEach(btn => {
+btn.addEventListener('click', async () => {
+const taskId = btn.getAttribute('data-task-id');
+const body = taskListEl.querySelector(`.task-activity-body[data-task-id="${taskId}"]`);
+const chevron = btn.querySelector('.tat-chevron');
+if (!body) return;
+const isHidden = body.classList.contains('hidden');
+if (isHidden){
+body.classList.remove('hidden');
+chevron.innerHTML = '&#9662;';
+if (!body.dataset.loaded){
+body.innerHTML = '<div class="empty-state" style="padding:10px;">Loading…</div>';
+const { data, error } = await sb.from('prod_task_activity')
+.select('id, description, changed_by, created_at')
+.eq('task_id', taskId).order('created_at', { ascending: true });
+if (error){
+body.innerHTML = `<div class="auth-msg error">${error.message}</div>`;
+} else {
+body.innerHTML = renderActivityListHtml(data || []);
+body.dataset.loaded = '1';
+}
+}
+} else {
+body.classList.add('hidden');
+chevron.innerHTML = '&#9656;';
+}
 });
 });
 
@@ -1390,14 +1434,9 @@ if (error){ card.innerHTML = `<div class="auth-msg error">${error.message}</div>
 renderActivityModal(taskName, data || []);
 }
 
-function renderActivityModal(taskName, rows){
-const card = document.getElementById('activityModalCard');
-card.innerHTML = `
-<button class="modal-x-btn" id="activityCloseBtn">&times;</button>
-<h2>Activity log</h2>
-<p class="modal-sub">${taskName} — everything logged from creation to now.</p>
-<div class="activity-list">
-${rows.length ? rows.map(r => `
+function renderActivityListHtml(rows){
+if (!rows.length) return '<div class="empty-state" style="padding:14px;">No activity recorded yet.</div>';
+return `<div class="activity-list">${rows.map(r => `
 <div class="activity-row">
 <div class="activity-dot"></div>
 <div class="activity-body">
@@ -1405,8 +1444,16 @@ ${rows.length ? rows.map(r => `
 <div class="activity-meta">${fmtDateTime(r.created_at)}${r.changed_by ? ' · ' + r.changed_by.split('@')[0] : ''}</div>
 </div>
 </div>
-`).join('') : '<div class="empty-state" style="padding:20px;">No activity recorded yet.</div>'}
-</div>
+`).join('')}</div>`;
+}
+
+function renderActivityModal(taskName, rows){
+const card = document.getElementById('activityModalCard');
+card.innerHTML = `
+<button class="modal-x-btn" id="activityCloseBtn">&times;</button>
+<h2>Activity log</h2>
+<p class="modal-sub">${taskName} — everything logged from creation to now.</p>
+${renderActivityListHtml(rows)}
 <div class="modal-close-row">
 <button class="icon-btn ghost-light" id="activityDoneBtn">Close</button>
 </div>
