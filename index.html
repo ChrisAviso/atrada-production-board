@@ -184,9 +184,14 @@ padding:14px 18px;margin-bottom:14px;
 }
 .attn-title{font-size:13.5px;font-weight:800;color:#92610a;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
 .attn-chips{display:flex;flex-wrap:wrap;gap:10px;}
+@keyframes blink-red-white{
+0%, 100% { background: #ffffff; color: var(--text); }
+50% { background: var(--red); color: #ffffff; }
+}
 .attn-chip{
 display:inline-flex;align-items:center;gap:10px;border:1.5px solid var(--red);border-radius:20px;
-padding:6px 8px 6px 14px;background:white;font-size:12.5px;font-weight:700;color:var(--text);
+padding:6px 8px 6px 14px;font-size:12.5px;font-weight:700;
+animation:blink-red-white 1.1s ease-in-out infinite;
 }
 .attn-chip button{
 border:none;background:var(--red-pale);color:#a51f34;font-size:10.5px;font-weight:700;
@@ -237,7 +242,8 @@ padding:12px 16px;margin-bottom:12px;
 .tsp-chips{display:flex;flex-wrap:wrap;gap:9px;}
 .tsp-chip{
 display:inline-flex;align-items:center;gap:9px;border:1.5px solid var(--red);border-radius:20px;
-padding:5px 7px 5px 13px;background:white;font-size:12px;font-weight:700;color:var(--text);
+padding:5px 7px 5px 13px;font-size:12px;font-weight:700;
+animation:blink-red-white 1.1s ease-in-out infinite;
 }
 .tsp-chip button{
 border:none;background:var(--red-pale);color:#a51f34;font-size:10px;font-weight:700;
@@ -295,34 +301,70 @@ padding:14px 16px;margin-bottom:4px;
 
 /* ---------- Attendance & reconciliation (fortnightly timesheet) ---------- */
 .reconcile-panel{
-background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);
-box-shadow:var(--shadow-sm);padding:16px 18px;margin-bottom:22px;
+background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+box-shadow:var(--shadow-md);padding:20px 22px;margin-bottom:22px;overflow:hidden;position:relative;
 }
-.reconcile-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:6px;}
-.reconcile-title{font-size:14px;font-weight:800;color:var(--text);}
+.reconcile-panel::before{
+content:'';position:absolute;top:0;left:0;right:0;height:3px;
+background:linear-gradient(90deg, var(--primary), var(--amber), var(--red));
+}
+.reconcile-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:12px;padding-top:3px;}
+.reconcile-head-left{display:flex;align-items:center;gap:12px;}
+.reconcile-icon{
+width:34px;height:34px;border-radius:10px;background:var(--primary-pale);color:var(--primary);
+display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;
+}
+.reconcile-title-wrap{display:flex;flex-direction:column;gap:1px;}
+.reconcile-title{font-size:14.5px;font-weight:800;color:var(--text);}
+.reconcile-subtitle{font-size:11px;color:var(--text-faint);}
 .reconcile-nav{display:flex;align-items:center;gap:8px;}
 .reconcile-nav-btn{
 border:1px solid var(--border);background:var(--surface-alt);color:var(--text-dim);border-radius:16px;
-padding:5px 12px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;
+padding:6px 13px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .12s;
 }
-.reconcile-nav-btn:hover{border-color:var(--primary);color:var(--primary);}
-.reconcile-range{font-size:12px;font-weight:700;color:var(--text);font-family:'JetBrains Mono',monospace;white-space:nowrap;}
-.reconcile-rules{font-size:11px;color:var(--text-faint);margin-bottom:12px;line-height:1.5;}
-.reconcile-table{border-top:1px solid var(--border);}
+.reconcile-nav-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-pale);}
+.reconcile-range{
+font-size:12px;font-weight:700;color:var(--text);font-family:'JetBrains Mono',monospace;white-space:nowrap;
+background:var(--surface-alt);border:1px solid var(--border);border-radius:14px;padding:6px 12px;
+}
+.reconcile-rules{
+font-size:11px;color:var(--text-dim);margin-bottom:10px;line-height:1.5;background:var(--surface-alt);
+border-radius:8px;padding:9px 12px;
+}
+.reconcile-legend{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:12px;padding:0 2px;}
+.reconcile-legend-item{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;color:var(--text-dim);}
+.reconcile-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.reconcile-legend-dot.dot-regular{background:var(--slate);}
+.reconcile-legend-dot.dot-ot15{background:var(--amber);}
+.reconcile-legend-dot.dot-ot20{background:var(--red);}
+.reconcile-table{border:1px solid var(--border);border-radius:10px;overflow:hidden;}
 .reconcile-row{
-display:grid;grid-template-columns:minmax(0,1.6fr) repeat(4, 90px);gap:12px;align-items:center;
-padding:9px 4px;border-bottom:1px solid var(--border);font-size:12.5px;
+display:grid;grid-template-columns:minmax(0,1.6fr) repeat(4, 96px);gap:12px;align-items:center;
+padding:11px 12px;border-bottom:1px solid var(--border);font-size:12.5px;transition:background .1s;
 }
+.reconcile-row:last-child{border-bottom:none;}
+.reconcile-row:not(.reconcile-row-head):not(.reconcile-row-total):hover{background:var(--surface-alt);}
 .reconcile-row-head{
 font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint);
+background:var(--surface-alt);
 }
 .reconcile-row-head span:not(:first-child),
 .rc-hours{text-align:right;font-family:'JetBrains Mono',monospace;}
-.rc-person{font-weight:600;color:var(--text);}
-.reconcile-row-ot{background:var(--amber-pale);}
-.rc-ot15,.rc-ot20{color:#a3660c;font-weight:700;}
-.reconcile-row-total{font-weight:800;border-bottom:none;border-top:1.5px solid var(--border-strong);color:var(--text);}
-.reconcile-empty{font-size:12.5px;color:var(--text-faint);font-style:italic;padding:10px 2px 2px;}
+.rc-person{display:flex;align-items:center;gap:9px;font-weight:600;color:var(--text);}
+.rc-avatar{
+width:24px;height:24px;border-radius:50%;background:var(--primary-pale);color:var(--primary-dark);
+display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;
+}
+.reconcile-row-ot{background:#fffaf0;box-shadow:inset 3px 0 0 var(--amber);}
+.reconcile-row-ot:hover{background:#fff3d9;}
+.rc-pill{display:inline-block;padding:2px 9px;border-radius:12px;font-weight:700;font-size:11.5px;}
+.rc-pill-15{background:var(--amber-pale);color:#a3660c;}
+.rc-pill-20{background:var(--red-pale);color:#a51f34;}
+.rc-hours.rc-zero{color:var(--text-faint);}
+.rc-total{font-weight:800;color:var(--text);}
+.reconcile-row-total{font-weight:800;border-bottom:none;background:var(--primary-pale);color:var(--text);}
+.reconcile-row-total .rc-hours{color:var(--primary-dark);}
+.reconcile-empty{font-size:12.5px;color:var(--text-faint);font-style:italic;padding:18px 4px;text-align:center;background:var(--surface-alt);border-radius:10px;}
 
 /* ---------- Stats ---------- */
 .stats-grid{
@@ -962,7 +1004,7 @@ let runningTimer = null;
 let runningTimerTick = null;
 let taskFocusTick = null;
 let taskFocusTeamTick = null;
-const FORTNIGHT_EPOCH = new Date('2024-01-01T00:00:00'); // a Monday; every fortnight is a 14-day block from here
+const FORTNIGHT_EPOCH = new Date('2026-07-02T00:00:00'); // reference fortnight: 02 Jul – 15 Jul 2026; every fortnight is a 14-day block from here
 function getFortnightStart(date){
 const diffDays = Math.floor((date - FORTNIGHT_EPOCH) / 86400000);
 const idx = Math.floor(diffDays / 14);
@@ -1188,11 +1230,18 @@ grand.total += totalsByPerson[p].total;
 
 const fmtH = (n) => n.toFixed(2) + 'h';
 const rangeLabel = `${fmtDate(startIso)} – ${fmtDate(endIso)}`;
+const initialsOf = (name) => name.split(' ').filter(Boolean).slice(0,2).map(w => w[0].toUpperCase()).join('') || '?';
 
 el.innerHTML = `
 <div class="reconcile-panel">
 <div class="reconcile-head">
-<div class="reconcile-title">\u{1F9FE} Team Attendance &amp; Reconciliation</div>
+<div class="reconcile-head-left">
+<div class="reconcile-icon">\u{1F9FE}</div>
+<div class="reconcile-title-wrap">
+<div class="reconcile-title">Team Attendance &amp; Reconciliation</div>
+<div class="reconcile-subtitle">${people.length} ${people.length === 1 ? 'person' : 'people'} logged this fortnight &middot; run per fortnight</div>
+</div>
+</div>
 <div class="reconcile-nav">
 <button type="button" class="reconcile-nav-btn" id="fnPrevBtn">&larr; Prior</button>
 <span class="reconcile-range">${rangeLabel}</span>
@@ -1201,6 +1250,11 @@ el.innerHTML = `
 </div>
 </div>
 <div class="reconcile-rules">Weekday OT starts after 7.6h/day. Weekends are OT from the 1st hour. First 2 OT hours/day at 1.5&times;, beyond that at 2&times;. No bank hours.</div>
+<div class="reconcile-legend">
+<span class="reconcile-legend-item"><span class="reconcile-legend-dot dot-regular"></span>Regular</span>
+<span class="reconcile-legend-item"><span class="reconcile-legend-dot dot-ot15"></span>OT &times;1.5</span>
+<span class="reconcile-legend-item"><span class="reconcile-legend-dot dot-ot20"></span>OT &times;2</span>
+</div>
 ${people.length ? `
 <div class="reconcile-table">
 <div class="reconcile-row reconcile-row-head">
@@ -1209,12 +1263,13 @@ ${people.length ? `
 ${people.map(p => {
 const r = totalsByPerson[p];
 const hasOt = (r.ot15 + r.ot20) > 0;
+const name = formatPersonName(p);
 return `
 <div class="reconcile-row${hasOt ? ' reconcile-row-ot' : ''}">
-<span class="rc-person">${formatPersonName(p)}</span>
-<span class="rc-hours">${fmtH(r.regular)}</span>
-<span class="rc-hours rc-ot15">${r.ot15 > 0 ? fmtH(r.ot15) : '—'}</span>
-<span class="rc-hours rc-ot20">${r.ot20 > 0 ? fmtH(r.ot20) : '—'}</span>
+<span class="rc-person"><span class="rc-avatar">${initialsOf(name)}</span>${name}</span>
+<span class="rc-hours${r.regular === 0 ? ' rc-zero' : ''}">${fmtH(r.regular)}</span>
+<span class="rc-hours">${r.ot15 > 0 ? `<span class="rc-pill rc-pill-15">${fmtH(r.ot15)}</span>` : '<span class="rc-zero">—</span>'}</span>
+<span class="rc-hours">${r.ot20 > 0 ? `<span class="rc-pill rc-pill-20">${fmtH(r.ot20)}</span>` : '<span class="rc-zero">—</span>'}</span>
 <span class="rc-hours rc-total">${fmtH(r.total)}</span>
 </div>
 `;
