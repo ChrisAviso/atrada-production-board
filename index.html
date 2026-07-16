@@ -2632,16 +2632,44 @@ ${predOptions}
 taskListEl.appendChild(row);
 });
 
-async function updateTaskField(taskId, patch){
+async function updateTaskField(taskId, patch, visited){
 const { error } = await sb.from('prod_tasks').update(patch).eq('id', taskId);
 if (error){ alert('Failed to update: ' + error.message); return; }
 const t = allTasksByUnit[unit.id].find(x => x.id === taskId);
 const taskNameBefore = t ? t.task_name : '';
 if (t) Object.assign(t, patch);
 logTaskActivity(taskId, unit.id, describeTaskPatch(patch, taskNameBefore));
+if ('completion_date_planned' in patch){
+await cascadeScheduleFrom(taskId, unit.id, visited);
+}
 renderStats();
 renderUnitList();
 renderDetail(unit);
+}
+
+// When a task's Due date changes (however it changed), push the schedule forward into every
+// task chained after it via the "After" field: next Start = this task's Due, next Due = next
+// Start + next task's own Days. Continues recursively down the whole chain.
+async function cascadeScheduleFrom(taskId, unitId, visited){
+visited = visited || new Set();
+if (visited.has(taskId)) return;
+visited.add(taskId);
+const tasks = allTasksByUnit[unitId] || [];
+const pred = tasks.find(x => x.id === taskId);
+if (!pred || !pred.completion_date_planned) return;
+const followers = tasks.filter(t => t.predecessor_task_id === taskId && t.id !== taskId);
+for (const ft of followers){
+const dur = Math.round(Number(ft.duration_days) || 0);
+const due = new Date(pred.completion_date_planned + 'T00:00:00');
+due.setDate(due.getDate() + dur);
+const newStart = pred.completion_date_planned;
+const newDue = due.toISOString().slice(0,10);
+if (ft.start_date !== newStart || ft.completion_date_planned !== newDue){
+await updateTaskField(ft.id, { start_date: newStart, completion_date_planned: newDue }, visited);
+} else {
+await cascadeScheduleFrom(ft.id, unitId, visited);
+}
+}
 }
 
 function renderAssigneeRows(taskId, unitId, assignees, hoursRows){
@@ -2767,6 +2795,17 @@ const start = new Date(t.start_date + 'T00:00:00');
 const due = new Date(value + 'T00:00:00');
 const diffDays = Math.round((due - start) / 86400000);
 patch.duration_days = Math.max(0, diffDays);
+} else if (field === 'predecessor_task_id'){
+// Picking an "After" task reads that task's own Start/Due and applies the next
+// correct date, then computes this task's Due from its own Days.
+const pred = value ? (allTasksByUnit[unit.id] || []).find(x => x.id === value) : null;
+if (pred && pred.completion_date_planned){
+const dur = Math.round(Number(t.duration_days) || 0);
+const due = new Date(pred.completion_date_planned + 'T00:00:00');
+due.setDate(due.getDate() + dur);
+patch.start_date = pred.completion_date_planned;
+patch.completion_date_planned = due.toISOString().slice(0,10);
+}
 }
 }
 updateTaskField(taskId, patch);
