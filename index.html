@@ -264,7 +264,7 @@ border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-botto
 .task-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;}
 .task-top input[type=checkbox]{width:17px;height:17px;accent-color:var(--green);cursor:pointer;flex-shrink:0;margin-top:2px;}
 .task-top .tname{flex:1;min-width:0;line-height:1.4;word-break:break-word;}
-.task-top .tname.done{text-decoration:line-through;color:var(--text-dim);}
+.task-top .tname.done{color:var(--text-dim);}
 .task-top .tmeta{font-size:10.5px;color:var(--text-dim);white-space:nowrap;background:var(--surface);border:1px solid var(--border);padding:3px 9px;border-radius:10px;flex-shrink:0;margin-top:1px;}
 .task-fields{
 display:grid;grid-template-columns:60px 96px 18px 96px 1fr;gap:8px;align-items:end;padding-left:27px;
@@ -278,12 +278,6 @@ font-family:'JetBrains Mono',monospace;background:var(--surface);color:var(--tex
 .tf-group select{font-family:'Inter',sans-serif;font-size:10.5px;}
 .tf-group input:focus,.tf-group select:focus{outline:none;border-color:var(--primary);}
 .tf-arrow{align-self:center;color:var(--text-faint);font-size:12px;text-align:center;padding-bottom:6px;}
-.na-toggle{display:flex;align-items:center;gap:7px;font-size:10.5px;color:var(--text-dim);flex-shrink:0;cursor:pointer;user-select:none;margin-top:1px;}
-.na-toggle .switch{width:30px;height:17px;border-radius:20px;background:var(--border);position:relative;transition:background .15s;flex-shrink:0;}
-.na-toggle .switch::after{content:"";position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:white;transition:left .15s;box-shadow:0 1px 2px rgba(0,0,0,.2);}
-.na-toggle.on{color:var(--text);}
-.na-toggle.on .switch{background:var(--amber);}
-.na-toggle.on .switch::after{left:15px;}
 .empty-state{color:var(--text-faint);font-size:13px;text-align:center;padding:44px 10px;}
 
 /* ---------- Modals ---------- */
@@ -799,12 +793,9 @@ const predOptions = tasks
 .join('');
 row.innerHTML = `
 <div class="task-top">
-<input type="checkbox" ${isDone ? 'checked' : ''} ${t.is_not_applicable ? 'disabled' : ''} data-task-id="${t.id}" class="task-done-cb">
+<input type="checkbox" ${isDone ? 'checked' : ''} data-task-id="${t.id}" class="task-done-cb">
 <span class="tname ${isDone ? 'done' : ''}">${t.task_name}</span>
 <span class="tmeta">${t.execution_group || ''}</span>
-<label class="na-toggle ${t.is_not_applicable ? 'on' : ''}" data-task-id="${t.id}">
-<span class="switch"></span>N/A
-</label>
 </div>
 <div class="task-fields">
 <div class="tf-group">
@@ -849,15 +840,8 @@ const checked = e.target.checked;
 updateTaskField(taskId, {
 percent_complete_numeric: checked ? 1 : 0,
 actual_completion_date: checked ? new Date().toISOString().slice(0,10) : null,
+is_not_applicable: false,
 });
-});
-});
-
-taskListEl.querySelectorAll('.na-toggle').forEach(toggle => {
-toggle.addEventListener('click', () => {
-const taskId = toggle.getAttribute('data-task-id');
-const t = allTasksByUnit[unit.id].find(x => x.id === taskId);
-updateTaskField(taskId, { is_not_applicable: !t.is_not_applicable });
 });
 });
 
