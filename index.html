@@ -180,8 +180,10 @@ font-size:13.5px;background:var(--surface-alt);font-family:inherit;color:var(--t
 /* ---------- Team status ---------- */
 .attn-banner{
 background:linear-gradient(180deg,#fff8ea,#fff1d6);border:1.5px solid #f0b429;border-radius:var(--radius-md);
-padding:14px 18px;margin-bottom:14px;
+padding:14px 18px;margin-bottom:14px;box-shadow:var(--shadow-sm);
 }
+.attn-banner.attn-banner-empty{background:linear-gradient(180deg,#f2fbf6,#eafaf1);border-color:#8fd9b6;}
+.attn-banner.attn-banner-empty .attn-title{color:#0a7d59;margin-bottom:0;}
 .attn-title{font-size:13.5px;font-weight:800;color:#92610a;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
 .attn-chips{display:flex;flex-wrap:wrap;gap:10px;}
 @keyframes blink-red-white{
@@ -200,7 +202,7 @@ padding:5px 10px;border-radius:14px;cursor:pointer;font-family:inherit;
 .attn-chip button:hover{background:var(--red);color:white;}
 .attn-chip button:disabled{opacity:.5;cursor:not-allowed;}
 
-.status-panel{border-radius:var(--radius-md);padding:14px 18px;margin-bottom:14px;border:1.5px solid;}
+.status-panel{border-radius:var(--radius-md);padding:14px 18px;margin-bottom:14px;border:1.5px solid;box-shadow:var(--shadow-sm);}
 .status-panel.sp-in{background:#eefaf3;border-color:#8fd9b6;}
 .status-panel.sp-paused{background:#fff8ea;border-color:#f0d090;}
 .status-panel-head{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
@@ -236,8 +238,10 @@ font-family:inherit;background:white;justify-self:end;
 /* Task-focus team panel: reuses the same banner/table language as the main board's team status */
 .tsp-banner{
 background:linear-gradient(180deg,#fff8ea,#fff1d6);border:1.5px solid #f0b429;border-radius:var(--radius-md);
-padding:12px 16px;margin-bottom:12px;
+padding:12px 16px;margin-bottom:12px;box-shadow:var(--shadow-sm);
 }
+.tsp-banner.tsp-banner-empty{background:linear-gradient(180deg,#f2fbf6,#eafaf1);border-color:#8fd9b6;}
+.tsp-banner.tsp-banner-empty .tsp-banner-title{color:#0a7d59;margin-bottom:0;}
 .tsp-banner-title{font-size:12.5px;font-weight:800;color:#92610a;margin-bottom:9px;display:flex;align-items:center;gap:8px;}
 .tsp-chips{display:flex;flex-wrap:wrap;gap:9px;}
 .tsp-chip{
@@ -252,7 +256,7 @@ padding:4px 9px;border-radius:14px;cursor:pointer;font-family:inherit;
 .tsp-chip button:hover{background:var(--red);color:white;}
 .tsp-chip button:disabled{opacity:.5;cursor:not-allowed;}
 
-.tsp-status-panel{border-radius:var(--radius-md);padding:12px 16px;margin-bottom:12px;border:1.5px solid;}
+.tsp-status-panel{border-radius:var(--radius-md);padding:12px 16px;margin-bottom:12px;border:1.5px solid;box-shadow:var(--shadow-sm);}
 .tsp-status-panel.tsp-in{background:#eefaf3;border-color:#8fd9b6;}
 .tsp-status-panel.tsp-paused{background:#fff8ea;border-color:#f0d090;}
 .tsp-status-head{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:9px;}
@@ -1402,9 +1406,10 @@ const decided = decisionByEmail[email] && decisionByEmail[email] !== 'pending';
 return !isIn && !decided;
 });
 
-attnEl.innerHTML = notClockedIn.length ? `
-<div class="attn-banner">
-<div class="attn-title">🔔 Not Clocked In — Please Start Your Timer!</div>
+attnEl.innerHTML = `
+<div class="attn-banner${notClockedIn.length ? '' : ' attn-banner-empty'}">
+<div class="attn-title">${notClockedIn.length ? '🔔 Not Clocked In — Please Start Your Timer!' : '✅ Everyone is clocked in'}</div>
+${notClockedIn.length ? `
 <div class="attn-chips">
 ${notClockedIn.map(email => `
 <span class="attn-chip">${formatPersonName(email)}
@@ -1412,8 +1417,9 @@ ${notClockedIn.map(email => `
 </span>
 `).join('')}
 </div>
+` : ''}
 </div>
-` : '';
+`;
 
 const activeRows = [];
 Object.keys(taskLatest).forEach(key => {
@@ -2051,9 +2057,10 @@ const notClocked = people.filter(p => p.status === 'not_clocked');
 const clockedIn = people.filter(p => p.status === 'in');
 const paused = people.filter(p => p.status === 'paused');
 
-const notClockedHtml = notClocked.length ? `
-<div class="tsp-banner">
-<div class="tsp-banner-title">🔔 Not Clocked In — Please Start Your Timer!</div>
+const notClockedHtml = `
+<div class="tsp-banner${notClocked.length ? '' : ' tsp-banner-empty'}">
+<div class="tsp-banner-title">${notClocked.length ? '🔔 Not Clocked In — Please Start Your Timer!' : '✅ Everyone involved is clocked in'}</div>
+${notClocked.length ? `
 <div class="tsp-chips">
 ${notClocked.map(p => `
 <span class="tsp-chip">${p.name}
@@ -2061,8 +2068,9 @@ ${p.email ? `<button type="button" class="tsp-absent-btn" data-email="${p.email}
 </span>
 `).join('')}
 </div>
+` : ''}
 </div>
-` : '';
+`;
 
 const clockedInHtml = clockedIn.length ? `
 <div class="tsp-status-panel tsp-in">
