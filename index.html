@@ -203,24 +203,72 @@ font-family:inherit;background:white;justify-self:end;
 .sp-paused .status-row button:hover{background:var(--amber);color:white;}
 .status-panel-empty{font-size:12px;color:var(--text-faint);font-style:italic;padding:6px 4px;}
 
-.tf-team-panel{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
-.tf-team-card{
-flex:1 1 220px;min-width:210px;max-width:280px;background:var(--surface);border:1.5px solid var(--border);
-border-radius:var(--radius-md);padding:10px 12px;box-shadow:var(--shadow-sm);
+.tf-team-empty{font-size:11px;color:var(--text-faint);font-style:italic;padding:2px 2px 14px;}
+
+/* Task-focus team panel: reuses the same banner/table language as the main board's team status */
+.tsp-banner{
+background:linear-gradient(180deg,#fff8ea,#fff1d6);border:1.5px solid #f0b429;border-radius:var(--radius-md);
+padding:12px 16px;margin-bottom:12px;
 }
-.tf-team-card.tf-team-in{background:#eefaf3;border-color:#8fd9b6;}
-.tf-team-card.tf-team-paused{background:#fff8ea;border-color:#f0d090;}
-.tf-team-card.tf-team-not_clocked{background:#fdeef0;border-color:#f3b0ba;}
-.tf-team-card.tf-team-absent{background:var(--surface-alt);border-color:var(--border);}
-.tf-team-name{font-size:12.5px;font-weight:800;color:var(--text);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.tf-team-status{font-size:10px;font-weight:700;color:var(--text-dim);margin-bottom:7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.tf-team-card.tf-team-in .tf-team-status{color:#0a7d59;}
-.tf-team-card.tf-team-paused .tf-team-status{color:#a3660c;}
-.tf-team-card.tf-team-not_clocked .tf-team-status{color:#a51f34;}
-.tf-team-priorities{display:flex;flex-direction:column;gap:3px;}
-.tf-priority-chip{font-size:9.5px;color:var(--text-faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.tf-priority-chip b{color:var(--text-dim);font-weight:700;}
-.tf-team-empty{font-size:11px;color:var(--text-faint);font-style:italic;padding:2px;}
+.tsp-banner-title{font-size:12.5px;font-weight:800;color:#92610a;margin-bottom:9px;display:flex;align-items:center;gap:8px;}
+.tsp-chips{display:flex;flex-wrap:wrap;gap:9px;}
+.tsp-chip{
+display:inline-flex;align-items:center;gap:9px;border:1.5px solid var(--red);border-radius:20px;
+padding:5px 7px 5px 13px;background:white;font-size:12px;font-weight:700;color:var(--text);
+}
+.tsp-chip button{
+border:none;background:var(--red-pale);color:#a51f34;font-size:10px;font-weight:700;
+padding:4px 9px;border-radius:14px;cursor:pointer;font-family:inherit;
+}
+.tsp-chip button:hover{background:var(--red);color:white;}
+.tsp-chip button:disabled{opacity:.5;cursor:not-allowed;}
+
+.tsp-status-panel{border-radius:var(--radius-md);padding:12px 16px;margin-bottom:12px;border:1.5px solid;}
+.tsp-status-panel.tsp-in{background:#eefaf3;border-color:#8fd9b6;}
+.tsp-status-panel.tsp-paused{background:#fff8ea;border-color:#f0d090;}
+.tsp-status-head{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:9px;}
+.tsp-status-panel.tsp-in .tsp-status-head{color:#0a7d59;}
+.tsp-status-panel.tsp-paused .tsp-status-head{color:#a3660c;}
+.tsp-status-head .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.tsp-status-panel.tsp-in .dot{background:var(--green);}
+.tsp-status-panel.tsp-paused .dot{background:var(--amber);}
+.tsp-status-row{
+display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) 92px 92px;
+gap:14px;align-items:center;padding:7px 4px;border-bottom:1px solid rgba(0,0,0,.06);font-size:12px;
+}
+.tsp-status-row:last-child{border-bottom:none;}
+.tsp-sr-person{color:var(--text);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tsp-sr-task{color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tsp-sr-time{font-family:'JetBrains Mono',monospace;font-weight:700;text-align:right;white-space:nowrap;}
+.tsp-status-panel.tsp-in .tsp-sr-time{color:#0a7d59;}
+.tsp-status-panel.tsp-paused .tsp-sr-time{color:#a3660c;font-size:10.5px;}
+.tsp-status-row button{
+border:1.5px solid;border-radius:16px;padding:4px 11px;font-size:10.5px;font-weight:700;cursor:pointer;
+font-family:inherit;background:white;justify-self:end;
+}
+.tsp-in .tsp-status-row button{border-color:var(--red);color:var(--red);}
+.tsp-in .tsp-status-row button:hover{background:var(--red);color:white;}
+.tsp-paused .tsp-status-row button{border-color:var(--amber);color:#a3660c;}
+.tsp-paused .tsp-status-row button:hover{background:var(--amber);color:white;}
+
+/* Task-focus schedule table, matching the "Team Schedule — What's next, in order" reference layout */
+.tsched-panel{
+background:var(--primary-pale);border:1.5px solid #c7d2fe;border-radius:var(--radius-md);
+padding:14px 16px;margin-bottom:4px;
+}
+.tsched-head{font-size:11px;font-weight:800;color:var(--primary-dark);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
+.tsched-block{display:grid;grid-template-columns:150px minmax(0,1fr);gap:14px;padding:10px 0;border-bottom:1px solid rgba(37,64,201,.12);}
+.tsched-block:last-child{border-bottom:none;padding-bottom:0;}
+.tsched-block:first-child{padding-top:0;}
+.tsched-person-name{font-size:12.5px;font-weight:800;color:var(--text);padding-top:2px;}
+.tsched-rows{display:flex;flex-direction:column;gap:6px;min-width:0;}
+.tsched-row{display:grid;grid-template-columns:82px minmax(0,1fr) auto;gap:10px;align-items:baseline;font-size:11.5px;}
+.tsched-priority{font-size:9.5px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;}
+.tsched-desc{color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tsched-desc b{font-family:'JetBrains Mono',monospace;font-weight:700;}
+.tsched-task{color:var(--text-dim);}
+.tsched-dates{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-faint);white-space:nowrap;}
+.tsched-row.tsched-empty{color:var(--text-faint);font-style:italic;grid-template-columns:1fr;}
 
 /* ---------- Stats ---------- */
 .stats-grid{
@@ -748,6 +796,7 @@ let clockEvents = [];
 let runningTimer = null;
 let runningTimerTick = null;
 let taskFocusTick = null;
+let taskFocusTeamTick = null;
 
 const CLASS_ORDER = ['Containers','Manufactured','Real Ezy','Modulate','Imported','Lubestation','Buy & Sell'];
 const CLASS_SLUG = {
@@ -1292,6 +1341,7 @@ function renderUnitList(){
 const el = document.getElementById('unitList');
 el.innerHTML = '';
 if (!taskFilterValue && taskFocusTick){ clearInterval(taskFocusTick); taskFocusTick = null; }
+if (!taskFilterValue && taskFocusTeamTick){ clearInterval(taskFocusTeamTick); taskFocusTeamTick = null; }
 const filtered = filteredUnits();
 
 if (taskFilterValue){
@@ -1464,13 +1514,14 @@ openLogsModal(taskId, taskName, unitId);
 
 async function renderTaskFocusTeamPanel(el, matchedRows){
 if (!el) return;
+if (taskFocusTeamTick){ clearInterval(taskFocusTeamTick); taskFocusTeamTick = null; }
 
 const [{ data: allAssignees }, { data: rosterRows }, { data: todayEvents }, { data: decisions }, { data: recentHours }] = await Promise.all([
 sb.from('prod_task_assignees').select('task_id, assignee_name'),
 sb.from('prod_clock_events').select('person_email').order('event_time', { ascending: false }).limit(500),
 sb.from('prod_clock_events').select('person_email, unit_id, task_id, event_type, event_time').gte('event_time', todayStartIso()).order('event_time'),
 sb.from('prod_attendance_decisions').select('person_email, decision').eq('work_date', todayStartIso().slice(0,10)),
-sb.from('prod_daily_hours').select('task_id, person_email, updated_at').order('updated_at', { ascending: false }).limit(200),
+sb.from('prod_daily_hours').select('task_id, unit_id, person_email, updated_at').order('updated_at', { ascending: false }).limit(200),
 ]);
 
 const assigneesByTaskAll = {};
@@ -1507,12 +1558,20 @@ else if (activeByEmail[e.person_email] && activeByEmail[e.person_email].task_id 
 dailyLatestByEmail[e.person_email] = e;
 }
 });
-const recentByEmail = new Set((recentHours || []).map(h => h.person_email));
 
-const peopleInfo = Array.from(involvedNames).sort((a,b) => a.localeCompare(b)).map(name => {
+const pausedByEmail = {};
+(recentHours || []).forEach(h => {
+if (pausedByEmail[h.person_email]) return;
+const t = (allTasksByUnit[h.unit_id] || []).find(x => x.id === h.task_id);
+if (!t || Number(t.percent_complete_numeric) >= 1) return;
+if (activeByEmail[h.person_email] && activeByEmail[h.person_email].task_id === h.task_id) return;
+pausedByEmail[h.person_email] = { taskId: h.task_id, unitId: h.unit_id, updatedAt: h.updated_at };
+});
+
+const people = Array.from(involvedNames).sort((a,b) => a.localeCompare(b)).map(name => {
 const email = nameToEmail[name];
 let status = 'not_clocked';
-let activeTaskName = null;
+let active = null;
 if (email){
 const lastDaily = dailyLatestByEmail[email];
 const isIn = lastDaily && lastDaily.event_type !== 'clock_out';
@@ -1521,11 +1580,11 @@ status = 'in';
 const ev = activeByEmail[email];
 if (ev){
 const t = (allTasksByUnit[ev.unit_id] || []).find(x => x.id === ev.task_id);
-activeTaskName = t ? t.task_name : null;
+active = { taskId: ev.task_id, unitId: ev.unit_id, taskName: t ? t.task_name : '—', startedAt: ev.event_time };
 }
 } else if (decisionByEmail[email] === 'absent'){
 status = 'absent';
-} else if (recentByEmail.has(email)){
+} else if (pausedByEmail[email]){
 status = 'paused';
 }
 }
@@ -1546,28 +1605,142 @@ const scored = candidateTasks.map(t => {
 const sched = taskScheduleInfo(t);
 const overdueDays = sched && sched.status === 'behind' ? sched.diffDays : -9999;
 const dueTime = t.completion_date_planned ? new Date(t.completion_date_planned).getTime() : Infinity;
-return { name: t.task_name, overdueDays, dueTime };
+return { t, overdueDays, dueTime };
 });
 scored.sort((a, b) => b.overdueDays - a.overdueDays || a.dueTime - b.dueTime);
-const top3 = scored.slice(0, 3);
+const top3 = scored.slice(0, 3).map(s => s.t);
 
-return { name, status, activeTaskName, top3 };
+return { name, email, status, active, paused: pausedByEmail[email] || null, top3 };
 });
 
-const statusLabel = (p) => {
-if (p.status === 'in') return `🟢 Clocked in${p.activeTaskName ? ' · ' + p.activeTaskName : ''}`;
-if (p.status === 'paused') return '🟠 Paused';
-if (p.status === 'absent') return '⚪ Absent today';
-return '🔴 Not clocked in';
+const notClocked = people.filter(p => p.status === 'not_clocked');
+const clockedIn = people.filter(p => p.status === 'in');
+const paused = people.filter(p => p.status === 'paused');
+
+const notClockedHtml = notClocked.length ? `
+<div class="tsp-banner">
+<div class="tsp-banner-title">🔔 Not Clocked In — Please Start Your Timer!</div>
+<div class="tsp-chips">
+${notClocked.map(p => `
+<span class="tsp-chip">${p.name}
+${p.email ? `<button type="button" class="tsp-absent-btn" data-email="${p.email}">Mark absent</button>` : ''}
+</span>
+`).join('')}
+</div>
+</div>
+` : '';
+
+const clockedInHtml = clockedIn.length ? `
+<div class="tsp-status-panel tsp-in">
+<div class="tsp-status-head"><span class="dot"></span>Clocked In Now (${clockedIn.length})</div>
+${clockedIn.map(p => `
+<div class="tsp-status-row" data-started-at="${p.active ? p.active.startedAt : ''}">
+<span class="tsp-sr-person">${p.name}</span>
+<span class="tsp-sr-task">${p.active ? p.active.taskName : '—'}</span>
+<span class="tsp-sr-time tsp-sr-live">00:00:00</span>
+<button type="button" class="tsp-stop-btn" data-email="${p.email}" data-task-id="${p.active ? p.active.taskId : ''}" data-unit-id="${p.active ? p.active.unitId : ''}" data-started-at="${p.active ? p.active.startedAt : ''}">Stop</button>
+</div>
+`).join('')}
+</div>
+` : '';
+
+const pausedHtml = paused.length ? `
+<div class="tsp-status-panel tsp-paused">
+<div class="tsp-status-head"><span class="dot"></span>Paused — Resume Where You Left Off (${paused.length})</div>
+${paused.map(p => {
+const t = (allTasksByUnit[p.paused.unitId] || []).find(x => x.id === p.paused.taskId);
+return `
+<div class="tsp-status-row">
+<span class="tsp-sr-person">${p.name}</span>
+<span class="tsp-sr-task">${t ? t.task_name : '—'}</span>
+<span class="tsp-sr-time">${fmtDateTime(p.paused.updatedAt)}</span>
+<button type="button" class="tsp-resume-btn" data-task-id="${p.paused.taskId}" data-unit-id="${p.paused.unitId}">Resume</button>
+</div>
+`;
+}).join('')}
+</div>
+` : '';
+
+const taskScheduleRow = (task) => {
+const u = allUnits.find(x => x.id === task.unit_id);
+const so = u ? soInfoByNumber[u.so_number] : null;
+return {
+so: u ? u.so_number : '—',
+company: so && so.company_name ? so.company_name : '',
+taskName: task.task_name,
+start: task.start_date ? fmtDate(task.start_date) : '—',
+due: task.completion_date_planned ? fmtDate(task.completion_date_planned) : '—',
+};
 };
 
-el.innerHTML = `<div class="tf-team-panel">${peopleInfo.map(p => `
-<div class="tf-team-card tf-team-${p.status}">
-<div class="tf-team-name">${p.name}</div>
-<div class="tf-team-status">${statusLabel(p)}</div>
-${p.top3.length ? `<div class="tf-team-priorities">${p.top3.map((s, i) => `<span class="tf-priority-chip"><b>#${i+1}</b> ${s.name}</span>`).join('')}</div>` : '<div class="tf-team-priorities"><span class="tf-priority-chip">No open tasks</span></div>'}
+const scheduleHtml = `
+<div class="tsched-panel">
+<div class="tsched-head">🗓 Team Schedule — What's Next, In Order</div>
+${people.map(p => `
+<div class="tsched-block">
+<div class="tsched-person-name">${p.name}</div>
+<div class="tsched-rows">
+${p.top3.length ? p.top3.map((task, i) => {
+const info = taskScheduleRow(task);
+return `
+<div class="tsched-row">
+<span class="tsched-priority">Priority ${i + 1}</span>
+<span class="tsched-desc"><b>${info.so}</b>${info.company ? ' — ' + info.company : ''} — <span class="tsched-task">${info.taskName}</span></span>
+<span class="tsched-dates">${info.start} &rarr; ${info.due}</span>
 </div>
-`).join('')}</div>`;
+`;
+}).join('') : '<div class="tsched-row tsched-empty">No open tasks</div>'}
+</div>
+</div>
+`).join('')}
+</div>
+`;
+
+el.innerHTML = notClockedHtml + clockedInHtml + pausedHtml + scheduleHtml;
+
+el.querySelectorAll('.tsp-absent-btn').forEach(btn => {
+btn.addEventListener('click', async () => {
+const email = btn.getAttribute('data-email');
+btn.disabled = true; btn.textContent = 'Saving…';
+await markAttendanceDecision(email, 'absent');
+renderUnitList();
+});
+});
+el.querySelectorAll('.tsp-stop-btn').forEach(btn => {
+btn.addEventListener('click', async () => {
+const email = btn.getAttribute('data-email');
+const taskId = btn.getAttribute('data-task-id');
+const unitId = btn.getAttribute('data-unit-id');
+const startedAt = btn.getAttribute('data-started-at');
+if (!taskId || !unitId){ return; }
+btn.disabled = true; btn.textContent = '…';
+await stopTimerFor(email, taskId, unitId, startedAt);
+renderUnitList();
+});
+});
+el.querySelectorAll('.tsp-resume-btn').forEach(btn => {
+btn.addEventListener('click', async () => {
+const taskId = btn.getAttribute('data-task-id');
+const unitId = btn.getAttribute('data-unit-id');
+if (!taskId || !unitId) return;
+btn.disabled = true; btn.textContent = '…';
+await startTaskTimer(taskId, unitId);
+renderUnitList();
+});
+});
+
+const tickFn = () => {
+el.querySelectorAll('.tsp-status-row[data-started-at]').forEach(row => {
+const sa = row.getAttribute('data-started-at');
+if (!sa) return;
+const startedAt = new Date(sa);
+const secs = Math.floor((Date.now() - startedAt.getTime()) / 1000);
+const liveEl = row.querySelector('.tsp-sr-live');
+if (liveEl) liveEl.textContent = formatHMS(secs / 3600);
+});
+};
+tickFn();
+taskFocusTeamTick = setInterval(tickFn, 1000);
 }
 
 function renderTaskFilterView(el, filtered){
