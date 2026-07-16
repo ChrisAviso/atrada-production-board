@@ -5,285 +5,343 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Production Board — Atrada</title>
 <script>
-  (function(){
-      var img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = function(){
-            var size = Math.max(img.naturalWidth, img.naturalHeight);
-            var canvas = document.createElement('canvas');
-            canvas.width = size; canvas.height = size;
-            var ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0,0,size,size);
-            var dx = Math.round((size - img.naturalWidth)/2);
-            var dy = Math.round((size - img.naturalHeight)/2);
-            ctx.drawImage(img, dx, dy, img.naturalWidth, img.naturalHeight);
-            try {
-                    var url = canvas.toDataURL('image/png');
-                    var link = document.querySelector('link[rel="icon"]') || document.createElement('link');
-                    link.rel = 'icon';
-                    link.type = 'image/png';
-                    link.href = url;
-                    if (!link.parentNode) document.head.appendChild(link);
-            } catch(e) {}
-      };
-      img.src = 'https://chrisaviso.github.io/atrada-production-board/atrada-logo.png';
-  })();
+(function(){
+var img = new Image();
+img.crossOrigin = 'anonymous';
+img.onload = function(){
+var size = Math.max(img.naturalWidth, img.naturalHeight);
+var canvas = document.createElement('canvas');
+canvas.width = size; canvas.height = size;
+var ctx = canvas.getContext('2d');
+ctx.fillStyle = '#ffffff';
+ctx.fillRect(0,0,size,size);
+var dx = Math.round((size - img.naturalWidth)/2);
+var dy = Math.round((size - img.naturalHeight)/2);
+ctx.drawImage(img, dx, dy, img.naturalWidth, img.naturalHeight);
+try {
+var url = canvas.toDataURL('image/png');
+var link = document.querySelector('link[rel="icon"]') || document.createElement('link');
+link.rel = 'icon';
+link.type = 'image/png';
+link.href = url;
+if (!link.parentNode) document.head.appendChild(link);
+} catch(e) {}
+};
+img.src = 'https://chrisaviso.github.io/atrada-production-board/atrada-logo.png';
+})();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  :root{
-    --bg:#e7e9f1;
-    --surface:#ffffff;
-    --border:#d5d9e6;
-    --text:#22242f;
-    --text-dim:#585d73;
-    --primary:#0b5cff;
-    --primary-dark:#0847cc;
-    --green:#0da374;
-    --red:#d63d57;
-    --amber:#e0921a;
-    --gray-pill:#e4e7f1;
-    --radius:10px;
-    --topbar-bg:#1d2233;
-    --shadow:0 1px 2px rgba(20,22,40,.08), 0 8px 24px rgba(20,22,40,.09);
-    --mod:#8a6d00; --mod-pale:#fdf6dc;
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0; font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--text);
-    -webkit-font-smoothing:antialiased;
-  }
-  .hidden{display:none !important;}
+:root{
+--bg:#f4f5f9;
+--surface:#ffffff;
+--surface-alt:#fafbfd;
+--border:#e3e6ef;
+--border-strong:#d3d7e4;
+--text:#191b28;
+--text-dim:#686d82;
+--text-faint:#9498ac;
+--primary:#3457f5;
+--primary-dark:#2540c9;
+--primary-pale:#edf0ff;
+--green:#0ea472;
+--green-pale:#e7f8f1;
+--red:#e0394f;
+--red-pale:#fceef0;
+--amber:#d68a12;
+--amber-pale:#fdf3e1;
+--mod:#8a6d00;
+--mod-pale:#fdf6dc;
+--purple:#7c3aed;
+--purple-pale:#f3ecfe;
+--rose:#be185d;
+--rose-pale:#fdeaf1;
+--slate:#475569;
+--slate-pale:#eef1f5;
+--radius-sm:8px;
+--radius-md:12px;
+--radius-lg:18px;
+--shadow-sm:0 1px 2px rgba(20,22,45,.05);
+--shadow-md:0 8px 24px rgba(20,22,45,.09);
+--topbar-bg:#12142a;
+}
+*{box-sizing:border-box;}
+body{
+margin:0; font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--text);
+-webkit-font-smoothing:antialiased;
+}
+.hidden{display:none !important;}
 
-  #authScreen{
-    min-height:100vh; display:flex; align-items:center; justify-content:center;
-    background:
-      radial-gradient(circle at 15% 20%, rgba(58,92,235,.10), transparent 40%),
-      radial-gradient(circle at 85% 80%, rgba(18,184,134,.10), transparent 40%),
-      var(--bg);
-  }
-  .auth-card{
-    width:380px; background:var(--surface); border:1px solid var(--border); border-radius:16px;
-    box-shadow:var(--shadow); padding:36px 32px 28px;
-  }
-  .auth-mark{
-    width:40px;height:40px;border-radius:10px; background:linear-gradient(135deg,var(--primary),#7c5cf0);
-    display:flex;align-items:center;justify-content:center; color:white;font-weight:800;font-size:14px;margin-bottom:18px;
-  }
-  .auth-card h1{font-size:20px;margin:0 0 4px;letter-spacing:-0.01em;}
-  .auth-card p.sub{color:var(--text-dim);font-size:13.5px;margin:0 0 22px;}
-  .field{margin-bottom:14px;}
-  .field label{font-size:12.5px;font-weight:600;color:var(--text-dim);display:block;margin-bottom:6px;}
-  .field input{
-    width:100%;padding:10px 12px;border:1.5px solid var(--border);
-    border-radius:8px;font-size:14px;font-family:inherit;background:#fbfbfd;
-  }
-  .field input:focus{outline:none;border-color:var(--primary);background:white;}
-  .btn{
-    width:100%;padding:11px;border:none;border-radius:8px;background:var(--primary);color:white;
-    font-weight:600;font-size:14px;cursor:pointer;font-family:inherit;
-  }
-  .btn:hover{background:var(--primary-dark);}
-  .auth-toggle{text-align:center;margin-top:14px;font-size:13.5px;color:var(--text-dim);}
-  .auth-toggle a{color:var(--primary);cursor:pointer;text-decoration:none;font-weight:600;}
-  .auth-msg{font-size:13px;padding:9px 11px;border-radius:8px;margin-bottom:14px;}
-  .auth-msg.error{background:#fdecef;color:#c22a44;}
-  .auth-msg.ok{background:#e8f9f2;color:#0d8c62;}
+/* ---------- Auth screen ---------- */
+#authScreen{
+min-height:100vh; display:flex; align-items:center; justify-content:center;
+background:
+radial-gradient(circle at 15% 20%, rgba(52,87,245,.10), transparent 42%),
+radial-gradient(circle at 85% 80%, rgba(14,164,114,.10), transparent 42%),
+var(--bg);
+}
+.auth-card{
+width:380px; background:var(--surface); border:1px solid var(--border); border-radius:20px;
+box-shadow:var(--shadow-md); padding:38px 34px 30px;
+}
+.auth-mark{
+width:42px;height:42px;border-radius:12px; background:linear-gradient(135deg,var(--primary),#8b5cf6);
+display:flex;align-items:center;justify-content:center; color:white;font-weight:800;font-size:14px;margin-bottom:20px;
+box-shadow:0 6px 16px rgba(52,87,245,.35);
+}
+.auth-card h1{font-size:21px;margin:0 0 4px;letter-spacing:-0.01em;font-weight:700;}
+.auth-card p.sub{color:var(--text-dim);font-size:13.5px;margin:0 0 24px;}
+.field{margin-bottom:15px;}
+.field label{font-size:12px;font-weight:600;color:var(--text-dim);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;}
+.field input{
+width:100%;padding:11px 13px;border:1.5px solid var(--border);
+border-radius:9px;font-size:14px;font-family:inherit;background:var(--surface-alt);transition:border-color .15s,background .15s;
+}
+.field input:focus{outline:none;border-color:var(--primary);background:white;box-shadow:0 0 0 3px var(--primary-pale);}
+.btn{
+width:100%;padding:12px;border:none;border-radius:9px;background:var(--primary);color:white;
+font-weight:600;font-size:14px;cursor:pointer;font-family:inherit;transition:background .15s;
+}
+.btn:hover{background:var(--primary-dark);}
+.auth-toggle{text-align:center;margin-top:16px;font-size:13.5px;color:var(--text-dim);}
+.auth-toggle a{color:var(--primary);cursor:pointer;text-decoration:none;font-weight:600;}
+.auth-msg{font-size:13px;padding:10px 12px;border-radius:9px;margin-bottom:15px;}
+.auth-msg.error{background:var(--red-pale);color:#a51f34;}
+.auth-msg.ok{background:var(--green-pale);color:#0a7d59;}
 
-  #appScreen{min-height:100vh;}
-  header.topbar{
-    background:var(--topbar-bg);border-bottom:1px solid #12162399;
-    padding:14px 26px;display:flex;align-items:center;justify-content:space-between;
-    position:sticky;top:0;z-index:20;
-  }
-  .brand{display:flex;align-items:center;gap:10px;}
-  .brand .mark{width:30px;height:30px;border-radius:8px;object-fit:contain;flex-shrink:0;}
-  .brand h1{font-size:16px;margin:0;letter-spacing:-0.01em;color:#ffffff;}
-  .brand .sub{font-size:12px;color:rgba(255,255,255,.55);}
-  .topbar-right{display:flex;align-items:center;gap:14px;}
-  .user-chip{font-size:13px;color:rgba(255,255,255,.7);}
-  .icon-btn{
-    border:1.5px solid var(--border);background:white;border-radius:8px;
-    padding:7px 13px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;font-family:inherit;
-  }
-  .icon-btn:hover{border-color:var(--primary);color:var(--primary);}
+/* ---------- App shell ---------- */
+#appScreen{min-height:100vh;}
+header.topbar{
+background:var(--topbar-bg);
+padding:14px 30px;display:flex;align-items:center;justify-content:space-between;
+position:sticky;top:0;z-index:20;box-shadow:0 2px 10px rgba(0,0,0,.18);
+}
+.brand{display:flex;align-items:center;gap:12px;}
+.brand .mark{width:32px;height:32px;border-radius:9px;object-fit:contain;flex-shrink:0;box-shadow:0 0 0 1px rgba(255,255,255,.08);}
+.brand h1{font-size:16px;margin:0;letter-spacing:-0.01em;color:#ffffff;font-weight:700;}
+.brand .sub{font-size:12px;color:rgba(255,255,255,.5);margin-top:1px;}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.user-chip{font-size:12.5px;color:rgba(255,255,255,.75);background:rgba(255,255,255,.08);padding:6px 12px;border-radius:20px;}
+.icon-btn{
+border:1.5px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);border-radius:8px;
+padding:7px 14px;font-size:13px;font-weight:600;color:rgba(255,255,255,.85);cursor:pointer;font-family:inherit;transition:all .15s;
+}
+.icon-btn:hover{border-color:var(--primary);color:#fff;background:var(--primary);}
+.icon-btn.ghost-light{
+border:1.5px solid var(--border);background:var(--surface);color:var(--text);
+}
+.icon-btn.ghost-light:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-pale);}
 
-  main{max-width:1900px;margin:0 auto;padding:22px 26px 80px;}
+main{max-width:1600px;margin:0 auto;padding:26px 30px 90px;}
 
-  .toolbar-top{display:flex;gap:10px;align-items:center;margin-bottom:12px;}
-  .toolbar-top .search-box{flex:1;}
-  .search-box{
-    flex:1;min-width:200px;padding:9px 14px;border:1.5px solid var(--border);
-    border-radius:8px;font-size:13.5px;background:white;font-family:inherit;
-  }
-  .search-box:focus{outline:none;border-color:var(--primary);}
+/* ---------- Toolbar ---------- */
+.toolbar-card{
+display:flex;gap:12px;align-items:center;flex-wrap:wrap;
+background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);
+padding:12px 16px;margin-bottom:18px;box-shadow:var(--shadow-sm);
+}
+.search-box{
+flex:1;min-width:220px;padding:10px 14px;border:1.5px solid var(--border);
+border-radius:9px;font-size:13.5px;background:var(--surface-alt);font-family:inherit;transition:border-color .15s,background .15s;
+}
+.search-box:focus{outline:none;border-color:var(--primary);background:white;box-shadow:0 0 0 3px var(--primary-pale);}
+.filter-select{
+padding:10px 14px;border:1.5px solid var(--border);border-radius:9px;
+font-size:13.5px;background:var(--surface-alt);font-family:inherit;color:var(--text);cursor:pointer;min-width:150px;
+}
+.filter-select:focus{outline:none;border-color:var(--primary);}
+.toolbar-clear{margin-left:auto;}
 
-  .filters-bar{
-    display:flex;gap:22px;flex-wrap:wrap;align-items:flex-end;
-    background:#fafbff;border:1px solid var(--border);border-radius:12px;
-    padding:14px 18px;margin-bottom:20px;
-  }
-  .filter-group{display:flex;flex-direction:column;gap:7px;}
-  .filter-group-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);}
-  .filter-group-controls{display:flex;gap:8px;flex-wrap:wrap;}
-  .filter-select{
-    padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;
-    font-size:13.5px;background:white;font-family:inherit;color:var(--text);cursor:pointer;
-  }
-  .filter-select:focus{outline:none;border-color:var(--primary);}
-  .filters-bar-clear{margin-left:auto;align-self:center;}
+/* ---------- Stats ---------- */
+.stats-grid{
+display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:22px;
+}
+.stat-card{
+background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);
+padding:16px 18px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;
+}
+.stat-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent,var(--border-strong));}
+.stat-card.c-total{--accent:var(--text-faint);}
+.stat-card.c-progress{--accent:var(--primary);}
+.stat-card.c-done{--accent:var(--green);}
+.stat-card.c-behind{--accent:var(--red);}
+.stat-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-bottom:8px;}
+.stat-value{font-size:28px;font-weight:800;letter-spacing:-0.02em;line-height:1;}
+.stat-card.c-progress .stat-value{color:var(--primary-dark);}
+.stat-card.c-done .stat-value{color:var(--green);}
+.stat-card.c-behind .stat-value{color:var(--red);}
 
-  .open-panel{
-    background:#fafbff;border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:16px;
-  }
-  .open-panel-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim);margin-bottom:10px;}
-  .open-panel-counts{display:flex;gap:10px;margin-bottom:4px;flex-wrap:wrap;}
-  .count-chip{font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;}
-  .count-chip.count-total{background:var(--gray-pill);color:var(--text-dim);}
-  .count-chip.count-progress{background:#eef2ff;color:var(--primary-dark);}
-  .count-chip.count-done{background:#eefaf1;color:var(--green);}
-  .count-chip.count-behind{background:#fdedef;color:var(--red);}
+/* ---------- Layout ---------- */
+.layout{display:grid;grid-template-columns:1.5fr 1fr;gap:20px;align-items:start;}
+@media (max-width:1000px){ .layout{grid-template-columns:1fr;} }
 
-  .so-group{margin-bottom:18px;}
-  .so-group-head{
-    font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim);
-    padding:0 2px 8px;
-  }
-  .unit-row{
-    display:grid;grid-template-columns:9px 100px 1.6fr 110px 90px 130px;gap:14px;align-items:center;
-    padding:9px 10px;font-size:13px;border-bottom:1px solid var(--border);cursor:pointer;border-radius:6px;
-    transition:background .1s;
-  }
-  .unit-row-head{
-    display:grid;grid-template-columns:9px 100px 1.6fr 110px 90px 130px;gap:14px;
-    padding:0 10px 8px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
-    color:var(--text-dim);border-bottom:1.5px solid var(--border);margin-bottom:2px;
-  }
-  .unit-row:hover{background:#eef1ff;}
-  .unit-row.active{background:#eef1ff;border-left:3px solid var(--primary);}
-  .unit-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
-  .unit-dot.dot-ontrack{background:var(--green);}
-  .unit-dot.dot-behind{background:var(--red);}
-  .unit-dot.dot-progress{background:var(--primary);}
-  .unit-dot.dot-null{background:var(--border);}
-  .unit-class{font-weight:700;color:var(--text-dim);font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;}
-  .unit-class.modulate{color:var(--mod);}
-  .unit-name{color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .unit-progress-track{height:5px;background:var(--gray-pill);border-radius:3px;overflow:hidden;margin-top:5px;}
-  .unit-progress-fill{height:100%;background:var(--primary);}
-  .unit-progress-fill.done{background:var(--green);}
-  .unit-qty{color:var(--text-dim);font-size:12px;text-align:right;font-variant-numeric:tabular-nums;}
-  .unit-status{
-    font-size:11px;font-weight:700;white-space:nowrap;justify-self:start;border-radius:12px;padding:3px 10px;
-  }
-  .unit-status.st-ontrack{background:#eefaf1;color:var(--green);}
-  .unit-status.st-behind{background:#fdedef;color:var(--red);}
-  .unit-status.st-progress{background:rgba(11,92,255,.1);color:var(--primary-dark);}
-  .unit-status.st-notstarted{background:var(--gray-pill);color:var(--text-dim);}
+/* ---------- SO group cards ---------- */
+.so-group{
+background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);
+box-shadow:var(--shadow-sm);margin-bottom:14px;overflow:hidden;
+}
+.so-group-head{
+display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--border);
+background:var(--surface-alt);
+}
+.so-group-head .so-name{font-size:13px;font-weight:800;letter-spacing:.01em;color:var(--text);font-family:'JetBrains Mono',monospace;}
+.so-unit-count{font-size:11px;font-weight:700;color:var(--text-dim);background:var(--border);padding:2px 9px;border-radius:20px;}
+.so-flag-behind{
+font-size:11px;font-weight:700;color:var(--red);background:var(--red-pale);padding:3px 10px;border-radius:20px;margin-left:auto;
+}
 
-  .layout{display:grid;grid-template-columns:1.5fr 1fr;gap:18px;align-items:start;}
-  @media (max-width:1000px){ .layout{grid-template-columns:1fr;} }
-  .detail-panel{
-    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-    box-shadow:var(--shadow);padding:18px 20px;position:sticky;top:80px;
-  }
-  .dp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;gap:10px;}
-  .dp-title{font-size:15px;font-weight:600;}
-  .dp-sub{font-size:12.5px;color:var(--text-dim);margin-bottom:14px;}
-  .section-lbl{
-    font-size:10.5px;font-weight:700;color:var(--text-dim);text-transform:uppercase;
-    letter-spacing:.05em;margin:16px 0 8px;
-  }
-  .task-row{
-    display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--border);font-size:13px;
-  }
-  .task-row:last-child{border-bottom:none;}
-  .task-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--green);cursor:pointer;flex-shrink:0;}
-  .task-row .tname{flex:1;min-width:0;}
-  .task-row .tname.done{text-decoration:line-through;color:var(--text-dim);}
-  .task-row .tname.na{text-decoration:line-through;color:var(--border);font-style:italic;}
-  .task-row .tdates{
-    font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-dim);white-space:nowrap;text-align:right;
-  }
-  .task-row .tdates .dur{display:block;font-weight:600;color:var(--text);}
-  .task-row .tmeta{font-size:10.5px;color:var(--text-dim);white-space:nowrap;background:var(--gray-pill);padding:2px 8px;border-radius:10px;flex-shrink:0;}
-  .empty-state{color:var(--text-dim);font-size:13px;text-align:center;padding:40px 0;}
+.unit-row-head{
+display:grid;grid-template-columns:130px 1.6fr 90px 160px;gap:16px;
+padding:9px 18px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
+color:var(--text-faint);border-bottom:1px solid var(--border);
+}
+.unit-row{
+display:grid;grid-template-columns:130px 1.6fr 90px 160px;gap:16px;align-items:center;
+padding:12px 18px;font-size:13px;border-bottom:1px solid var(--border);cursor:pointer;
+transition:background .12s;
+}
+.unit-row:last-child{border-bottom:none;}
+.unit-row:hover{background:var(--primary-pale);}
+.unit-row.active{background:var(--primary-pale);box-shadow:inset 3px 0 0 var(--primary);}
+
+.class-badge{
+display:inline-flex;align-items:center;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.03em;
+padding:4px 10px;border-radius:7px;white-space:nowrap;
+background:var(--slate-pale);color:var(--slate);
+}
+.class-badge.cls-manufactured{background:var(--primary-pale);color:var(--primary-dark);}
+.class-badge.cls-real-ezy{background:var(--green-pale);color:#0a7d59;}
+.class-badge.cls-modulate{background:var(--mod-pale);color:var(--mod);}
+.class-badge.cls-imported{background:var(--purple-pale);color:var(--purple);}
+.class-badge.cls-lubestation{background:var(--rose-pale);color:var(--rose);}
+.class-badge.cls-buy-sell{background:var(--slate-pale);color:var(--slate);}
+
+.unit-name{color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;}
+.unit-progress-track{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:6px;}
+.unit-progress-fill{height:100%;background:var(--primary);border-radius:3px;}
+.unit-progress-fill.done{background:var(--green);}
+.unit-qty{color:var(--text-dim);font-size:12px;text-align:right;font-variant-numeric:tabular-nums;font-family:'JetBrains Mono',monospace;}
+
+.unit-status{
+display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;white-space:nowrap;
+border-radius:20px;padding:5px 12px 5px 10px;justify-self:start;max-width:100%;overflow:hidden;text-overflow:ellipsis;
+}
+.unit-status .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.unit-status.st-ontrack{background:var(--green-pale);color:#0a7d59;}
+.unit-status.st-ontrack .dot{background:var(--green);}
+.unit-status.st-behind{background:var(--red-pale);color:#a51f34;}
+.unit-status.st-behind .dot{background:var(--red);}
+.unit-status.st-progress{background:var(--primary-pale);color:var(--primary-dark);}
+.unit-status.st-progress .dot{background:var(--primary);}
+.unit-status.st-notstarted{background:var(--border);color:var(--text-dim);}
+.unit-status.st-notstarted .dot{background:var(--text-faint);}
+
+/* ---------- Detail panel ---------- */
+.detail-panel{
+background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+box-shadow:var(--shadow-md);padding:22px 24px;position:sticky;top:86px;
+}
+.dp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:4px;}
+.dp-title{font-size:16px;font-weight:700;letter-spacing:-0.01em;line-height:1.3;}
+.dp-sub{font-size:12.5px;color:var(--text-dim);margin:6px 0 18px;font-family:'JetBrains Mono',monospace;}
+
+.dp-progress{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--surface-alt);border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:6px;}
+.dp-ring{flex-shrink:0;}
+.dp-progress-text{font-size:12px;color:var(--text-dim);}
+.dp-progress-text b{display:block;font-size:14px;color:var(--text);font-weight:700;margin-bottom:2px;}
+
+.section-lbl{
+font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;
+letter-spacing:.05em;margin:20px 0 6px;
+}
+.task-row{
+display:flex;align-items:center;gap:11px;padding:10px 4px;border-bottom:1px solid var(--border);font-size:13px;
+}
+.task-row:last-child{border-bottom:none;}
+.task-row input[type=checkbox]{width:17px;height:17px;accent-color:var(--green);cursor:pointer;flex-shrink:0;}
+.task-row .tname{flex:1;min-width:0;}
+.task-row .tname.done{text-decoration:line-through;color:var(--text-dim);}
+.task-row .tname.na{text-decoration:line-through;color:var(--text-faint);font-style:italic;}
+.task-row .tdates{
+font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-dim);white-space:nowrap;text-align:right;
+}
+.task-row .tdates .dur{display:block;font-weight:700;color:var(--text);}
+.task-row .tmeta{font-size:10.5px;color:var(--text-dim);white-space:nowrap;background:var(--surface-alt);border:1px solid var(--border);padding:2px 8px;border-radius:10px;flex-shrink:0;}
+.empty-state{color:var(--text-faint);font-size:13px;text-align:center;padding:44px 10px;}
 </style>
 </head>
 <body>
 
 <div id="authScreen">
-  <div class="auth-card">
-    <div class="auth-mark">PR</div>
-    <h1 id="authTitle">Sign in</h1>
-    <p class="sub" id="authSub">Atrada · Production Board</p>
-    <div id="authMsg"></div>
-    <div class="field">
-      <label>Email</label>
-      <input type="email" id="authEmail" placeholder="you@atrada.com.au" autocomplete="username">
-    </div>
-    <div class="field">
-      <label>Password</label>
-      <input type="password" id="authPassword" placeholder="••••••••" autocomplete="current-password">
-    </div>
-    <button class="btn" id="authSubmit">Sign in</button>
-    <div class="auth-toggle"><span id="authToggleText">No account?</span> <a id="authToggleLink">Create one</a></div>
-  </div>
+<div class="auth-card">
+<div class="auth-mark">PR</div>
+<h1 id="authTitle">Sign in</h1>
+<p class="sub" id="authSub">Atrada · Production Board</p>
+<div id="authMsg"></div>
+<div class="field">
+<label>Email</label>
+<input type="email" id="authEmail" placeholder="you@atrada.com.au" autocomplete="username">
+</div>
+<div class="field">
+<label>Password</label>
+<input type="password" id="authPassword" placeholder="••••••••" autocomplete="current-password">
+</div>
+<button class="btn" id="authSubmit">Sign in</button>
+<div class="auth-toggle"><span id="authToggleText">No account?</span> <a id="authToggleLink">Create one</a></div>
+</div>
 </div>
 
 <div id="appScreen" class="hidden">
-  <header class="topbar">
-    <div class="brand">
-      <img class="mark" src="atrada-logo.png" alt="Atrada">
-      <div>
-        <h1>Production Board</h1>
-        <div class="sub">Atrada &middot; Fabrication &rarr; QA &rarr; Dispatch</div>
-      </div>
-    </div>
-    <div class="topbar-right">
-      <span class="user-chip" id="userChip"></span>
-      <button class="icon-btn" id="refreshBtn">&#8635; Refresh</button>
-      <button class="icon-btn" id="signOutBtn">Sign out</button>
-    </div>
-  </header>
+<header class="topbar">
+<div class="brand">
+<img class="mark" src="atrada-logo.png" alt="Atrada">
+<div>
+<h1>Production Board</h1>
+<div class="sub">Atrada &middot; Fabrication &rarr; QA &rarr; Dispatch</div>
+</div>
+</div>
+<div class="topbar-right">
+<span class="user-chip" id="userChip"></span>
+<button class="icon-btn" id="refreshBtn">&#8635; Refresh</button>
+<button class="icon-btn" id="signOutBtn">Sign out</button>
+</div>
+</header>
 
-  <main>
-    <div class="toolbar-top">
-      <input class="search-box" id="searchBox" placeholder="Search unit name or SO number…">
-    </div>
+<main>
+<div class="stats-grid">
+<div class="stat-card c-total">
+<div class="stat-label">Total Units</div>
+<div class="stat-value" id="statTotal">0</div>
+</div>
+<div class="stat-card c-progress">
+<div class="stat-label">In Progress</div>
+<div class="stat-value" id="statInProgress">0</div>
+</div>
+<div class="stat-card c-done">
+<div class="stat-label">Dispatch Ready</div>
+<div class="stat-value" id="statDone">0</div>
+</div>
+<div class="stat-card c-behind">
+<div class="stat-label">Behind Schedule</div>
+<div class="stat-value" id="statOverdue">0</div>
+</div>
+</div>
 
-    <div class="filters-bar">
-      <div class="filter-group">
-        <span class="filter-group-label">Class</span>
-        <div class="filter-group-controls">
-          <select class="filter-select" id="classFilter"></select>
-        </div>
-      </div>
-      <div class="filters-bar-clear">
-        <button class="icon-btn" id="clearFiltersBtn">Clear filters</button>
-      </div>
-    </div>
+<div class="toolbar-card">
+<input class="search-box" id="searchBox" placeholder="Search unit name or SO number…">
+<select class="filter-select" id="classFilter"></select>
+<button class="icon-btn ghost-light toolbar-clear" id="clearFiltersBtn">Clear filters</button>
+</div>
 
-    <div class="open-panel">
-      <div class="open-panel-title">Units in Production</div>
-      <div class="open-panel-counts">
-        <span class="count-chip count-total" id="statTotal">0 total</span>
-        <span class="count-chip count-progress" id="statInProgress">0 in progress</span>
-        <span class="count-chip count-done" id="statDone">0 dispatch ready</span>
-        <span class="count-chip count-behind" id="statOverdue">0 behind schedule</span>
-      </div>
-    </div>
-
-    <div class="layout">
-      <div id="unitList"></div>
-      <div class="detail-panel" id="detailPanel">
-        <div class="empty-state">Select a unit to see its task list</div>
-      </div>
-    </div>
-  </main>
+<div class="layout">
+<div id="unitList"></div>
+<div class="detail-panel" id="detailPanel">
+<div class="empty-state">Select a unit to see its task list</div>
+</div>
+</div>
+</main>
 </div>
 
 <script>
@@ -299,92 +357,97 @@ let selectedUnitId = null;
 let isSignUpMode = false;
 
 const CLASS_ORDER = ['Containers','Manufactured','Real Ezy','Modulate','Imported','Lubestation','Buy & Sell'];
+const CLASS_SLUG = {
+'Containers':'containers','Manufactured':'manufactured','Real Ezy':'real-ezy','Modulate':'modulate',
+'Imported':'imported','Lubestation':'lubestation','Buy & Sell':'buy-sell'
+};
 
 function classLabel(cls){ return cls || 'Unclassed'; }
+function classSlug(cls){ return CLASS_SLUG[cls] || 'buy-sell'; }
 
 function fmtDate(d){
-  if (!d) return '—';
-  const dt = new Date(d + 'T00:00:00');
-  const dd = String(dt.getDate()).padStart(2,'0');
-  const mm = String(dt.getMonth()+1).padStart(2,'0');
-  const yy = String(dt.getFullYear()).slice(-2);
-  return `${dd}/${mm}/${yy}`;
+if (!d) return '—';
+const dt = new Date(d + 'T00:00:00');
+const dd = String(dt.getDate()).padStart(2,'0');
+const mm = String(dt.getMonth()+1).padStart(2,'0');
+const yy = String(dt.getFullYear()).slice(-2);
+return `${dd}/${mm}/${yy}`;
 }
 
 function orderTasksByChain(tasks){
-  const byId = new Map(tasks.map(t => [t.id, t]));
-  const nextOf = new Map();
-  tasks.forEach(t => { if (t.predecessor_task_id) nextOf.set(t.predecessor_task_id, t); });
+const byId = new Map(tasks.map(t => [t.id, t]));
+const nextOf = new Map();
+tasks.forEach(t => { if (t.predecessor_task_id) nextOf.set(t.predecessor_task_id, t); });
 
-  const roots = tasks.filter(t => !t.predecessor_task_id || !byId.has(t.predecessor_task_id));
-  const ordered = [];
-  const visited = new Set();
-  roots.forEach(root => {
-    let cur = root;
-    while (cur && !visited.has(cur.id)){
-      ordered.push(cur);
-      visited.add(cur.id);
-      cur = nextOf.get(cur.id);
-    }
-  });
-  tasks.forEach(t => { if (!visited.has(t.id)) ordered.push(t); });
-  return ordered;
+const roots = tasks.filter(t => !t.predecessor_task_id || !byId.has(t.predecessor_task_id));
+const ordered = [];
+const visited = new Set();
+roots.forEach(root => {
+let cur = root;
+while (cur && !visited.has(cur.id)){
+ordered.push(cur);
+visited.add(cur.id);
+cur = nextOf.get(cur.id);
+}
+});
+tasks.forEach(t => { if (!visited.has(t.id)) ordered.push(t); });
+return ordered;
 }
 
 function computeUnitProgress(unitId){
-  const hl2 = (allTasksByUnit[unitId] || []).filter(t => t.hierarchy_level === 2);
-  const ordered = orderTasksByChain(hl2);
-  const tasks = ordered.filter(t => !t.is_not_applicable);
-  if (tasks.length === 0) return { pct: 0, currentStage: 'No tasks', status: 'not_started', overdue: false };
-  const done = tasks.filter(t => t.percent_complete_numeric >= 1).length;
-  const pct = Math.round((done / tasks.length) * 100);
-  const next = tasks.find(t => t.percent_complete_numeric < 1);
-  const currentStage = next ? next.task_name : 'Dispatch';
-  let status = 'not_started';
-  if (pct === 100) status = 'complete';
-  else if (done > 0) status = 'in_progress';
-  const today = new Date();
-  const overdue = next && next.completion_date_planned && new Date(next.completion_date_planned) < today && pct < 100;
-  return { pct, currentStage, status: overdue ? 'overdue' : status, overdue };
+const hl2 = (allTasksByUnit[unitId] || []).filter(t => t.hierarchy_level === 2);
+const ordered = orderTasksByChain(hl2);
+const tasks = ordered.filter(t => !t.is_not_applicable);
+if (tasks.length === 0) return { pct: 0, currentStage: 'No tasks', status: 'not_started', overdue: false };
+const done = tasks.filter(t => t.percent_complete_numeric >= 1).length;
+const pct = Math.round((done / tasks.length) * 100);
+const next = tasks.find(t => t.percent_complete_numeric < 1);
+const currentStage = next ? next.task_name : 'Dispatch';
+let status = 'not_started';
+if (pct === 100) status = 'complete';
+else if (done > 0) status = 'in_progress';
+const today = new Date();
+const overdue = next && next.completion_date_planned && new Date(next.completion_date_planned) < today && pct < 100;
+return { pct, currentStage, status: overdue ? 'overdue' : status, overdue };
 }
 
 async function checkSession(){
-  const { data: { session } } = await sb.auth.getSession();
-  if (session){
-    document.getElementById('authScreen').classList.add('hidden');
-    document.getElementById('appScreen').classList.remove('hidden');
-    document.getElementById('userChip').textContent = session.user.email;
-    loadBoard();
-  } else {
-    document.getElementById('authScreen').classList.remove('hidden');
-    document.getElementById('appScreen').classList.add('hidden');
-  }
+const { data: { session } } = await sb.auth.getSession();
+if (session){
+document.getElementById('authScreen').classList.add('hidden');
+document.getElementById('appScreen').classList.remove('hidden');
+document.getElementById('userChip').textContent = session.user.email;
+loadBoard();
+} else {
+document.getElementById('authScreen').classList.remove('hidden');
+document.getElementById('appScreen').classList.add('hidden');
+}
 }
 
 document.getElementById('authSubmit').addEventListener('click', async () => {
-  const email = document.getElementById('authEmail').value.trim();
-  const password = document.getElementById('authPassword').value;
-  const msgEl = document.getElementById('authMsg');
-  msgEl.innerHTML = '';
-  if (!email || !password){ msgEl.innerHTML = '<div class="auth-msg error">Enter email and password.</div>'; return; }
+const email = document.getElementById('authEmail').value.trim();
+const password = document.getElementById('authPassword').value;
+const msgEl = document.getElementById('authMsg');
+msgEl.innerHTML = '';
+if (!email || !password){ msgEl.innerHTML = '<div class="auth-msg error">Enter email and password.</div>'; return; }
 
-  if (isSignUpMode){
-    const { error } = await sb.auth.signUp({ email, password });
-    if (error){ msgEl.innerHTML = `<div class="auth-msg error">${error.message}</div>`; return; }
-    msgEl.innerHTML = '<div class="auth-msg ok">Account created — check your email to confirm, then sign in.</div>';
-  } else {
-    const { error } = await sb.auth.signInWithPassword({ email, password });
-    if (error){ msgEl.innerHTML = `<div class="auth-msg error">${error.message}</div>`; return; }
-    checkSession();
-  }
+if (isSignUpMode){
+const { error } = await sb.auth.signUp({ email, password });
+if (error){ msgEl.innerHTML = `<div class="auth-msg error">${error.message}</div>`; return; }
+msgEl.innerHTML = '<div class="auth-msg ok">Account created — check your email to confirm, then sign in.</div>';
+} else {
+const { error } = await sb.auth.signInWithPassword({ email, password });
+if (error){ msgEl.innerHTML = `<div class="auth-msg error">${error.message}</div>`; return; }
+checkSession();
+}
 });
 
 document.getElementById('authToggleLink').addEventListener('click', () => {
-  isSignUpMode = !isSignUpMode;
-  document.getElementById('authTitle').textContent = isSignUpMode ? 'Create an account' : 'Sign in';
-  document.getElementById('authSubmit').textContent = isSignUpMode ? 'Create account' : 'Sign in';
-  document.getElementById('authToggleText').textContent = isSignUpMode ? 'Already have an account?' : 'No account?';
-  document.getElementById('authToggleLink').textContent = isSignUpMode ? 'Sign in' : 'Create one';
+isSignUpMode = !isSignUpMode;
+document.getElementById('authTitle').textContent = isSignUpMode ? 'Create an account' : 'Sign in';
+document.getElementById('authSubmit').textContent = isSignUpMode ? 'Create account' : 'Sign in';
+document.getElementById('authToggleText').textContent = isSignUpMode ? 'Already have an account?' : 'No account?';
+document.getElementById('authToggleLink').textContent = isSignUpMode ? 'Sign in' : 'Create one';
 });
 
 document.getElementById('signOutBtn').addEventListener('click', async () => { await sb.auth.signOut(); checkSession(); });
@@ -392,189 +455,216 @@ document.getElementById('refreshBtn').addEventListener('click', () => loadBoard(
 document.getElementById('searchBox').addEventListener('input', (e) => { searchText = e.target.value.toLowerCase(); renderUnitList(); });
 document.getElementById('classFilter').addEventListener('change', (e) => { activeClass = e.target.value; renderStats(); renderUnitList(); });
 document.getElementById('clearFiltersBtn').addEventListener('click', () => {
-  activeClass = ''; searchText = '';
-  document.getElementById('classFilter').value = '';
-  document.getElementById('searchBox').value = '';
-  renderStats(); renderUnitList();
+activeClass = ''; searchText = '';
+document.getElementById('classFilter').value = '';
+document.getElementById('searchBox').value = '';
+renderStats(); renderUnitList();
 });
 
 async function fetchAllRows(query){
-  const pageSize = 1000;
-  let from = 0;
-  let all = [];
-  while (true){
-    const { data, error } = await query.range(from, from + pageSize - 1);
-    if (error) return { data: null, error };
-    all = all.concat(data || []);
-    if (!data || data.length < pageSize) break;
-    from += pageSize;
-  }
-  return { data: all, error: null };
+const pageSize = 1000;
+let from = 0;
+let all = [];
+while (true){
+const { data, error } = await query.range(from, from + pageSize - 1);
+if (error) return { data: null, error };
+all = all.concat(data || []);
+if (!data || data.length < pageSize) break;
+from += pageSize;
+}
+return { data: all, error: null };
 }
 
 async function loadBoard(){
-  const { data: units, error: unitErr } = await sb
-    .from('prod_units')
-    .select('id, so_number, unit_name, class, qty, difot_date')
-    .order('so_number');
-  if (unitErr){ console.error(unitErr); return; }
-  allUnits = units || [];
+document.getElementById('unitList').innerHTML = '<div class="empty-state">Loading production board…</div>';
+const { data: units, error: unitErr } = await sb
+.from('prod_units')
+.select('id, so_number, unit_name, class, qty, difot_date')
+.order('so_number');
+if (unitErr){ console.error(unitErr); return; }
+allUnits = units || [];
 
-  const { data: tasks, error: taskErr } = await fetchAllRows(
-    sb.from('prod_tasks')
-      .select('id, unit_id, task_name, execution_group, hierarchy_level, duration_days, start_date, completion_date_planned, percent_complete_numeric, is_not_applicable, predecessor_task_id')
-  );
-  if (taskErr){ console.error(taskErr); return; }
+const { data: tasks, error: taskErr } = await fetchAllRows(
+sb.from('prod_tasks')
+.select('id, unit_id, task_name, execution_group, hierarchy_level, duration_days, start_date, completion_date_planned, percent_complete_numeric, is_not_applicable, predecessor_task_id')
+);
+if (taskErr){ console.error(taskErr); return; }
 
-  allTasksByUnit = {};
-  (tasks || []).forEach(t => {
-    if (!allTasksByUnit[t.unit_id]) allTasksByUnit[t.unit_id] = [];
-    allTasksByUnit[t.unit_id].push(t);
-  });
+allTasksByUnit = {};
+(tasks || []).forEach(t => {
+if (!allTasksByUnit[t.unit_id]) allTasksByUnit[t.unit_id] = [];
+allTasksByUnit[t.unit_id].push(t);
+});
 
-  populateClassFilter();
-  renderStats();
-  renderUnitList();
+populateClassFilter();
+renderStats();
+renderUnitList();
 }
 
 function populateClassFilter(){
-  const el = document.getElementById('classFilter');
-  el.innerHTML = '<option value="">All Classes</option>' +
-    CLASS_ORDER.map(c => `<option value="${c}">${c}</option>`).join('');
+const el = document.getElementById('classFilter');
+el.innerHTML = '<option value="">All Classes</option>' +
+CLASS_ORDER.map(c => `<option value="${c}">${c}</option>`).join('');
 }
 
 function filteredUnits(){
-  return allUnits.filter(u => {
-    if (activeClass && u.class !== activeClass) return false;
-    if (searchText){
-      const hay = ((u.unit_name || '') + ' ' + (u.so_number || '')).toLowerCase();
-      if (!hay.includes(searchText)) return false;
-    }
-    return true;
-  });
+return allUnits.filter(u => {
+if (activeClass && u.class !== activeClass) return false;
+if (searchText){
+const hay = ((u.unit_name || '') + ' ' + (u.so_number || '')).toLowerCase();
+if (!hay.includes(searchText)) return false;
+}
+return true;
+});
 }
 
 function renderStats(){
-  const filtered = filteredUnits();
-  let inProgress = 0, done = 0, overdue = 0;
-  filtered.forEach(u => {
-    const p = computeUnitProgress(u.id);
-    if (p.status === 'in_progress') inProgress++;
-    if (p.status === 'complete') done++;
-    if (p.overdue) overdue++;
-  });
-  document.getElementById('statTotal').textContent = `${filtered.length} total`;
-  document.getElementById('statInProgress').textContent = `${inProgress} in progress`;
-  document.getElementById('statDone').textContent = `${done} dispatch ready`;
-  document.getElementById('statOverdue').textContent = `${overdue} behind schedule`;
+const filtered = filteredUnits();
+let inProgress = 0, done = 0, overdue = 0;
+filtered.forEach(u => {
+const p = computeUnitProgress(u.id);
+if (p.status === 'in_progress') inProgress++;
+if (p.status === 'complete') done++;
+if (p.overdue) overdue++;
+});
+document.getElementById('statTotal').textContent = filtered.length;
+document.getElementById('statInProgress').textContent = inProgress;
+document.getElementById('statDone').textContent = done;
+document.getElementById('statOverdue').textContent = overdue;
 }
 
 function statusInfo(p){
-  if (p.overdue) return { dot: 'dot-behind', badge: 'st-behind', label: 'Overdue' };
-  if (p.status === 'complete') return { dot: 'dot-ontrack', badge: 'st-ontrack', label: 'Dispatch' };
-  if (p.status === 'in_progress') return { dot: 'dot-progress', badge: 'st-progress', label: p.currentStage };
-  return { dot: 'dot-null', badge: 'st-notstarted', label: p.currentStage };
+if (p.overdue) return { badge: 'st-behind', label: 'Overdue' };
+if (p.status === 'complete') return { badge: 'st-ontrack', label: 'Dispatch' };
+if (p.status === 'in_progress') return { badge: 'st-progress', label: p.currentStage };
+return { badge: 'st-notstarted', label: p.currentStage };
 }
 
 function renderUnitList(){
-  const el = document.getElementById('unitList');
-  el.innerHTML = '';
-  const filtered = filteredUnits();
+const el = document.getElementById('unitList');
+el.innerHTML = '';
+const filtered = filteredUnits();
 
-  const bySo = {};
-  filtered.forEach(u => { (bySo[u.so_number] = bySo[u.so_number] || []).push(u); });
+const bySo = {};
+filtered.forEach(u => { (bySo[u.so_number] = bySo[u.so_number] || []).push(u); });
 
-  const soKeys = Object.keys(bySo).sort();
-  if (soKeys.length === 0){
-    el.innerHTML = '<div class="empty-state">No units match the current filters.</div>';
-    return;
-  }
+const soKeys = Object.keys(bySo).sort();
+if (soKeys.length === 0){
+el.innerHTML = '<div class="empty-state">No units match the current filters.</div>';
+return;
+}
 
-  soKeys.forEach(so => {
-    const group = document.createElement('div');
-    group.className = 'so-group';
-    const head = document.createElement('div');
-    head.className = 'so-group-head';
-    head.textContent = `${so} \u00b7 ${bySo[so].length} unit${bySo[so].length > 1 ? 's' : ''}`;
-    group.appendChild(head);
+soKeys.forEach(so => {
+const group = document.createElement('div');
+group.className = 'so-group';
 
-    const rowHead = document.createElement('div');
-    rowHead.className = 'unit-row-head';
-    rowHead.innerHTML = '<span></span><span>Class</span><span>Unit</span><span>Qty</span><span></span><span>Stage</span>';
-    group.appendChild(rowHead);
+const units = bySo[so];
+const anyBehind = units.some(u => computeUnitProgress(u.id).overdue);
 
-    bySo[so].forEach(u => {
-      const p = computeUnitProgress(u.id);
-      const s = statusInfo(p);
-      const row = document.createElement('div');
-      row.className = 'unit-row' + (u.id === selectedUnitId ? ' active' : '');
-      row.innerHTML = `
-        <span class="unit-dot ${s.dot}"></span>
-        <span class="unit-class ${u.class === 'Modulate' ? 'modulate' : ''}">${classLabel(u.class)}</span>
-        <div>
-          <div class="unit-name">${u.unit_name || 'Untitled unit'}</div>
-          <div class="unit-progress-track"><div class="unit-progress-fill ${p.status === 'complete' ? 'done' : ''}" style="width:${p.pct}%;"></div></div>
-        </div>
-        <span class="unit-qty">Qty ${u.qty}</span>
-        <span></span>
-        <span class="unit-status ${s.badge}">${s.label}</span>
-      `;
-      row.addEventListener('click', () => { selectedUnitId = u.id; renderUnitList(); renderDetail(u); });
-      group.appendChild(row);
-    });
-    el.appendChild(group);
-  });
+const head = document.createElement('div');
+head.className = 'so-group-head';
+head.innerHTML = `
+<span class="so-name">${so}</span>
+<span class="so-unit-count">${units.length} unit${units.length > 1 ? 's' : ''}</span>
+${anyBehind ? '<span class="so-flag-behind">Behind schedule</span>' : ''}
+`;
+group.appendChild(head);
+
+const rowHead = document.createElement('div');
+rowHead.className = 'unit-row-head';
+rowHead.innerHTML = '<span>Class</span><span>Unit</span><span style="text-align:right;">Qty</span><span>Stage</span>';
+group.appendChild(rowHead);
+
+units.forEach(u => {
+const p = computeUnitProgress(u.id);
+const s = statusInfo(p);
+const row = document.createElement('div');
+row.className = 'unit-row' + (u.id === selectedUnitId ? ' active' : '');
+row.innerHTML = `
+<span class="class-badge cls-${classSlug(u.class)}">${classLabel(u.class)}</span>
+<div>
+<div class="unit-name">${u.unit_name || 'Untitled unit'}</div>
+<div class="unit-progress-track"><div class="unit-progress-fill ${p.status === 'complete' ? 'done' : ''}" style="width:${p.pct}%;"></div></div>
+</div>
+<span class="unit-qty">Qty ${u.qty}</span>
+<span class="unit-status ${s.badge}"><span class="dot"></span>${s.label}</span>
+`;
+row.addEventListener('click', () => { selectedUnitId = u.id; renderUnitList(); renderDetail(u); });
+group.appendChild(row);
+});
+el.appendChild(group);
+});
 }
 
 function renderDetail(unit){
-  const panel = document.getElementById('detailPanel');
-  const tasks = orderTasksByChain((allTasksByUnit[unit.id] || []).filter(t => t.hierarchy_level === 2));
+const panel = document.getElementById('detailPanel');
+const tasks = orderTasksByChain((allTasksByUnit[unit.id] || []).filter(t => t.hierarchy_level === 2));
+const p = computeUnitProgress(unit.id);
+const s = statusInfo(p);
 
-  panel.innerHTML = `
-    <div class="dp-head">
-      <div class="dp-title">${unit.unit_name || 'Untitled unit'}</div>
-      <span class="unit-class ${unit.class === 'Modulate' ? 'modulate' : ''}">${classLabel(unit.class)}</span>
-    </div>
-    <div class="dp-sub">${unit.so_number} &middot; Qty ${unit.qty}</div>
-    <div class="section-lbl">Tasks</div>
-    <div id="taskListEl"></div>
-  `;
+const r = 26, c = 2 * Math.PI * r;
+const dash = c * (p.pct / 100);
+const ringColor = p.status === 'complete' ? 'var(--green)' : (p.overdue ? 'var(--red)' : 'var(--primary)');
 
-  const taskListEl = panel.querySelector('#taskListEl');
-  if (tasks.length === 0){
-    taskListEl.innerHTML = '<div class="empty-state">No tasks recorded for this unit yet.</div>';
-    return;
-  }
+panel.innerHTML = `
+<div class="dp-head">
+<div>
+<div class="dp-title">${unit.unit_name || 'Untitled unit'}</div>
+<div class="dp-sub">${unit.so_number} &middot; Qty ${unit.qty}</div>
+</div>
+<span class="class-badge cls-${classSlug(unit.class)}">${classLabel(unit.class)}</span>
+</div>
+<div class="dp-progress">
+<svg class="dp-ring" width="64" height="64" viewBox="0 0 64 64">
+<circle cx="32" cy="32" r="${r}" fill="none" stroke="var(--border)" stroke-width="6"/>
+<circle cx="32" cy="32" r="${r}" fill="none" stroke="${ringColor}" stroke-width="6"
+stroke-dasharray="${dash} ${c}" stroke-linecap="round" transform="rotate(-90 32 32)"/>
+<text x="32" y="37" text-anchor="middle" font-size="14" font-weight="700" font-family="Inter" fill="var(--text)">${p.pct}%</text>
+</svg>
+<div class="dp-progress-text">
+<b>${s.label}</b>
+${p.pct}% of drafting/production tasks complete
+</div>
+</div>
+<div class="section-lbl">Tasks</div>
+<div id="taskListEl"></div>
+`;
 
-  tasks.forEach(t => {
-    const row = document.createElement('div');
-    row.className = 'task-row';
-    const isDone = t.percent_complete_numeric >= 1;
-    row.innerHTML = `
-      <input type="checkbox" ${isDone ? 'checked' : ''} ${t.is_not_applicable ? 'disabled' : ''} data-task-id="${t.id}">
-      <span class="tname ${t.is_not_applicable ? 'na' : (isDone ? 'done' : '')}">${t.task_name}${t.is_not_applicable ? ' (N/A)' : ''}</span>
-      <span class="tdates"><span class="dur">${t.duration_days}d</span>${fmtDate(t.start_date)} \u2192 ${fmtDate(t.completion_date_planned)}</span>
-      <span class="tmeta">${t.execution_group || ''}</span>
-    `;
-    taskListEl.appendChild(row);
-  });
+const taskListEl = panel.querySelector('#taskListEl');
+if (tasks.length === 0){
+taskListEl.innerHTML = '<div class="empty-state">No tasks recorded for this unit yet.</div>';
+return;
+}
 
-  taskListEl.querySelectorAll('input[type=checkbox]').forEach(cb => {
-    cb.addEventListener('change', async (e) => {
-      const taskId = e.target.getAttribute('data-task-id');
-      const checked = e.target.checked;
-      const { error } = await sb.from('prod_tasks').update({
-        percent_complete_numeric: checked ? 1 : 0,
-        actual_completion_date: checked ? new Date().toISOString().slice(0,10) : null,
-      }).eq('id', taskId);
-      if (error){ alert('Failed to update: ' + error.message); return; }
-      const t = allTasksByUnit[unit.id].find(x => x.id === taskId);
-      if (t){ t.percent_complete_numeric = checked ? 1 : 0; }
-      renderStats();
-      renderUnitList();
-      renderDetail(unit);
-    });
-  });
+tasks.forEach(t => {
+const row = document.createElement('div');
+row.className = 'task-row';
+const isDone = t.percent_complete_numeric >= 1;
+row.innerHTML = `
+<input type="checkbox" ${isDone ? 'checked' : ''} ${t.is_not_applicable ? 'disabled' : ''} data-task-id="${t.id}">
+<span class="tname ${t.is_not_applicable ? 'na' : (isDone ? 'done' : '')}">${t.task_name}${t.is_not_applicable ? ' (N/A)' : ''}</span>
+<span class="tdates"><span class="dur">${t.duration_days}d</span>${fmtDate(t.start_date)} → ${fmtDate(t.completion_date_planned)}</span>
+<span class="tmeta">${t.execution_group || ''}</span>
+`;
+taskListEl.appendChild(row);
+});
+
+taskListEl.querySelectorAll('input[type=checkbox]').forEach(cb => {
+cb.addEventListener('change', async (e) => {
+const taskId = e.target.getAttribute('data-task-id');
+const checked = e.target.checked;
+const { error } = await sb.from('prod_tasks').update({
+percent_complete_numeric: checked ? 1 : 0,
+actual_completion_date: checked ? new Date().toISOString().slice(0,10) : null,
+}).eq('id', taskId);
+if (error){ alert('Failed to update: ' + error.message); return; }
+const t = allTasksByUnit[unit.id].find(x => x.id === taskId);
+if (t){ t.percent_complete_numeric = checked ? 1 : 0; }
+renderStats();
+renderUnitList();
+renderDetail(unit);
+});
+});
 }
 
 checkSession();
