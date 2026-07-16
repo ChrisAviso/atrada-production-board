@@ -1055,6 +1055,27 @@ display:flex;align-items:center;justify-content:center;
 <input type="number" id="editSoProjectSales" placeholder="e.g. 250000" min="0" step="0.01">
 </div>
 
+<div class="section-lbl">New unit (optional)</div>
+<div class="field">
+<label>Unit name</label>
+<input type="text" id="editSoUnitName" placeholder="e.g. HDWL1D-450 - 1 Door Heavy Duty Workshop Locker">
+</div>
+<div class="field-row">
+<div class="field">
+<label>Class</label>
+<select id="editSoUnitClass"></select>
+</div>
+<div class="field">
+<label>Qty</label>
+<input type="number" id="editSoUnitQty" value="1" min="1">
+</div>
+</div>
+<div class="field">
+<label>Task template</label>
+<select id="editSoUnitTemplate"></select>
+<div class="field-hint">Leave unit name blank if you're only updating the SO details above.</div>
+</div>
+
 <div class="modal-danger-row">
 <button type="button" class="modal-danger-link" id="editSoDeleteBtn">Delete this SO…</button>
 </div>
@@ -3437,6 +3458,7 @@ else e.target.value = '';
 });
 document.getElementById('editSoCancelBtn').addEventListener('click', closeEditSoModal);
 document.getElementById('editSoSubmitBtn').addEventListener('click', submitEditSo);
+document.getElementById('editSoUnitClass').addEventListener('change', loadEditSoUnitTemplateOptions);
 document.getElementById('editSoDeleteBtn').addEventListener('click', () => {
 const soNumber = document.getElementById('editSoModal').dataset.soNumber;
 if (!soNumber) return;
@@ -3509,6 +3531,11 @@ populateSalesRepOptions('editSoSalesRep', so && so.sales_rep ? so.sales_rep : ''
 document.getElementById('editSoReceivedDate').value = so && so.created_at ? new Date(so.created_at).toISOString().slice(0,10) : '';
 document.getElementById('editSoClientApprovalDate').value = so && so.client_approval_date ? so.client_approval_date : '';
 document.getElementById('editSoProjectSales').value = so && so.project_sales !== null && so.project_sales !== undefined ? so.project_sales : '';
+document.getElementById('editSoUnitName').value = '';
+document.getElementById('editSoUnitQty').value = 1;
+const unitClsEl = document.getElementById('editSoUnitClass');
+unitClsEl.innerHTML = CLASS_ORDER.map(c => `<option value="${c}">${c}</option>`).join('');
+loadEditSoUnitTemplateOptions();
 document.getElementById('editSoModal').dataset.soNumber = soNumber;
 document.getElementById('editSoModal').classList.remove('hidden');
 }
@@ -3571,14 +3598,33 @@ const { error: unitErr } = await sb.from('prod_units').update({ so_number: newSo
 if (unitErr) throw unitErr;
 }
 
-msgEl.innerHTML = '<div class="auth-msg ok">Saved.</div>';
+const newUnitName = document.getElementById('editSoUnitName').value.trim();
+let createdUnit = null;
+if (newUnitName){
+const newUnitCls = document.getElementById('editSoUnitClass').value;
+const newUnitQty = Number(document.getElementById('editSoUnitQty').value) || 1;
+const newUnitTemplate = document.getElementById('editSoUnitTemplate').value;
+if (!newUnitCls || !newUnitTemplate){
+msgEl.innerHTML = '<div class="auth-msg error">Class and task template are required to add a new unit.</div>';
+submitBtn.disabled = false; submitBtn.textContent = 'Save';
+return;
+}
+const { unit } = await createUnitFromTemplate(newSoNumber, newUnitName, newUnitCls, newUnitQty, newUnitTemplate);
+createdUnit = unit;
+}
+
+msgEl.innerHTML = `<div class="auth-msg ok">Saved.${createdUnit ? ` Added ${newUnitName}.` : ''}</div>`;
 await loadBoard();
-if (renaming && selectedUnitId){
+if (createdUnit){
+selectedUnitId = createdUnit.id;
+const u = allUnits.find(x => x.id === createdUnit.id);
+if (u) renderDetail(u);
+} else if (renaming && selectedUnitId){
 const u = allUnits.find(x => x.id === selectedUnitId);
 if (u) renderDetail(u);
 }
 renderUnitList();
-setTimeout(closeEditSoModal, 500);
+setTimeout(closeEditSoModal, createdUnit ? 900 : 500);
 } catch (e){
 msgEl.innerHTML = `<div class="auth-msg error">${e.message}</div>`;
 } finally {
@@ -3681,6 +3727,10 @@ async function loadEditUnitTemplateOptions(){
 await loadTemplateOptionsInto('editUnitClass', 'editUnitTemplate', true);
 }
 
+async function loadEditSoUnitTemplateOptions(){
+await loadTemplateOptionsInto('editSoUnitClass', 'editSoUnitTemplate', false);
+}
+
 function openEditUnitModal(unitId){
 const unit = allUnits.find(u => u.id === unitId);
 if (!unit) return;
@@ -3774,6 +3824,40 @@ submitBtn.disabled = false; submitBtn.textContent = 'Save';
 }
 }
 
+// Creates a production unit under an existing/new SO and clones its task checklist from the
+// matching template. Shared by the Add SO modal and Edit SO's optional "New unit" section.
+async function createUnitFromTemplate(soNumber, unitName, cls, qty, templateItem){
+const { data: newUnit, error: unitErr } = await sb.from('prod_units')
+.insert({ so_number: soNumber, unit_name: unitName, class: cls, qty, status: 'not_started' })
+.select().single();
+if (unitErr) throw unitErr;
+
+const { data: templateRows, error: tplErr } = await sb.from('prod_task_templates')
+.select('id, seq, task_name, execution_group, default_duration_days, predecessor_seq, predecessor_lag_days')
+.eq('class', cls).eq('item_name', templateItem).order('seq');
+if (tplErr) throw tplErr;
+
+const seqToId = {};
+for (const t of (templateRows || [])){
+const predId = (t.predecessor_seq != null && seqToId[t.predecessor_seq]) ? seqToId[t.predecessor_seq] : null;
+const { data: inserted, error: taskErr } = await sb.from('prod_tasks').insert({
+unit_id: newUnit.id,
+template_id: t.id,
+task_name: t.task_name,
+execution_group: t.execution_group,
+hierarchy_level: 2,
+duration_days: t.default_duration_days,
+predecessor_task_id: predId,
+predecessor_lag_days: t.predecessor_lag_days,
+percent_complete_numeric: 0,
+}).select().single();
+if (taskErr) throw taskErr;
+seqToId[t.seq] = inserted.id;
+logTaskActivity(inserted.id, newUnit.id, 'Task created', 'created');
+}
+return { unit: newUnit, taskCount: (templateRows || []).length };
+}
+
 async function submitAddSo(){
 const msgEl = document.getElementById('addSoMsg');
 msgEl.innerHTML = '';
@@ -3814,36 +3898,9 @@ const { error: soErr } = await sb.from('prod_sales_orders').update(soPatch).eq('
 if (soErr) throw soErr;
 }
 
-const { data: newUnit, error: unitErr } = await sb.from('prod_units')
-.insert({ so_number: soNumber, unit_name: unitName, class: cls, qty, status: 'not_started' })
-.select().single();
-if (unitErr) throw unitErr;
+const { unit: newUnit, taskCount } = await createUnitFromTemplate(soNumber, unitName, cls, qty, templateItem);
 
-const { data: templateRows, error: tplErr } = await sb.from('prod_task_templates')
-.select('id, seq, task_name, execution_group, default_duration_days, predecessor_seq, predecessor_lag_days')
-.eq('class', cls).eq('item_name', templateItem).order('seq');
-if (tplErr) throw tplErr;
-
-const seqToId = {};
-for (const t of (templateRows || [])){
-const predId = (t.predecessor_seq != null && seqToId[t.predecessor_seq]) ? seqToId[t.predecessor_seq] : null;
-const { data: inserted, error: taskErr } = await sb.from('prod_tasks').insert({
-unit_id: newUnit.id,
-template_id: t.id,
-task_name: t.task_name,
-execution_group: t.execution_group,
-hierarchy_level: 2,
-duration_days: t.default_duration_days,
-predecessor_task_id: predId,
-predecessor_lag_days: t.predecessor_lag_days,
-percent_complete_numeric: 0,
-}).select().single();
-if (taskErr) throw taskErr;
-seqToId[t.seq] = inserted.id;
-logTaskActivity(inserted.id, newUnit.id, 'Task created', 'created');
-}
-
-msgEl.innerHTML = `<div class="auth-msg ok">Created ${soNumber} with ${(templateRows||[]).length} tasks.</div>`;
+msgEl.innerHTML = `<div class="auth-msg ok">Created ${soNumber} with ${taskCount} tasks.</div>`;
 await loadBoard();
 selectedUnitId = newUnit.id;
 renderUnitList();
