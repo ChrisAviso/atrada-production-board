@@ -259,6 +259,24 @@ font-family:'JetBrains Mono',monospace;
 .dp-progress-text{font-size:12px;color:var(--text-dim);}
 .dp-progress-text b{display:block;font-size:14px;color:var(--text);font-weight:700;margin-bottom:2px;}
 
+.dp-schedule-summary{
+display:flex;flex-direction:column;gap:6px;background:var(--surface-alt);border:1px solid var(--border);
+border-radius:var(--radius-md);padding:12px 16px;margin-top:10px;font-size:12px;
+}
+.sched-row{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;}
+.sched-row b{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;flex-shrink:0;min-width:118px;}
+.sched-row span{color:var(--text-dim);line-height:1.5;}
+.sched-row.sd-behind b{color:#a51f34;}
+.sched-row.sd-ahead b{color:#0a7d59;}
+.sched-row.sd-ontime b{color:var(--primary-dark);}
+.sched-row.sd-empty{color:var(--text-faint);font-size:12px;}
+.task-sched-badge{
+font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:9px;white-space:nowrap;flex-shrink:0;margin-top:1px;
+}
+.task-sched-badge.sched-behind{background:var(--red-pale);color:#a51f34;}
+.task-sched-badge.sched-ahead{background:var(--green-pale);color:#0a7d59;}
+.task-sched-badge.sched-ontime{background:var(--slate-pale);color:var(--slate);}
+
 .section-lbl{
 font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;
 letter-spacing:.05em;margin:20px 0 6px;
@@ -346,7 +364,7 @@ font-size:11.5px;font-family:inherit;background:var(--surface);color:var(--text)
 position:relative;z-index:1;transition:box-shadow .12s;
 }
 .task-remarks-input:focus{outline:none;border-color:var(--primary);}
-.task-remarks-wrap:hover .task-remarks-input,
+.task-remarks-wrap.remarks-hover-expand .task-remarks-input,
 .task-remarks-wrap:focus-within .task-remarks-input{
 position:absolute;left:0;top:0;width:100%;min-height:190px;z-index:30;
 font-size:13.5px;line-height:1.6;padding:14px 16px;
@@ -589,6 +607,28 @@ const dd = String(dt.getDate()).padStart(2,'0');
 const mm = String(dt.getMonth()+1).padStart(2,'0');
 const yy = String(dt.getFullYear()).slice(-2);
 return `${dd}/${mm}/${yy}`;
+}
+
+function taskScheduleInfo(t){
+if (!t.completion_date_planned || t.is_not_applicable) return null;
+const planned = new Date(t.completion_date_planned + 'T00:00:00');
+const isDone = Number(t.percent_complete_numeric) >= 1;
+let refDate;
+if (isDone){
+if (!t.actual_completion_date) return null;
+refDate = new Date(t.actual_completion_date + 'T00:00:00');
+} else {
+refDate = new Date();
+refDate.setHours(0,0,0,0);
+}
+const diffDays = Math.round((refDate - planned) / 86400000);
+if (diffDays > 0){
+return { status: 'behind', diffDays, label: isDone ? `${diffDays}d late` : `${diffDays}d overdue` };
+}
+if (diffDays < 0){
+return { status: 'ahead', diffDays, label: isDone ? `${Math.abs(diffDays)}d early` : `${Math.abs(diffDays)}d ahead` };
+}
+return { status: 'ontime', diffDays: 0, label: isDone ? 'On time' : 'On track' };
 }
 
 function orderTasksByChain(tasks){
@@ -874,6 +914,25 @@ const maxDate = allDates.length ? new Date(Math.max(...allDates)) : null;
 const totalSpan = (minDate && maxDate) ? Math.max(1, maxDate - minDate) : 1;
 const totalSpanDays = (minDate && maxDate) ? Math.round((maxDate - minDate) / 86400000) + 1 : 0;
 
+const scheduleMap = new Map();
+tasks.forEach(t => {
+const info = taskScheduleInfo(t);
+if (info) scheduleMap.set(t.id, info);
+});
+const schedBehind = [], schedAhead = [], schedOnTime = [];
+scheduleMap.forEach((info, id) => {
+const t = tasks.find(x => x.id === id);
+if (!t) return;
+if (info.status === 'behind') schedBehind.push(`${t.task_name} (${info.label})`);
+else if (info.status === 'ahead') schedAhead.push(`${t.task_name} (${info.label})`);
+else schedOnTime.push(t.task_name);
+});
+const schedSummaryHtml = (schedBehind.length || schedAhead.length || schedOnTime.length) ? `
+${schedBehind.length ? `<div class="sched-row sd-behind"><b>Behind schedule</b><span>${schedBehind.join(', ')}</span></div>` : ''}
+${schedAhead.length ? `<div class="sched-row sd-ahead"><b>Ahead of schedule</b><span>${schedAhead.join(', ')}</span></div>` : ''}
+${schedOnTime.length ? `<div class="sched-row sd-ontime"><b>On schedule</b><span>${schedOnTime.join(', ')}</span></div>` : ''}
+` : '<div class="sched-row sd-empty">No dated tasks yet.</div>';
+
 document.getElementById('detailModal').classList.remove('hidden');
 
 panel.innerHTML = `
@@ -904,6 +963,9 @@ stroke-dasharray="${dash} ${c}" stroke-linecap="round" transform="rotate(-90 32 
 ${p.pct}% of drafting/production tasks complete
 </div>
 </div>
+<div class="dp-schedule-summary">
+${schedSummaryHtml}
+</div>
 <div class="section-lbl">Tasks</div>
 <div id="taskListEl"></div>
 `;
@@ -929,6 +991,7 @@ const predOptions = tasks
 .map(t2 => `<option value="${t2.id}" ${t.predecessor_task_id === t2.id ? 'selected' : ''}>${t2.task_name}</option>`)
 .join('');
 const sp = taskStatusPill(t);
+const schedInfo = scheduleMap.get(t.id);
 let barLeft = 0, barWidth = 4;
 if (minDate && t.start_date){
 barLeft = Math.max(0, Math.min(100, ((new Date(t.start_date) - minDate) / totalSpan) * 100));
@@ -954,6 +1017,7 @@ row.innerHTML = `
 <option value="done" ${sp.value === 'done' ? 'selected' : ''}>Done</option>
 </select>
 <span class="tmeta">${t.execution_group || ''}</span>
+${schedInfo ? `<span class="task-sched-badge sched-${schedInfo.status}">${schedInfo.label}</span>` : ''}
 </div>
 <div class="task-fields">
 <div class="tf-group">
@@ -1110,6 +1174,17 @@ if (countEl) countEl.textContent = `${words.length} / 400 words`;
 ta.addEventListener('change', (e) => {
 const taskId = e.target.getAttribute('data-task-id');
 updateTaskField(taskId, { remarks: e.target.value || null });
+});
+});
+
+taskListEl.querySelectorAll('.task-remarks-wrap').forEach(wrap => {
+let hoverTimer = null;
+wrap.addEventListener('mouseenter', () => {
+hoverTimer = setTimeout(() => { wrap.classList.add('remarks-hover-expand'); }, 3000);
+});
+wrap.addEventListener('mouseleave', () => {
+if (hoverTimer){ clearTimeout(hoverTimer); hoverTimer = null; }
+wrap.classList.remove('remarks-hover-expand');
 });
 });
 
