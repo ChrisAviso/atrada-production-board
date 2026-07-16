@@ -203,6 +203,25 @@ font-family:inherit;background:white;justify-self:end;
 .sp-paused .status-row button:hover{background:var(--amber);color:white;}
 .status-panel-empty{font-size:12px;color:var(--text-faint);font-style:italic;padding:6px 4px;}
 
+.tf-team-panel{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
+.tf-team-card{
+flex:1 1 220px;min-width:210px;max-width:280px;background:var(--surface);border:1.5px solid var(--border);
+border-radius:var(--radius-md);padding:10px 12px;box-shadow:var(--shadow-sm);
+}
+.tf-team-card.tf-team-in{background:#eefaf3;border-color:#8fd9b6;}
+.tf-team-card.tf-team-paused{background:#fff8ea;border-color:#f0d090;}
+.tf-team-card.tf-team-not_clocked{background:#fdeef0;border-color:#f3b0ba;}
+.tf-team-card.tf-team-absent{background:var(--surface-alt);border-color:var(--border);}
+.tf-team-name{font-size:12.5px;font-weight:800;color:var(--text);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tf-team-status{font-size:10px;font-weight:700;color:var(--text-dim);margin-bottom:7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tf-team-card.tf-team-in .tf-team-status{color:#0a7d59;}
+.tf-team-card.tf-team-paused .tf-team-status{color:#a3660c;}
+.tf-team-card.tf-team-not_clocked .tf-team-status{color:#a51f34;}
+.tf-team-priorities{display:flex;flex-direction:column;gap:3px;}
+.tf-priority-chip{font-size:9.5px;color:var(--text-faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tf-priority-chip b{color:var(--text-dim);font-weight:700;}
+.tf-team-empty{font-size:11px;color:var(--text-faint);font-style:italic;padding:2px;}
+
 /* ---------- Stats ---------- */
 .stats-grid{
 display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:22px;
@@ -851,6 +870,16 @@ const local = (email || '').split('@')[0];
 return local.split(/[.\-_]+/).filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || email;
 }
 
+function nameMatchesEmail(name, email){
+if (!name || !email) return false;
+const local = email.split('@')[0].toLowerCase().replace(/[._-]+/g, ' ').trim();
+const n = name.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+if (!local || !n) return false;
+const localParts = local.split(/\s+/).filter(Boolean);
+const nameParts = n.split(/\s+/).filter(Boolean);
+return nameParts.some(np => np.length > 1 && localParts.some(lp => lp === np || lp.startsWith(np) || np.startsWith(lp)));
+}
+
 function taskUnitIndex(){
 const taskIndex = {};
 const unitIndex = {};
@@ -1433,6 +1462,114 @@ openLogsModal(taskId, taskName, unitId);
 });
 }
 
+async function renderTaskFocusTeamPanel(el, matchedRows){
+if (!el) return;
+
+const [{ data: allAssignees }, { data: rosterRows }, { data: todayEvents }, { data: decisions }, { data: recentHours }] = await Promise.all([
+sb.from('prod_task_assignees').select('task_id, assignee_name'),
+sb.from('prod_clock_events').select('person_email').order('event_time', { ascending: false }).limit(500),
+sb.from('prod_clock_events').select('person_email, unit_id, task_id, event_type, event_time').gte('event_time', todayStartIso()).order('event_time'),
+sb.from('prod_attendance_decisions').select('person_email, decision').eq('work_date', todayStartIso().slice(0,10)),
+sb.from('prod_daily_hours').select('task_id, person_email, updated_at').order('updated_at', { ascending: false }).limit(200),
+]);
+
+const assigneesByTaskAll = {};
+(allAssignees || []).forEach(a => {
+(assigneesByTaskAll[a.task_id] = assigneesByTaskAll[a.task_id] || []).push(a);
+});
+
+const involvedNames = new Set();
+matchedRows.forEach(({ t }) => {
+const rowsForTask = assigneesByTaskAll[t.id] || [];
+if (rowsForTask.length){
+rowsForTask.forEach(a => { if (a.assignee_name && a.assignee_name.trim()) involvedNames.add(a.assignee_name.trim()); });
+} else if (t.assigned_to && t.assigned_to.trim()){
+involvedNames.add(t.assigned_to.trim());
+}
+});
+
+if (!involvedNames.size){ el.innerHTML = '<div class="tf-team-empty">No one assigned to this task yet.</div>'; return; }
+
+const roster = Array.from(new Set((rosterRows || []).map(r => r.person_email))).sort();
+const nameToEmail = {};
+involvedNames.forEach(name => { nameToEmail[name] = roster.find(email => nameMatchesEmail(name, email)) || null; });
+
+const decisionByEmail = {};
+(decisions || []).forEach(d => { decisionByEmail[d.person_email] = d.decision; });
+
+const dailyLatestByEmail = {};
+const activeByEmail = {};
+(todayEvents || []).forEach(e => {
+if (e.task_id){
+if (e.event_type === 'clock_in') activeByEmail[e.person_email] = e;
+else if (activeByEmail[e.person_email] && activeByEmail[e.person_email].task_id === e.task_id) delete activeByEmail[e.person_email];
+} else {
+dailyLatestByEmail[e.person_email] = e;
+}
+});
+const recentByEmail = new Set((recentHours || []).map(h => h.person_email));
+
+const peopleInfo = Array.from(involvedNames).sort((a,b) => a.localeCompare(b)).map(name => {
+const email = nameToEmail[name];
+let status = 'not_clocked';
+let activeTaskName = null;
+if (email){
+const lastDaily = dailyLatestByEmail[email];
+const isIn = lastDaily && lastDaily.event_type !== 'clock_out';
+if (isIn){
+status = 'in';
+const ev = activeByEmail[email];
+if (ev){
+const t = (allTasksByUnit[ev.unit_id] || []).find(x => x.id === ev.task_id);
+activeTaskName = t ? t.task_name : null;
+}
+} else if (decisionByEmail[email] === 'absent'){
+status = 'absent';
+} else if (recentByEmail.has(email)){
+status = 'paused';
+}
+}
+
+const candidateTaskIds = new Set();
+Object.entries(assigneesByTaskAll).forEach(([taskId, arr]) => {
+if (arr.some(a => a.assignee_name === name)) candidateTaskIds.add(taskId);
+});
+Object.values(allTasksByUnit).forEach(list => {
+list.forEach(t => { if (t.hierarchy_level === 2 && !t.is_not_applicable && t.assigned_to === name) candidateTaskIds.add(t.id); });
+});
+
+const candidateTasks = [];
+Object.values(allTasksByUnit).forEach(list => {
+list.forEach(t => { if (candidateTaskIds.has(t.id) && Number(t.percent_complete_numeric) < 1 && !t.is_not_applicable) candidateTasks.push(t); });
+});
+const scored = candidateTasks.map(t => {
+const sched = taskScheduleInfo(t);
+const overdueDays = sched && sched.status === 'behind' ? sched.diffDays : -9999;
+const dueTime = t.completion_date_planned ? new Date(t.completion_date_planned).getTime() : Infinity;
+return { name: t.task_name, overdueDays, dueTime };
+});
+scored.sort((a, b) => b.overdueDays - a.overdueDays || a.dueTime - b.dueTime);
+const top3 = scored.slice(0, 3);
+
+return { name, status, activeTaskName, top3 };
+});
+
+const statusLabel = (p) => {
+if (p.status === 'in') return `🟢 Clocked in${p.activeTaskName ? ' · ' + p.activeTaskName : ''}`;
+if (p.status === 'paused') return '🟠 Paused';
+if (p.status === 'absent') return '⚪ Absent today';
+return '🔴 Not clocked in';
+};
+
+el.innerHTML = `<div class="tf-team-panel">${peopleInfo.map(p => `
+<div class="tf-team-card tf-team-${p.status}">
+<div class="tf-team-name">${p.name}</div>
+<div class="tf-team-status">${statusLabel(p)}</div>
+${p.top3.length ? `<div class="tf-team-priorities">${p.top3.map((s, i) => `<span class="tf-priority-chip"><b>#${i+1}</b> ${s.name}</span>`).join('')}</div>` : '<div class="tf-team-priorities"><span class="tf-priority-chip">No open tasks</span></div>'}
+</div>
+`).join('')}</div>`;
+}
+
 function renderTaskFilterView(el, filtered){
 if (taskFocusTick){ clearInterval(taskFocusTick); taskFocusTick = null; }
 el.innerHTML = '';
@@ -1447,6 +1584,11 @@ if (!rows.length){
 el.innerHTML = '<div class="empty-state">No units have this task.</div>';
 return;
 }
+
+const teamPanelEl = document.createElement('div');
+teamPanelEl.id = 'taskFocusTeamPanel';
+el.appendChild(teamPanelEl);
+renderTaskFocusTeamPanel(teamPanelEl, rows);
 
 const list = document.createElement('div');
 list.className = 'task-focus-list';
