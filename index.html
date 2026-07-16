@@ -237,17 +237,19 @@ background:var(--surface-alt);
 }
 .so-group-head .so-name{font-size:13px;font-weight:800;letter-spacing:.01em;color:var(--text);font-family:'JetBrains Mono',monospace;}
 .so-unit-count{font-size:11px;font-weight:700;color:var(--text-dim);background:var(--border);padding:2px 9px;border-radius:20px;}
+.so-company{font-size:11.5px;color:var(--text-dim);font-weight:600;}
+.so-received{font-size:10.5px;color:var(--text-faint);font-family:'JetBrains Mono',monospace;}
 .so-flag-behind{
 font-size:11px;font-weight:700;color:var(--red);background:var(--red-pale);padding:3px 10px;border-radius:20px;margin-left:auto;
 }
 
 .unit-row-head{
-display:grid;grid-template-columns:110px minmax(0,1fr) 68px 68px 68px 60px 130px;gap:12px;
+display:grid;grid-template-columns:110px minmax(0,1fr) 68px 68px 68px 88px 60px 130px;gap:12px;
 padding:9px 18px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
 color:var(--text-faint);border-bottom:1px solid var(--border);
 }
 .unit-row{
-display:grid;grid-template-columns:110px minmax(0,1fr) 68px 68px 68px 60px 130px;gap:12px;align-items:center;
+display:grid;grid-template-columns:110px minmax(0,1fr) 68px 68px 68px 88px 60px 130px;gap:12px;align-items:center;
 padding:12px 18px;font-size:13px;border-bottom:1px solid var(--border);cursor:pointer;
 transition:background .12s;
 }
@@ -289,6 +291,14 @@ border-radius:20px;padding:5px 12px 5px 10px;justify-self:start;max-width:100%;o
 .unit-status.st-progress .dot{background:var(--primary);}
 .unit-status.st-notstarted{background:var(--border);color:var(--text-dim);}
 .unit-status.st-notstarted .dot{background:var(--text-faint);}
+
+.unit-task-focus{display:flex;flex-direction:column;gap:3px;min-width:0;}
+.utf-pill{font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:9px;white-space:nowrap;display:inline-block;width:fit-content;}
+.utf-pill.ts-done{background:var(--green-pale);color:#0a7d59;}
+.utf-pill.ts-progress{background:var(--primary-pale);color:var(--primary-dark);}
+.utf-pill.ts-onhold{background:var(--amber-pale);color:#a3660c;}
+.utf-pill.ts-notstarted{background:var(--border);color:var(--text-dim);}
+.utf-meta{font-size:10px;color:var(--text-faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'JetBrains Mono',monospace;}
 
 /* ---------- Detail panel ---------- */
 .detail-panel{
@@ -431,6 +441,23 @@ font-size:13.5px;line-height:1.6;padding:14px 16px;
 box-shadow:var(--shadow-md);border-color:var(--primary);background:var(--surface);
 }
 .task-remarks-count{font-size:9.5px;color:var(--text-faint);text-align:right;margin-top:2px;font-family:'JetBrains Mono',monospace;}
+.task-assignees-wrap{padding-left:27px;margin-top:10px;}
+.task-assignees-list{display:flex;flex-direction:column;gap:6px;margin-bottom:6px;}
+.ta-row{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:5px 7px;flex-wrap:wrap;}
+.ta-name{flex:1;min-width:100px;max-width:150px;padding:4px 6px;border:1px solid var(--border);border-radius:5px;font-size:10.5px;background:var(--surface-alt);color:var(--text);font-family:inherit;cursor:pointer;}
+.ta-start,.ta-due{width:112px;padding:4px 5px;border:1px solid var(--border);border-radius:5px;font-size:10px;font-family:'JetBrains Mono',monospace;background:var(--surface-alt);color:var(--text);}
+.ta-arrow{color:var(--text-faint);font-size:11px;}
+.ta-hours{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-dim);white-space:nowrap;min-width:44px;text-align:right;}
+.ta-start-btn{padding:4px 10px;border:1px solid var(--border);border-radius:14px;font-size:10px;font-weight:700;background:var(--surface-alt);color:var(--text-dim);cursor:pointer;font-family:inherit;flex-shrink:0;}
+.ta-start-btn.running{background:var(--red-pale);border-color:transparent;color:#a51f34;}
+.ta-remove-btn{border:none;background:none;color:var(--text-faint);cursor:pointer;font-size:14px;padding:0 3px;flex-shrink:0;}
+.ta-remove-btn:hover{color:var(--red);}
+.task-add-assignee-btn{
+background:none;border:1px dashed var(--border-strong);border-radius:7px;padding:5px 10px;
+font-size:10.5px;font-weight:600;color:var(--text-dim);cursor:pointer;font-family:inherit;
+}
+.task-add-assignee-btn:hover{border-color:var(--primary);color:var(--primary);}
+.ta-loading{font-size:10.5px;color:var(--text-faint);font-style:italic;}
 .task-activity-wrap{padding-left:27px;margin-top:10px;}
 .task-activity-toggle{
 background:none;border:none;padding:2px 0;font-size:10px;font-weight:700;color:var(--text-dim);
@@ -558,6 +585,7 @@ display:flex;align-items:center;justify-content:center;
 <div class="toolbar-card">
 <input class="search-box" id="searchBox" placeholder="Search unit name or SO number…">
 <select class="filter-select" id="classFilter"></select>
+<select class="filter-select" id="taskFilterSelect"><option value="">Filter by task…</option></select>
 <select class="filter-select" id="groupBySelect">
 <option value="so">Group by SO</option>
 <option value="class">Group by class</option>
@@ -595,6 +623,10 @@ display:flex;align-items:center;justify-content:center;
 <div class="field">
 <label>Sales rep (only used if this SO is new)</label>
 <input type="text" id="addSoSalesRep" placeholder="Name">
+</div>
+<div class="field">
+<label>Company name (only used if this SO is new)</label>
+<input type="text" id="addSoCompanyName" placeholder="e.g. BHP Iron Ore Pty Ltd">
 </div>
 <div class="field">
 <label>Unit name</label>
@@ -657,7 +689,10 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let allUnits = [];
 let allTasksByUnit = {};
+let soInfoByNumber = {};
+let extraAssigneeNames = new Set();
 let activeClass = '';
+let taskFilterValue = '';
 let searchText = '';
 let selectedUnitId = null;
 let isSignUpMode = false;
@@ -757,8 +792,25 @@ const days = Math.round((maxD - minD) / 86400000) + 1;
 return { days, start: minD.toISOString().slice(0,10), finish: maxD.toISOString().slice(0,10) };
 }
 
+function computeApprovalAge(unitId){
+const tasks = (allTasksByUnit[unitId] || []).filter(t => t.hierarchy_level === 2);
+const approvalTask = tasks.find(t => /approval/i.test(t.task_name || ''));
+if (!approvalTask || !approvalTask.actual_completion_date) return null;
+const approvedDate = new Date(approvalTask.actual_completion_date + 'T00:00:00');
+const today = new Date(); today.setHours(0,0,0,0);
+return Math.round((today - approvedDate) / 86400000);
+}
+
+function soReceivedAge(soNumber){
+const so = soInfoByNumber[soNumber];
+if (!so || !so.created_at) return null;
+const received = new Date(so.created_at); received.setHours(0,0,0,0);
+const today = new Date(); today.setHours(0,0,0,0);
+return Math.round((today - received) / 86400000);
+}
+
 function allKnownAssignees(){
-const names = new Set();
+const names = new Set(extraAssigneeNames);
 Object.values(allTasksByUnit).forEach(list => {
 list.forEach(t => { if (t.assigned_to && t.assigned_to.trim()) names.add(t.assigned_to.trim()); });
 });
@@ -1022,10 +1074,17 @@ document.getElementById('signOutBtn').addEventListener('click', async () => { aw
 document.getElementById('refreshBtn').addEventListener('click', () => loadBoard());
 document.getElementById('searchBox').addEventListener('input', (e) => { searchText = e.target.value.toLowerCase(); renderUnitList(); });
 document.getElementById('classFilter').addEventListener('change', (e) => { activeClass = e.target.value; renderStats(); renderUnitList(); });
+document.getElementById('taskFilterSelect').addEventListener('change', (e) => {
+taskFilterValue = e.target.value;
+updateBoardChromeVisibility();
+renderStats(); renderUnitList();
+});
 document.getElementById('clearFiltersBtn').addEventListener('click', () => {
-activeClass = ''; searchText = '';
+activeClass = ''; searchText = ''; taskFilterValue = '';
 document.getElementById('classFilter').value = '';
 document.getElementById('searchBox').value = '';
+document.getElementById('taskFilterSelect').value = '';
+updateBoardChromeVisibility();
 renderStats(); renderUnitList();
 });
 document.getElementById('groupBySelect').addEventListener('change', (e) => { groupBy = e.target.value; renderUnitList(); });
@@ -1064,7 +1123,7 @@ allUnits = units || [];
 
 const { data: tasks, error: taskErr } = await fetchAllRows(
 sb.from('prod_tasks')
-.select('id, unit_id, task_name, execution_group, hierarchy_level, duration_days, start_date, completion_date_planned, percent_complete_numeric, is_not_applicable, predecessor_task_id, assigned_to, task_status, remarks')
+.select('id, unit_id, task_name, execution_group, hierarchy_level, duration_days, start_date, completion_date_planned, percent_complete_numeric, is_not_applicable, predecessor_task_id, assigned_to, task_status, remarks, actual_completion_date')
 );
 if (taskErr){ console.error(taskErr); return; }
 
@@ -1074,7 +1133,12 @@ if (!allTasksByUnit[t.unit_id]) allTasksByUnit[t.unit_id] = [];
 allTasksByUnit[t.unit_id].push(t);
 });
 
+const { data: soRows } = await sb.from('prod_sales_orders').select('so_number, sales_rep, company_name, created_at');
+soInfoByNumber = {};
+(soRows || []).forEach(so => { soInfoByNumber[so.so_number] = so; });
+
 populateClassFilter();
+populateTaskFilter();
 renderStats();
 renderUnitList();
 renderTeamStatus();
@@ -1086,9 +1150,44 @@ el.innerHTML = '<option value="">All Classes</option>' +
 CLASS_ORDER.map(c => `<option value="${c}">${c}</option>`).join('');
 }
 
+function populateTaskFilter(){
+const el = document.getElementById('taskFilterSelect');
+const names = new Set();
+Object.values(allTasksByUnit).forEach(list => {
+list.forEach(t => { if (t.hierarchy_level === 2 && t.task_name) names.add(t.task_name); });
+});
+const sorted = Array.from(names).sort((a,b) => a.localeCompare(b));
+const prev = el.value;
+el.innerHTML = '<option value="">Filter by task…</option>' + sorted.map(n => `<option value="${n}">${n}</option>`).join('');
+if (sorted.includes(prev)) el.value = prev;
+}
+
+function updateBoardChromeVisibility(){
+const hide = !!taskFilterValue;
+const stats = document.querySelector('.stats-grid');
+const team = document.getElementById('teamPanel');
+if (stats) stats.classList.toggle('hidden', hide);
+if (team) team.classList.toggle('hidden', hide);
+}
+
+function taskFocusInfo(unitId, taskName){
+const t = (allTasksByUnit[unitId] || []).find(x => x.hierarchy_level === 2 && x.task_name === taskName);
+if (!t) return null;
+const sp = taskStatusPill(t);
+return {
+cls: sp.cls, label: sp.label,
+assignee: t.assigned_to || 'Unassigned',
+due: t.completion_date_planned ? fmtDate(t.completion_date_planned) : '—',
+};
+}
+
 function filteredUnits(){
 return allUnits.filter(u => {
 if (activeClass && u.class !== activeClass) return false;
+if (taskFilterValue){
+const tasks = (allTasksByUnit[u.id] || []).filter(t => t.hierarchy_level === 2 && !t.is_not_applicable);
+if (!tasks.some(t => t.task_name === taskFilterValue)) return false;
+}
 if (searchText){
 const hay = ((u.unit_name || '') + ' ' + (u.so_number || '')).toLowerCase();
 if (!hay.includes(searchText)) return false;
@@ -1158,31 +1257,45 @@ const group = document.createElement('div');
 group.className = 'so-group';
 
 const anyBehind = g.units.some(u => computeUnitProgress(u.id).overdue);
+const so = groupBy === 'so' ? soInfoByNumber[g.label] : null;
+const receivedAge = groupBy === 'so' ? soReceivedAge(g.label) : null;
 
 const head = document.createElement('div');
 head.className = 'so-group-head';
 head.innerHTML = `
 <span class="so-name">${g.label}</span>
+${so && so.company_name ? `<span class="so-company">${so.company_name}</span>` : ''}
 <span class="so-unit-count">${g.units.length} unit${g.units.length > 1 ? 's' : ''}</span>
+${receivedAge !== null ? `<span class="so-received">SO received ${receivedAge}d ago</span>` : ''}
 ${anyBehind ? '<span class="so-flag-behind">Behind schedule</span>' : ''}
 `;
 group.appendChild(head);
 
 const leadColLabel = groupBy === 'so' ? 'Class' : 'SO#';
+const stageColLabel = taskFilterValue ? 'Task Status' : 'Stage';
 const rowHead = document.createElement('div');
 rowHead.className = 'unit-row-head';
-rowHead.innerHTML = `<span>${leadColLabel}</span><span>Unit</span><span>Start</span><span>Finish</span><span style="text-align:right;">Days</span><span style="text-align:right;">Qty</span><span>Stage</span>`;
+rowHead.innerHTML = `<span>${leadColLabel}</span><span>Unit</span><span>Start</span><span>Finish</span><span style="text-align:right;">Days</span><span style="text-align:right;">Since Approval</span><span style="text-align:right;">Qty</span><span>${stageColLabel}</span>`;
 group.appendChild(rowHead);
 
 g.units.forEach(u => {
 const p = computeUnitProgress(u.id);
 const s = statusInfo(p);
 const cov = computeUnitCoverage(u.id);
+const approvalAge = computeApprovalAge(u.id);
 const row = document.createElement('div');
 row.className = 'unit-row' + (u.id === selectedUnitId ? ' active' : '');
 const leadBadge = groupBy === 'so'
 ? `<span class="class-badge cls-${classSlug(u.class)}">${classLabel(u.class)}</span>`
 : `<span class="class-badge" style="font-family:'JetBrains Mono',monospace;">${u.so_number}</span>`;
+const stageCell = taskFilterValue
+? (() => {
+const info = taskFocusInfo(u.id, taskFilterValue);
+return info
+? `<div class="unit-task-focus"><span class="utf-pill ${info.cls}">${info.label}</span><span class="utf-meta">${info.assignee} · ${info.due}</span></div>`
+: '<span class="unit-status st-notstarted"><span class="dot"></span>N/A</span>';
+})()
+: `<span class="unit-status ${s.badge}"><span class="dot"></span>${s.label}</span>`;
 row.innerHTML = `
 ${leadBadge}
 <div class="unit-main">
@@ -1192,8 +1305,9 @@ ${leadBadge}
 <span class="unit-cov">${cov.start ? fmtDate(cov.start) : '—'}</span>
 <span class="unit-cov">${cov.finish ? fmtDate(cov.finish) : '—'}</span>
 <span class="unit-cov-days">${cov.days || '—'}</span>
+<span class="unit-cov-days">${approvalAge !== null ? approvalAge + 'd' : '—'}</span>
 <span class="unit-qty">Qty ${u.qty}</span>
-<span class="unit-status ${s.badge}"><span class="dot"></span>${s.label}</span>
+${stageCell}
 `;
 row.addEventListener('click', () => { selectedUnitId = u.id; renderUnitList(); renderDetail(u); });
 group.appendChild(row);
@@ -1401,11 +1515,6 @@ ${predOptions}
 </div>
 <div class="task-track">
 <div class="task-bar-wrap"><div class="task-bar" style="left:${barLeft}%;width:${barWidth}%;"></div></div>
-<select class="task-assignee" data-task-id="${t.id}" ${dis}>
-<option value="">Unassigned</option>
-${assigneeOptions}
-<option value="__add__">+ Add name…</option>
-</select>
 <button class="task-timer-btn" data-task-id="${t.id}" data-unit-id="${unit.id}" ${dis}>Start</button>
 <span class="task-timer-elapsed" data-task-id="${t.id}" title="No logged hours yet">00:00:00</span>
 <button class="task-wrench-btn" data-task-id="${t.id}" title="More actions" ${dis}>&#9881;</button>
@@ -1415,6 +1524,10 @@ ${assigneeOptions}
 <button type="button" class="wrench-action" data-task-id="${t.id}" data-action="logs">Edit time logs…</button>
 <button type="button" class="wrench-action" data-task-id="${t.id}" data-action="activity">View activity log…</button>
 </div>
+</div>
+<div class="task-assignees-wrap">
+<div class="task-assignees-list" data-task-id="${t.id}"><span class="ta-loading">Loading assignees…</span></div>
+<button type="button" class="task-add-assignee-btn" data-task-id="${t.id}" ${dis}>+ Add assignee</button>
 </div>
 <div class="task-remarks-wrap">
 <textarea class="task-remarks-input" data-task-id="${t.id}" placeholder="Remarks…" ${dis}>${remarksVal}</textarea>
@@ -1440,6 +1553,81 @@ logTaskActivity(taskId, unit.id, describeTaskPatch(patch, taskNameBefore));
 renderStats();
 renderUnitList();
 renderDetail(unit);
+}
+
+function renderAssigneeRows(taskId, unitId, assignees, hoursRows){
+const listEl = taskListEl.querySelector(`.task-assignees-list[data-task-id="${taskId}"]`);
+if (!listEl) return;
+if (!assignees.length){
+listEl.innerHTML = '<span class="ta-loading">No assignees yet.</span>';
+return;
+}
+const isRunning = runningTimer && runningTimer.taskId === taskId;
+listEl.innerHTML = assignees.map(a => {
+const hrs = hoursRows
+.filter(r => r.task_id === taskId && nameMatchesEmail(a.assignee_name || '', r.person_email || ''))
+.reduce((sum, r) => sum + Number(r.hours_worked || 0), 0);
+return `
+<div class="ta-row" data-assignee-id="${a.id}">
+<select class="ta-name" data-assignee-id="${a.id}">
+<option value="">Unassigned</option>
+${knownAssignees.map(n => `<option value="${n}" ${a.assignee_name === n ? 'selected' : ''}>${n}</option>`).join('')}
+<option value="__add__">+ Add name…</option>
+</select>
+<input type="date" class="ta-start" data-assignee-id="${a.id}" value="${a.start_date || ''}">
+<span class="ta-arrow">&rarr;</span>
+<input type="date" class="ta-due" data-assignee-id="${a.id}" value="${a.due_date || ''}">
+<span class="ta-hours">${hrs > 0 ? hrs.toFixed(1) + 'h' : ''}</span>
+<button type="button" class="ta-start-btn ${isRunning ? 'running' : ''}" data-task-id="${taskId}" data-unit-id="${unitId}">${isRunning ? 'Stop' : 'Start'}</button>
+<button type="button" class="ta-remove-btn" data-assignee-id="${a.id}" title="Remove">&times;</button>
+</div>
+`;
+}).join('');
+
+listEl.querySelectorAll('.ta-name').forEach(sel => {
+sel.addEventListener('change', async (e) => {
+const assigneeId = e.target.getAttribute('data-assignee-id');
+let value = e.target.value;
+if (value === '__add__'){
+const name = prompt('Add name:');
+if (!name || !name.trim()){ renderDetail(unit); return; }
+value = name.trim();
+}
+await sb.from('prod_task_assignees').update({ assignee_name: value }).eq('id', assigneeId);
+renderDetail(unit);
+});
+});
+listEl.querySelectorAll('.ta-start').forEach(inp => {
+inp.addEventListener('change', async (e) => {
+const assigneeId = e.target.getAttribute('data-assignee-id');
+await sb.from('prod_task_assignees').update({ start_date: e.target.value || null }).eq('id', assigneeId);
+});
+});
+listEl.querySelectorAll('.ta-due').forEach(inp => {
+inp.addEventListener('change', async (e) => {
+const assigneeId = e.target.getAttribute('data-assignee-id');
+await sb.from('prod_task_assignees').update({ due_date: e.target.value || null }).eq('id', assigneeId);
+});
+});
+listEl.querySelectorAll('.ta-remove-btn').forEach(btn => {
+btn.addEventListener('click', async () => {
+const assigneeId = btn.getAttribute('data-assignee-id');
+await sb.from('prod_task_assignees').delete().eq('id', assigneeId);
+renderDetail(unit);
+});
+});
+listEl.querySelectorAll('.ta-start-btn').forEach(btn => {
+btn.addEventListener('click', async () => {
+const tId = btn.getAttribute('data-task-id');
+const uId = btn.getAttribute('data-unit-id');
+if (runningTimer && runningTimer.taskId === tId){
+await stopTaskTimer();
+} else {
+await startTaskTimer(tId, uId);
+}
+renderDetail(unit);
+});
+});
 }
 
 taskListEl.querySelectorAll('.task-done-cb').forEach(cb => {
@@ -1522,6 +1710,19 @@ const taskId = btn.getAttribute('data-task-id');
 const t = (allTasksByUnit[unit.id] || []).find(x => x.id === taskId);
 taskListEl.querySelectorAll('.task-wrench-menu').forEach(m => m.classList.add('hidden'));
 openActivityModal(taskId, t ? t.task_name : '');
+});
+});
+
+taskListEl.querySelectorAll('.task-add-assignee-btn').forEach(btn => {
+btn.addEventListener('click', async () => {
+const taskId = btn.getAttribute('data-task-id');
+const t = (allTasksByUnit[unit.id] || []).find(x => x.id === taskId);
+btn.disabled = true;
+await sb.from('prod_task_assignees').insert({
+task_id: taskId, unit_id: unit.id, assignee_name: '',
+start_date: t ? t.start_date : null, due_date: t ? t.completion_date_planned : null,
+});
+renderDetail(unit);
 });
 });
 
@@ -1611,12 +1812,16 @@ runningTimerTick = setInterval(tick, 1000);
 const taskIds = tasks.map(t => t.id);
 const hoursEl = panel.querySelector('#dpHoursLogged');
 if (taskIds.length){
-sb.from('prod_daily_hours').select('task_id, hours_worked, work_date, person_email').in('task_id', taskIds).order('work_date').then(({ data, error }) => {
-if (error || !data){ if (hoursEl) hoursEl.textContent = '—'; return; }
+Promise.all([
+sb.from('prod_daily_hours').select('task_id, hours_worked, work_date, person_email').in('task_id', taskIds).order('work_date'),
+sb.from('prod_task_assignees').select('id, task_id, assignee_name, start_date, due_date').in('task_id', taskIds).order('created_at'),
+]).then(([hoursRes, assigneesRes]) => {
+const data = hoursRes.data;
+if (hoursRes.error || !data){ if (hoursEl) hoursEl.textContent = '—'; }
 const sums = {};
 const logs = {};
 let totalLogged = 0;
-data.forEach(r => {
+(data || []).forEach(r => {
 sums[r.task_id] = (sums[r.task_id] || 0) + Number(r.hours_worked || 0);
 (logs[r.task_id] = logs[r.task_id] || []).push(r);
 totalLogged += Number(r.hours_worked || 0);
@@ -1631,6 +1836,15 @@ el.title = entries.length
 : 'No logged hours yet';
 });
 if (hoursEl) hoursEl.textContent = `${totalLogged.toFixed(1)}h / ${estimatedHours.toFixed(0)}h est.`;
+
+const assigneesByTask = {};
+(assigneesRes.data || []).forEach(a => {
+(assigneesByTask[a.task_id] = assigneesByTask[a.task_id] || []).push(a);
+if (a.assignee_name && a.assignee_name.trim()) extraAssigneeNames.add(a.assignee_name.trim());
+});
+taskIds.forEach(id => {
+renderAssigneeRows(id, unit.id, assigneesByTask[id] || [], data || []);
+});
 });
 } else if (hoursEl){
 hoursEl.textContent = `0h / ${estimatedHours.toFixed(0)}h est.`;
@@ -1889,6 +2103,7 @@ function openAddSoModal(){
 document.getElementById('addSoMsg').innerHTML = '';
 document.getElementById('addSoNumber').value = '';
 document.getElementById('addSoSalesRep').value = '';
+document.getElementById('addSoCompanyName').value = '';
 document.getElementById('addSoUnitName').value = '';
 document.getElementById('addSoQty').value = 1;
 const clsEl = document.getElementById('addSoClass');
@@ -1924,6 +2139,7 @@ const msgEl = document.getElementById('addSoMsg');
 msgEl.innerHTML = '';
 const soNumber = document.getElementById('addSoNumber').value.trim();
 const salesRep = document.getElementById('addSoSalesRep').value.trim();
+const companyName = document.getElementById('addSoCompanyName').value.trim();
 const unitName = document.getElementById('addSoUnitName').value.trim();
 const cls = document.getElementById('addSoClass').value;
 const qty = Number(document.getElementById('addSoQty').value) || 1;
@@ -1940,7 +2156,7 @@ submitBtn.disabled = true; submitBtn.textContent = 'Creating…';
 try {
 const { data: existingSo } = await sb.from('prod_sales_orders').select('so_number').eq('so_number', soNumber).maybeSingle();
 if (!existingSo){
-const { error: soErr } = await sb.from('prod_sales_orders').insert({ so_number: soNumber, sales_rep: salesRep || null });
+const { error: soErr } = await sb.from('prod_sales_orders').insert({ so_number: soNumber, sales_rep: salesRep || null, company_name: companyName || null });
 if (soErr) throw soErr;
 }
 
