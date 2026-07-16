@@ -95,6 +95,7 @@ box-shadow:0 6px 16px rgba(52,87,245,.35);
 .auth-card p.sub{color:var(--text-dim);font-size:13.5px;margin:0 0 24px;}
 .field{margin-bottom:15px;}
 .field label{font-size:12px;font-weight:600;color:var(--text-dim);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;}
+.field-hint{font-size:11px;color:var(--text-faint);margin-top:5px;line-height:1.4;}
 .field input{
 width:100%;padding:11px 13px;border:1.5px solid var(--border);
 border-radius:9px;font-size:14px;font-family:inherit;background:var(--surface-alt);transition:border-color .15s,background .15s;
@@ -410,6 +411,12 @@ box-shadow:var(--shadow-md);padding:22px 24px;position:sticky;top:86px;min-width
 .dp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:4px;}
 .dp-title{font-size:16px;font-weight:700;letter-spacing:-0.01em;line-height:1.3;}
 .dp-sub{font-size:12.5px;color:var(--text-dim);margin:6px 0 18px;font-family:'JetBrains Mono',monospace;}
+.dp-head-right{display:flex;flex-direction:column;align-items:flex-end;gap:7px;flex-shrink:0;}
+.dp-edit-unit-btn{
+font-size:10.5px;font-weight:700;color:var(--text-dim);background:var(--surface);
+border:1px solid var(--border);padding:4px 11px;border-radius:16px;cursor:pointer;font-family:inherit;
+}
+.dp-edit-unit-btn:hover{border-color:var(--primary);color:var(--primary);}
 
 .dp-coverage{
 display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--text-dim);flex-wrap:wrap;
@@ -756,8 +763,12 @@ display:flex;align-items:center;justify-content:center;
 <div id="editSoModal" class="modal-overlay hidden">
 <div class="modal-card">
 <h2>Edit SO details</h2>
-<p class="modal-sub" id="editSoSub"></p>
+<p class="modal-sub">Renaming the SO number updates it everywhere — the sales order record and every unit filed under it.</p>
 <div id="editSoMsg"></div>
+<div class="field">
+<label>SO number</label>
+<input type="text" id="editSoNumberInput" placeholder="SOTS12345">
+</div>
 <div class="field">
 <label>Company name</label>
 <input type="text" id="editSoCompanyName" placeholder="e.g. BHP Iron Ore Pty Ltd">
@@ -773,6 +784,47 @@ display:flex;align-items:center;justify-content:center;
 <div class="modal-close-row">
 <button class="icon-btn ghost-light" id="editSoCancelBtn">Cancel</button>
 <button class="btn" id="editSoSubmitBtn" style="width:auto;">Save</button>
+</div>
+</div>
+</div>
+
+<div id="editUnitModal" class="modal-overlay hidden">
+<div class="modal-card">
+<h2>Edit unit</h2>
+<p class="modal-sub">Reassign this unit to a different SO, or update its details. Sales rep / company name are only used if the SO number is new.</p>
+<div id="editUnitMsg"></div>
+<div class="field">
+<label>SO number</label>
+<input type="text" id="editUnitSoNumber" placeholder="SOTS12345">
+</div>
+<div class="field">
+<label>Sales rep (only used if this SO is new)</label>
+<input type="text" id="editUnitSalesRep" placeholder="Name">
+</div>
+<div class="field">
+<label>Company name (only used if this SO is new)</label>
+<input type="text" id="editUnitCompanyName" placeholder="e.g. BHP Iron Ore Pty Ltd">
+</div>
+<div class="field">
+<label>Unit name</label>
+<input type="text" id="editUnitName" placeholder="e.g. HDWL1D-450 - 1 Door Heavy Duty Workshop Locker">
+</div>
+<div class="field">
+<label>Class</label>
+<select id="editUnitClass"></select>
+</div>
+<div class="field">
+<label>Qty</label>
+<input type="number" id="editUnitQty" value="1" min="1">
+</div>
+<div class="field">
+<label>Add tasks from a different template (optional)</label>
+<select id="editUnitTemplate"></select>
+<div class="field-hint">Only adds tasks from the template that aren't already on this unit — existing tasks and progress are left untouched.</div>
+</div>
+<div class="modal-close-row">
+<button class="icon-btn ghost-light" id="editUnitCancelBtn">Cancel</button>
+<button class="btn" id="editUnitSubmitBtn" style="width:auto;">Save</button>
 </div>
 </div>
 </div>
@@ -1926,7 +1978,10 @@ panel.innerHTML = `
 <div class="dp-title">${unit.unit_name || 'Untitled unit'}</div>
 <div class="dp-sub">${unit.so_number} &middot; Qty ${unit.qty}</div>
 </div>
+<div class="dp-head-right">
 <span class="class-badge cls-${classSlug(unit.class)}">${classLabel(unit.class)}</span>
+<button type="button" class="dp-edit-unit-btn" id="dpEditUnitBtn">✎ Edit unit</button>
+</div>
 </div>
 <div class="dp-coverage">
 <span>Coverage:</span>
@@ -1975,6 +2030,7 @@ ${schedSummaryHtml}
 panel.querySelector('#detailCloseBtn').addEventListener('click', () => {
 document.getElementById('detailModal').classList.add('hidden');
 });
+panel.querySelector('#dpEditUnitBtn').addEventListener('click', () => openEditUnitModal(unit.id));
 
 const taskListEl = panel.querySelector('#taskListEl');
 if (tasks.length === 0){
@@ -2633,10 +2689,15 @@ document.getElementById('addSoSubmitBtn').addEventListener('click', submitAddSo)
 document.getElementById('editSoCancelBtn').addEventListener('click', closeEditSoModal);
 document.getElementById('editSoSubmitBtn').addEventListener('click', submitEditSo);
 
+/* ---------- Edit unit ---------- */
+document.getElementById('editUnitCancelBtn').addEventListener('click', closeEditUnitModal);
+document.getElementById('editUnitClass').addEventListener('change', loadEditUnitTemplateOptions);
+document.getElementById('editUnitSubmitBtn').addEventListener('click', submitEditUnit);
+
 function openEditSoModal(soNumber){
 document.getElementById('editSoMsg').innerHTML = '';
-document.getElementById('editSoSub').textContent = soNumber;
 const so = soInfoByNumber[soNumber];
+document.getElementById('editSoNumberInput').value = soNumber;
 document.getElementById('editSoCompanyName').value = so && so.company_name ? so.company_name : '';
 document.getElementById('editSoSalesRep').value = so && so.sales_rep ? so.sales_rep : '';
 document.getElementById('editSoReceivedDate').value = so && so.created_at ? new Date(so.created_at).toISOString().slice(0,10) : '';
@@ -2648,11 +2709,18 @@ function closeEditSoModal(){ document.getElementById('editSoModal').classList.ad
 async function submitEditSo(){
 const msgEl = document.getElementById('editSoMsg');
 msgEl.innerHTML = '';
-const soNumber = document.getElementById('editSoModal').dataset.soNumber;
-if (!soNumber) return;
+const originalSoNumber = document.getElementById('editSoModal').dataset.soNumber;
+if (!originalSoNumber) return;
+const newSoNumber = document.getElementById('editSoNumberInput').value.trim();
 const companyName = document.getElementById('editSoCompanyName').value.trim();
 const salesRep = document.getElementById('editSoSalesRep').value.trim();
 const receivedDate = document.getElementById('editSoReceivedDate').value;
+
+if (!newSoNumber){
+msgEl.innerHTML = '<div class="auth-msg error">SO number can\'t be empty.</div>';
+return;
+}
+const renaming = newSoNumber !== originalSoNumber;
 
 const submitBtn = document.getElementById('editSoSubmitBtn');
 submitBtn.disabled = true; submitBtn.textContent = 'Saving…';
@@ -2661,16 +2729,38 @@ const patch = { company_name: companyName || null, sales_rep: salesRep || null }
 if (receivedDate) patch.created_at = new Date(receivedDate + 'T00:00:00').toISOString();
 
 try {
-const { data: existingSo } = await sb.from('prod_sales_orders').select('so_number').eq('so_number', soNumber).maybeSingle();
+if (renaming){
+const [{ data: soClash }, { data: unitClash }] = await Promise.all([
+sb.from('prod_sales_orders').select('so_number').eq('so_number', newSoNumber).maybeSingle(),
+sb.from('prod_units').select('id').eq('so_number', newSoNumber).limit(1).maybeSingle(),
+]);
+if (soClash || unitClash){
+msgEl.innerHTML = `<div class="auth-msg error">${newSoNumber} is already in use by another SO.</div>`;
+submitBtn.disabled = false; submitBtn.textContent = 'Save';
+return;
+}
+}
+
+const { data: existingSo } = await sb.from('prod_sales_orders').select('so_number').eq('so_number', originalSoNumber).maybeSingle();
 if (existingSo){
-const { error } = await sb.from('prod_sales_orders').update(patch).eq('so_number', soNumber);
+const { error } = await sb.from('prod_sales_orders').update({ so_number: newSoNumber, ...patch }).eq('so_number', originalSoNumber);
 if (error) throw error;
 } else {
-const { error } = await sb.from('prod_sales_orders').insert({ so_number: soNumber, ...patch });
+const { error } = await sb.from('prod_sales_orders').insert({ so_number: newSoNumber, ...patch });
 if (error) throw error;
 }
+
+if (renaming){
+const { error: unitErr } = await sb.from('prod_units').update({ so_number: newSoNumber }).eq('so_number', originalSoNumber);
+if (unitErr) throw unitErr;
+}
+
 msgEl.innerHTML = '<div class="auth-msg ok">Saved.</div>';
 await loadBoard();
+if (renaming && selectedUnitId){
+const u = allUnits.find(x => x.id === selectedUnitId);
+if (u) renderDetail(u);
+}
 renderUnitList();
 setTimeout(closeEditSoModal, 500);
 } catch (e){
@@ -2694,9 +2784,9 @@ loadAddSoTemplateOptions();
 }
 function closeAddSoModal(){ document.getElementById('addSoModal').classList.add('hidden'); }
 
-async function loadAddSoTemplateOptions(){
-const cls = document.getElementById('addSoClass').value;
-const tplEl = document.getElementById('addSoTemplate');
+async function loadTemplateOptionsInto(classSelectId, templateSelectId, includeBlankOption){
+const cls = document.getElementById(classSelectId).value;
+const tplEl = document.getElementById(templateSelectId);
 tplEl.innerHTML = '<option>Loading…</option>';
 const { data, error } = await sb
 .from('prod_task_templates')
@@ -2710,9 +2800,111 @@ const ga = seen.get(a), gb = seen.get(b);
 if (ga !== gb) return ga ? -1 : 1;
 return a.localeCompare(b);
 });
-tplEl.innerHTML = names.length
+const blankOpt = includeBlankOption ? '<option value="">No change — keep current tasks</option>' : '';
+tplEl.innerHTML = blankOpt + (names.length
 ? names.map(n => `<option value="${n}">${n}${seen.get(n) ? ' (generic)' : ''}</option>`).join('')
-: '<option value="">(no templates for this class)</option>';
+: (includeBlankOption ? '' : '<option value="">(no templates for this class)</option>'));
+}
+
+async function loadAddSoTemplateOptions(){
+await loadTemplateOptionsInto('addSoClass', 'addSoTemplate', false);
+}
+
+async function loadEditUnitTemplateOptions(){
+await loadTemplateOptionsInto('editUnitClass', 'editUnitTemplate', true);
+}
+
+function openEditUnitModal(unitId){
+const unit = allUnits.find(u => u.id === unitId);
+if (!unit) return;
+document.getElementById('editUnitMsg').innerHTML = '';
+document.getElementById('editUnitSoNumber').value = unit.so_number || '';
+const so = soInfoByNumber[unit.so_number];
+document.getElementById('editUnitSalesRep').value = so && so.sales_rep ? so.sales_rep : '';
+document.getElementById('editUnitCompanyName').value = so && so.company_name ? so.company_name : '';
+document.getElementById('editUnitName').value = unit.unit_name || '';
+document.getElementById('editUnitClass').innerHTML = CLASS_ORDER.map(c => `<option value="${c}" ${c === unit.class ? 'selected' : ''}>${c}</option>`).join('');
+document.getElementById('editUnitQty').value = unit.qty || 1;
+document.getElementById('editUnitModal').dataset.unitId = unitId;
+document.getElementById('editUnitModal').classList.remove('hidden');
+loadEditUnitTemplateOptions();
+}
+function closeEditUnitModal(){ document.getElementById('editUnitModal').classList.add('hidden'); }
+
+async function submitEditUnit(){
+const msgEl = document.getElementById('editUnitMsg');
+msgEl.innerHTML = '';
+const unitId = document.getElementById('editUnitModal').dataset.unitId;
+if (!unitId) return;
+
+const soNumber = document.getElementById('editUnitSoNumber').value.trim();
+const salesRep = document.getElementById('editUnitSalesRep').value.trim();
+const companyName = document.getElementById('editUnitCompanyName').value.trim();
+const unitName = document.getElementById('editUnitName').value.trim();
+const cls = document.getElementById('editUnitClass').value;
+const qty = Number(document.getElementById('editUnitQty').value) || 1;
+const templateItem = document.getElementById('editUnitTemplate').value;
+
+if (!soNumber || !unitName || !cls){
+msgEl.innerHTML = '<div class="auth-msg error">SO number, unit name and class are all required.</div>';
+return;
+}
+
+const submitBtn = document.getElementById('editUnitSubmitBtn');
+submitBtn.disabled = true; submitBtn.textContent = 'Saving…';
+
+try {
+const { data: existingSo } = await sb.from('prod_sales_orders').select('so_number').eq('so_number', soNumber).maybeSingle();
+if (!existingSo){
+const { error: soErr } = await sb.from('prod_sales_orders').insert({ so_number: soNumber, sales_rep: salesRep || null, company_name: companyName || null });
+if (soErr) throw soErr;
+}
+
+const { error: unitErr } = await sb.from('prod_units').update({ so_number: soNumber, unit_name: unitName, class: cls, qty }).eq('id', unitId);
+if (unitErr) throw unitErr;
+
+let addedCount = 0;
+if (templateItem){
+const { data: templateRows, error: tplErr } = await sb.from('prod_task_templates')
+.select('id, seq, task_name, execution_group, default_duration_days, predecessor_seq, predecessor_lag_days')
+.eq('class', cls).eq('item_name', templateItem).order('seq');
+if (tplErr) throw tplErr;
+
+const { data: existingTasks } = await sb.from('prod_tasks').select('id, task_name').eq('unit_id', unitId).eq('hierarchy_level', 2);
+const existingByName = {};
+(existingTasks || []).forEach(t => { existingByName[t.task_name] = t.id; });
+
+const seqToId = {};
+for (const t of (templateRows || [])){
+if (existingByName[t.task_name]){
+seqToId[t.seq] = existingByName[t.task_name];
+continue;
+}
+const predId = (t.predecessor_seq != null && seqToId[t.predecessor_seq]) ? seqToId[t.predecessor_seq] : null;
+const { data: inserted, error: taskErr } = await sb.from('prod_tasks').insert({
+unit_id: unitId, template_id: t.id, task_name: t.task_name, execution_group: t.execution_group,
+hierarchy_level: 2, duration_days: t.default_duration_days, predecessor_task_id: predId,
+predecessor_lag_days: t.predecessor_lag_days, percent_complete_numeric: 0,
+}).select().single();
+if (taskErr) throw taskErr;
+seqToId[t.seq] = inserted.id;
+addedCount++;
+logTaskActivity(inserted.id, unitId, 'Task added via template update', 'created');
+}
+}
+
+msgEl.innerHTML = `<div class="auth-msg ok">Saved.${addedCount ? ` Added ${addedCount} task(s) from ${templateItem}.` : ''}</div>`;
+await loadBoard();
+selectedUnitId = unitId;
+renderUnitList();
+const refreshedUnit = allUnits.find(u => u.id === unitId);
+if (refreshedUnit) renderDetail(refreshedUnit);
+setTimeout(closeEditUnitModal, 600);
+} catch (e){
+msgEl.innerHTML = `<div class="auth-msg error">${e.message}</div>`;
+} finally {
+submitBtn.disabled = false; submitBtn.textContent = 'Save';
+}
 }
 
 async function submitAddSo(){
