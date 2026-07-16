@@ -193,16 +193,18 @@ font-size:11px;font-weight:700;color:var(--red);background:var(--red-pale);paddi
 }
 
 .unit-row-head{
-display:grid;grid-template-columns:110px minmax(0,1fr) 60px 130px;gap:12px;
+display:grid;grid-template-columns:110px minmax(0,1fr) 68px 68px 68px 60px 130px;gap:12px;
 padding:9px 18px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
 color:var(--text-faint);border-bottom:1px solid var(--border);
 }
 .unit-row{
-display:grid;grid-template-columns:110px minmax(0,1fr) 60px 130px;gap:12px;align-items:center;
+display:grid;grid-template-columns:110px minmax(0,1fr) 68px 68px 68px 60px 130px;gap:12px;align-items:center;
 padding:12px 18px;font-size:13px;border-bottom:1px solid var(--border);cursor:pointer;
 transition:background .12s;
 }
 .unit-main{min-width:0;}
+.unit-cov{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);white-space:nowrap;}
+.unit-cov-days{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);text-align:right;white-space:nowrap;}
 .unit-row:last-child{border-bottom:none;}
 .unit-row:hover{background:var(--primary-pale);}
 .unit-row.active{background:var(--primary-pale);box-shadow:inset 3px 0 0 var(--primary);}
@@ -677,6 +679,20 @@ const overdue = next && next.completion_date_planned && new Date(next.completion
 return { pct, currentStage, status: overdue ? 'overdue' : status, overdue };
 }
 
+function computeUnitCoverage(unitId){
+const tasks = (allTasksByUnit[unitId] || []).filter(t => t.hierarchy_level === 2 && !t.is_not_applicable);
+const dates = [];
+tasks.forEach(t => {
+if (t.start_date) dates.push(new Date(t.start_date));
+if (t.completion_date_planned) dates.push(new Date(t.completion_date_planned));
+});
+if (!dates.length) return { days: 0, start: null, finish: null };
+const minD = new Date(Math.min(...dates));
+const maxD = new Date(Math.max(...dates));
+const days = Math.round((maxD - minD) / 86400000) + 1;
+return { days, start: minD.toISOString().slice(0,10), finish: maxD.toISOString().slice(0,10) };
+}
+
 function allKnownAssignees(){
 const names = new Set();
 Object.values(allTasksByUnit).forEach(list => {
@@ -876,12 +892,13 @@ group.appendChild(head);
 const leadColLabel = groupBy === 'so' ? 'Class' : 'SO#';
 const rowHead = document.createElement('div');
 rowHead.className = 'unit-row-head';
-rowHead.innerHTML = `<span>${leadColLabel}</span><span>Unit</span><span style="text-align:right;">Qty</span><span>Stage</span>`;
+rowHead.innerHTML = `<span>${leadColLabel}</span><span>Unit</span><span>Start</span><span>Finish</span><span style="text-align:right;">Days</span><span style="text-align:right;">Qty</span><span>Stage</span>`;
 group.appendChild(rowHead);
 
 g.units.forEach(u => {
 const p = computeUnitProgress(u.id);
 const s = statusInfo(p);
+const cov = computeUnitCoverage(u.id);
 const row = document.createElement('div');
 row.className = 'unit-row' + (u.id === selectedUnitId ? ' active' : '');
 const leadBadge = groupBy === 'so'
@@ -893,6 +910,9 @@ ${leadBadge}
 <div class="unit-name">${u.unit_name || 'Untitled unit'}</div>
 <div class="unit-progress-track"><div class="unit-progress-fill ${p.status === 'complete' ? 'done' : ''}" style="width:${p.pct}%;"></div></div>
 </div>
+<span class="unit-cov">${cov.start ? fmtDate(cov.start) : '—'}</span>
+<span class="unit-cov">${cov.finish ? fmtDate(cov.finish) : '—'}</span>
+<span class="unit-cov-days">${cov.days || '—'}</span>
 <span class="unit-qty">Qty ${u.qty}</span>
 <span class="unit-status ${s.badge}"><span class="dot"></span>${s.label}</span>
 `;
