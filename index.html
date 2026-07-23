@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Production Board â Atrada</title>
+<title>Production Board — Atrada</title>
 <script>
 (function(){
 var img = new Image();
@@ -284,7 +284,7 @@ font-family:inherit;background:white;justify-self:end;
 .tsp-paused .tsp-status-row button{border-color:var(--amber);color:#a3660c;}
 .tsp-paused .tsp-status-row button:hover{background:var(--amber);color:white;}
 
-/* Task-focus schedule table, matching the "Team Schedule â What's next, in order" reference layout */
+/* Task-focus schedule table, matching the "Team Schedule — What's next, in order" reference layout */
 .tsched-panel{
 background:var(--primary-pale);border:1.5px solid #c7d2fe;border-radius:var(--radius-md);
 padding:14px 16px;margin-bottom:4px;
@@ -391,7 +391,7 @@ padding:3px 7px;border-radius:6px;background:var(--surface);border:1px solid var
 .rc-day-chip.rc-day-ot20 .rc-day-num,
 .rc-day-chip.rc-day-ot20 .rc-day-hrs{color:#a51f34;}
 
-/* ---------- Final Totals â All Projects (bottom summary) ---------- */
+/* ---------- Final Totals — All Projects (bottom summary) ---------- */
 .final-totals-panel{
 background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
 box-shadow:var(--shadow-md);padding:20px 22px;margin-top:22px;overflow:hidden;position:relative;
@@ -855,7 +855,7 @@ display:flex;align-items:center;justify-content:center;
 <div class="auth-card">
 <div class="auth-mark">PR</div>
 <h1 id="authTitle">Sign in</h1>
-<p class="sub" id="authSub">Atrada Â· Production Board</p>
+<p class="sub" id="authSub">Atrada · Production Board</p>
 <div id="authMsg"></div>
 <div class="field">
 <label>Email</label>
@@ -863,7 +863,7 @@ display:flex;align-items:center;justify-content:center;
 </div>
 <div class="field">
 <label>Password</label>
-<input type="password" id="authPassword" placeholder="â¢â¢â¢â¢â¢â¢â¢â¢" autocomplete="current-password">
+<input type="password" id="authPassword" placeholder="••••••••" autocomplete="current-password">
 </div>
 <button class="btn" id="authSubmit">Sign in</button>
 <div class="auth-toggle"><span id="authToggleText">No account?</span> <a id="authToggleLink">Create one</a></div>
@@ -909,9 +909,9 @@ display:flex;align-items:center;justify-content:center;
 </div>
 
 <div class="toolbar-card">
-<input class="search-box" id="searchBox" placeholder="Search unit name or SO numberâ¦">
+<input class="search-box" id="searchBox" placeholder="Search unit name or SO number…">
 <select class="filter-select" id="classFilter"></select>
-<select class="filter-select" id="taskFilterSelect"><option value="">Filter by taskâ¦</option></select>
+<select class="filter-select" id="taskFilterSelect"><option value="">Filter by task…</option></select>
 <select class="filter-select" id="groupBySelect">
 <option value="so">Group by SO</option>
 <option value="class">Group by class</option>
@@ -943,7 +943,7 @@ display:flex;align-items:center;justify-content:center;
 
 <div id="addSoModal" class="modal-overlay hidden">
 <div class="modal-card modal-card-wide">
-<div class="modal-icon modal-icon-primary">â¦</div>
+<div class="modal-icon modal-icon-primary">✦</div>
 <h2>Add SO / unit</h2>
 <p class="modal-sub">Creates the sales order first if it doesn't exist yet, then a production unit with its task checklist cloned from the matching template.</p>
 <div id="addSoMsg"></div>
@@ -961,7 +961,7 @@ display:flex;align-items:center;justify-content:center;
 </div>
 <div class="field">
 <label>Sales rep</label>
-<select id="addSoSalesRep"><option value="">Selectâ¦</option></select>
+<select id="addSoSalesRep"><option value="">Select…</option></select>
 </div>
 </div>
 <div class="field-row">
@@ -1020,9 +1020,9 @@ display:flex;align-items:center;justify-content:center;
 
 <div id="editSoModal" class="modal-overlay hidden">
 <div class="modal-card modal-card-wide">
-<div class="modal-icon modal-icon-primary">â</div>
+<div class="modal-icon modal-icon-primary">✎</div>
 <h2>Edit SO details</h2>
-<p class="modal-sub">Renaming the SO number updates it everywhere â the sales order record and every unit filed under it.</p>
+<p class="modal-sub">Renaming the SO number updates it everywhere — the sales order record and every unit filed under it.</p>
 <div id="editSoMsg"></div>
 
 <div class="field">
@@ -1038,7 +1038,7 @@ display:flex;align-items:center;justify-content:center;
 </div>
 <div class="field">
 <label>Sales rep</label>
-<select id="editSoSalesRep"><option value="">Selectâ¦</option></select>
+<select id="editSoSalesRep"><option value="">Select…</option></select>
 </div>
 </div>
 <div class="field-row">
@@ -1078,7 +1078,7 @@ display:flex;align-items:center;justify-content:center;
 </div>
 
 <div class="modal-danger-row">
-<button type="button" class="modal-danger-link" id="editSoDeleteBtn">Delete this SOâ¦</button>
+<button type="button" class="modal-danger-link" id="editSoDeleteBtn">Delete this SO…</button>
 </div>
 <div class="modal-close-row">
 <button class="icon-btn ghost-light" id="editSoCancelBtn">Cancel</button>
@@ -1091,7 +1091,7 @@ display:flex;align-items:center;justify-content:center;
 <div class="modal-card" style="max-width:420px;">
 <div class="modal-icon modal-icon-amber">&#9888;</div>
 <h2>Delete sales order</h2>
-<p class="modal-sub">This permanently deletes <b id="deleteSoNumberLabel"></b> and everything under it â every unit, task, assignee, logged hours and activity history. This can't be undone.</p>
+<p class="modal-sub">This permanently deletes <b id="deleteSoNumberLabel"></b> and everything under it — every unit, task, assignee, logged hours and activity history. This can't be undone.</p>
 <div id="deleteSoMsg"></div>
 <div class="field">
 <label>Type the SO number to confirm</label>
@@ -1106,7 +1106,7 @@ display:flex;align-items:center;justify-content:center;
 
 <div id="editUnitModal" class="modal-overlay hidden">
 <div class="modal-card">
-<div class="modal-icon modal-icon-primary">â</div>
+<div class="modal-icon modal-icon-primary">✎</div>
 <h2>Edit unit</h2>
 <p class="modal-sub">Reassign this unit to a different SO, or update its details.</p>
 <div id="editUnitMsg"></div>
@@ -1140,7 +1140,7 @@ display:flex;align-items:center;justify-content:center;
 <div class="field">
 <label>Add tasks from a different template (optional)</label>
 <select id="editUnitTemplate"></select>
-<div class="field-hint">Only adds tasks from the template that aren't already on this unit â existing tasks and progress are left untouched.</div>
+<div class="field-hint">Only adds tasks from the template that aren't already on this unit — existing tasks and progress are left untouched.</div>
 </div>
 <div class="modal-close-row">
 <button class="icon-btn ghost-light" id="editUnitCancelBtn">Cancel</button>
@@ -1177,7 +1177,7 @@ let runningTimer = null;
 let runningTimerTick = null;
 let taskFocusTick = null;
 let taskFocusTeamTick = null;
-const FORTNIGHT_EPOCH = new Date('2026-07-02T00:00:00'); // reference fortnight: 02 Jul â 15 Jul 2026; every fortnight is a 14-day block from here
+const FORTNIGHT_EPOCH = new Date('2026-07-02T00:00:00'); // reference fortnight: 02 Jul – 15 Jul 2026; every fortnight is a 14-day block from here
 function getFortnightStart(date){
 const diffDays = Math.floor((date - FORTNIGHT_EPOCH) / 86400000);
 const idx = Math.floor(diffDays / 14);
@@ -1197,7 +1197,7 @@ function classLabel(cls){ return cls || 'Unclassed'; }
 function classSlug(cls){ return CLASS_SLUG[cls] || 'buy-sell'; }
 
 function fmtDate(d){
-if (!d) return 'â';
+if (!d) return '—';
 const dt = new Date(d + 'T00:00:00');
 const dd = String(dt.getDate()).padStart(2,'0');
 const mm = String(dt.getMonth()+1).padStart(2,'0');
@@ -1221,7 +1221,7 @@ const day = String(d.getDate()).padStart(2,'0');
 return `${y}-${m}-${day}`;
 }
 
-// ---------- Business-day scheduling helpers (MonâFri only; used for auto-scheduling â never
+// ---------- Business-day scheduling helpers (Mon–Fri only; used for auto-scheduling — never
 // overrides a date the user typed directly, only the counterpart the app derives from it). ----------
 function isWeekendDate(d){ const day = d.getDay(); return day === 0 || day === 6; }
 
@@ -1237,7 +1237,7 @@ if (!isWeekendDate(d)) remaining--;
 return localDateStr(d);
 }
 
-// First business day strictly after dateStr â used for the predecessorâsuccessor Start transition.
+// First business day strictly after dateStr — used for the predecessor→successor Start transition.
 function nextBusinessDay(dateStr){
 const d = new Date(dateStr + 'T00:00:00');
 d.setDate(d.getDate() + 1);
@@ -1245,7 +1245,7 @@ while (isWeekendDate(d)) d.setDate(d.getDate() + 1);
 return localDateStr(d);
 }
 
-// Inclusive count of business days from start to due â used to derive a Days value when the
+// Inclusive count of business days from start to due — used to derive a Days value when the
 // Due field itself is edited directly.
 function businessDaySpan(startStr, dueStr){
 let d = new Date(startStr + 'T00:00:00');
@@ -1261,7 +1261,7 @@ return Math.max(1, count);
 
 // Where the next chained task should start. A whole-number Days value fully uses up its last
 // day, so the next task starts the following business day. A fractional Days value (e.g. 1.5)
-// only partially uses its last day â the next task can continue in that same day's leftover time.
+// only partially uses its last day — the next task can continue in that same day's leftover time.
 function successorStart(predDueStr, predDuration){
 const dur = Number(predDuration) || 0;
 const isWhole = Math.abs(dur - Math.round(dur)) < 0.001;
@@ -1474,7 +1474,7 @@ grand.total += totalsByPerson[p].total;
 });
 
 const fmtH = (n) => n.toFixed(2) + 'h';
-const rangeLabel = `${fmtDate(startIso)} â ${fmtDate(endIso)}`;
+const rangeLabel = `${fmtDate(startIso)} – ${fmtDate(endIso)}`;
 const initialsOf = (name) => name.split(' ').filter(Boolean).slice(0,2).map(w => w[0].toUpperCase()).join('') || '?';
 const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const dayChipsHtml = (email) => {
@@ -1489,8 +1489,8 @@ if (hours > 0){
 tier = ot20 > 0 ? 'ot20' : (ot15 > 0 ? 'ot15' : 'regular');
 }
 const dd = String(new Date(dateStr + 'T00:00:00').getDate()).padStart(2,'0');
-return `<span class="rc-day-chip rc-day-${tier}" title="${DOW[dow]} ${fmtDate(dateStr)}${isWeekend ? ' (weekend)' : ''} â ${fmtH(hours)}">
-<span class="rc-day-dow">${DOW[dow]}</span><span class="rc-day-num">${dd}</span><span class="rc-day-hrs">${hours > 0 ? hours.toFixed(1) : 'â'}</span>
+return `<span class="rc-day-chip rc-day-${tier}" title="${DOW[dow]} ${fmtDate(dateStr)}${isWeekend ? ' (weekend)' : ''} — ${fmtH(hours)}">
+<span class="rc-day-dow">${DOW[dow]}</span><span class="rc-day-num">${dd}</span><span class="rc-day-hrs">${hours > 0 ? hours.toFixed(1) : '–'}</span>
 </span>`;
 }).join('');
 };
@@ -1532,8 +1532,8 @@ return `
 <div class="reconcile-row${hasOt ? ' reconcile-row-ot' : ''}">
 <span class="rc-person"><span class="rc-avatar">${initialsOf(name)}</span>${name}</span>
 <span class="rc-hours${r.regular === 0 ? ' rc-zero' : ''}">${fmtH(r.regular)}</span>
-<span class="rc-hours">${r.ot15 > 0 ? `<span class="rc-pill rc-pill-15">${fmtH(r.ot15)}</span>` : '<span class="rc-zero">â</span>'}</span>
-<span class="rc-hours">${r.ot20 > 0 ? `<span class="rc-pill rc-pill-20">${fmtH(r.ot20)}</span>` : '<span class="rc-zero">â</span>'}</span>
+<span class="rc-hours">${r.ot15 > 0 ? `<span class="rc-pill rc-pill-15">${fmtH(r.ot15)}</span>` : '<span class="rc-zero">—</span>'}</span>
+<span class="rc-hours">${r.ot20 > 0 ? `<span class="rc-pill rc-pill-20">${fmtH(r.ot20)}</span>` : '<span class="rc-zero">—</span>'}</span>
 <span class="rc-hours rc-total">${fmtH(r.total)}</span>
 </div>
 <div class="rc-day-chips">${dayChipsHtml(p)}</div>
@@ -1609,7 +1609,7 @@ return !isIn && !decided;
 
 attnEl.innerHTML = `
 <div class="attn-banner${notClockedIn.length ? '' : ' attn-banner-empty'}">
-<div class="attn-title">${notClockedIn.length ? 'ð Not Clocked In â Please Start Your Timer!' : 'â Everyone is clocked in'}</div>
+<div class="attn-title">${notClockedIn.length ? '🔔 Not Clocked In — Please Start Your Timer!' : '✅ Everyone is clocked in'}</div>
 ${notClockedIn.length ? `
 <div class="attn-chips">
 ${notClockedIn.map(email => `
@@ -1636,9 +1636,9 @@ inEl.innerHTML = `
 <div class="status-panel-head"><span class="dot"></span>Clocked In Now (${activeRows.length})</div>
 ${activeRows.length ? activeRows.map(r => `
 <div class="status-row" data-started-at="${r.startedAt}">
-<span class="sr-so">${r.unit ? r.unit.so_number : 'â'}</span>
-<span class="sr-unit">${r.unit ? (r.unit.unit_name || 'Untitled unit') : 'â'}</span>
-<span class="sr-task">${r.task ? r.task.task_name : 'â'}</span>
+<span class="sr-so">${r.unit ? r.unit.so_number : '—'}</span>
+<span class="sr-unit">${r.unit ? (r.unit.unit_name || 'Untitled unit') : '—'}</span>
+<span class="sr-task">${r.task ? r.task.task_name : '—'}</span>
 <span class="sr-person">${formatPersonName(r.email)}</span>
 <span class="sr-time sr-live">00:00:00</span>
 <button type="button" class="ts-stop-btn" data-email="${r.email}" data-task-id="${r.task ? r.task.id : ''}" data-unit-id="${r.unit ? r.unit.id : ''}" data-started-at="${r.startedAt}">Stop</button>
@@ -1666,12 +1666,12 @@ const pausedTop = pausedRows.slice(0, 6);
 
 pauseEl.innerHTML = `
 <div class="status-panel sp-paused">
-<div class="status-panel-head"><span class="dot"></span>Paused â Resume Where You Left Off (${pausedTop.length})</div>
+<div class="status-panel-head"><span class="dot"></span>Paused — Resume Where You Left Off (${pausedTop.length})</div>
 ${pausedTop.length ? pausedTop.map(r => `
 <div class="status-row">
-<span class="sr-so">${r.unit ? r.unit.so_number : 'â'}</span>
-<span class="sr-unit">${r.unit ? (r.unit.unit_name || 'Untitled unit') : 'â'}</span>
-<span class="sr-task">${r.task ? r.task.task_name : 'â'}</span>
+<span class="sr-so">${r.unit ? r.unit.so_number : '—'}</span>
+<span class="sr-unit">${r.unit ? (r.unit.unit_name || 'Untitled unit') : '—'}</span>
+<span class="sr-task">${r.task ? r.task.task_name : '—'}</span>
 <span class="sr-person">${formatPersonName(r.email)}</span>
 <span class="sr-time">${fmtDateTime(r.pausedAt)}</span>
 <button type="button" class="ts-resume-btn" data-task-id="${r.task ? r.task.id : ''}" data-unit-id="${r.unit ? r.unit.id : ''}">Resume</button>
@@ -1683,7 +1683,7 @@ ${pausedTop.length ? pausedTop.map(r => `
 document.querySelectorAll('.attn-absent-btn').forEach(btn => {
 btn.addEventListener('click', async () => {
 const email = btn.getAttribute('data-email');
-btn.disabled = true; btn.textContent = 'Savingâ¦';
+btn.disabled = true; btn.textContent = 'Saving…';
 await markAttendanceDecision(email, 'absent');
 renderTeamStatus();
 });
@@ -1694,7 +1694,7 @@ const email = btn.getAttribute('data-email');
 const taskId = btn.getAttribute('data-task-id');
 const unitId = btn.getAttribute('data-unit-id');
 const startedAt = btn.getAttribute('data-started-at');
-btn.disabled = true; btn.textContent = 'â¦';
+btn.disabled = true; btn.textContent = '…';
 await stopTimerFor(email, taskId, unitId, startedAt);
 renderTeamStatus();
 renderAttendanceReconciliation();
@@ -1705,7 +1705,7 @@ btn.addEventListener('click', async () => {
 const taskId = btn.getAttribute('data-task-id');
 const unitId = btn.getAttribute('data-unit-id');
 if (!taskId || !unitId) return;
-btn.disabled = true; btn.textContent = 'â¦';
+btn.disabled = true; btn.textContent = '…';
 await startTaskTimer(taskId, unitId);
 if (selectedUnitId === unitId){
 const u = allUnits.find(x => x.id === unitId);
@@ -1767,7 +1767,7 @@ person_email: personEmail, work_date: workDate, task_id: taskId, unit_id: unitId
 hours_worked: hoursThisSession, source: 'manual_adjustment',
 });
 }
-logTaskActivity(taskId, unitId || null, `Timer stopped by supervisor â logged ${hoursThisSession.toFixed(2)}h`, 'timer');
+logTaskActivity(taskId, unitId || null, `Timer stopped by supervisor — logged ${hoursThisSession.toFixed(2)}h`, 'timer');
 if (runningTimer && runningTimer.taskId === taskId){ runningTimer = null; }
 }
 
@@ -1794,7 +1794,7 @@ if (!email || !password){ msgEl.innerHTML = '<div class="auth-msg error">Enter e
 if (isSignUpMode){
 const { error } = await sb.auth.signUp({ email, password });
 if (error){ msgEl.innerHTML = `<div class="auth-msg error">${error.message}</div>`; return; }
-msgEl.innerHTML = '<div class="auth-msg ok">Account created â check your email to confirm, then sign in.</div>';
+msgEl.innerHTML = '<div class="auth-msg ok">Account created — check your email to confirm, then sign in.</div>';
 } else {
 const { error } = await sb.auth.signInWithPassword({ email, password });
 if (error){ msgEl.innerHTML = `<div class="auth-msg error">${error.message}</div>`; return; }
@@ -1854,7 +1854,7 @@ return { data: all, error: null };
 }
 
 async function loadBoard(){
-document.getElementById('unitList').innerHTML = '<div class="empty-state">Loading production boardâ¦</div>';
+document.getElementById('unitList').innerHTML = '<div class="empty-state">Loading production board…</div>';
 const { data: units, error: unitErr } = await sb
 .from('prod_units')
 .select('id, so_number, unit_name, class, qty, difot_date')
@@ -1900,7 +1900,7 @@ list.forEach(t => { if (t.hierarchy_level === 2 && t.task_name) names.add(t.task
 });
 const sorted = Array.from(names).sort((a,b) => a.localeCompare(b));
 const prev = el.value;
-el.innerHTML = '<option value="">Filter by taskâ¦</option>' + sorted.map(n => `<option value="${n}">${n}</option>`).join('');
+el.innerHTML = '<option value="">Filter by task…</option>' + sorted.map(n => `<option value="${n}">${n}</option>`).join('');
 if (sorted.includes(prev)) el.value = prev;
 }
 
@@ -1972,7 +1972,7 @@ filtered.forEach(u => { (groups[u.so_number] = groups[u.so_number] || []).push(u
 return Object.keys(groups).sort().map(k => ({ label: k, units: groups[k] }));
 }
 
-/* ---------- Final Totals â All Projects (bottom summary, live from board data) ---------- */
+/* ---------- Final Totals — All Projects (bottom summary, live from board data) ---------- */
 function renderFinalTotals(){
 const el = document.getElementById('finalTotalsPanel');
 if (!el) return;
@@ -2015,7 +2015,7 @@ const totalUnits = allUnits.length;
 const totalSos = new Set(allUnits.map(u => u.so_number).filter(Boolean)).size;
 const avgOf = arr => arr.length ? arr.reduce((a,b) => a + b, 0) / arr.length : null;
 const avgDifot = avgOf(difotDiffs);
-const difotLabel = d => d === null ? 'â' : (d >= 0 ? d.toFixed(1) + 'd left' : Math.abs(d).toFixed(1) + 'd over');
+const difotLabel = d => d === null ? '—' : (d >= 0 ? d.toFixed(1) + 'd left' : Math.abs(d).toFixed(1) + 'd over');
 
 const classNames = Array.from(new Set([...CLASS_ORDER.filter(c => byClass[c]), ...Object.keys(byClass).filter(c => !CLASS_ORDER.includes(c))]));
 const classRows = classNames.map(name => {
@@ -2028,8 +2028,8 @@ el.innerHTML = `
 <div class="ft-head">
 <div class="ft-icon">&#931;</div>
 <div class="ft-title-wrap">
-<div class="ft-title">Final Totals â All Projects</div>
-<div class="ft-subtitle">${totalUnits} unit${totalUnits === 1 ? '' : 's'} across ${totalSos} sales order${totalSos === 1 ? '' : 's'} Â· live from the board</div>
+<div class="ft-title">Final Totals — All Projects</div>
+<div class="ft-subtitle">${totalUnits} unit${totalUnits === 1 ? '' : 's'} across ${totalSos} sales order${totalSos === 1 ? '' : 's'} · live from the board</div>
 </div>
 </div>
 <div class="ft-summary-grid">
@@ -2041,7 +2041,7 @@ el.innerHTML = `
 <div class="ft-stat ft-complete">
 <div class="ft-stat-label">Dispatch Ready</div>
 <div class="ft-stat-value">${complete}</div>
-<div class="ft-stat-sub">${inProgress} in progress Â· ${notStarted} not started</div>
+<div class="ft-stat-sub">${inProgress} in progress · ${notStarted} not started</div>
 </div>
 <div class="ft-stat ft-behind">
 <div class="ft-stat-label">Behind Schedule</div>
@@ -2124,7 +2124,7 @@ ${so && so.company_name ? `<span class="so-company">${so.company_name}</span>` :
 ${so && so.sales_rep ? `<span class="so-sales-rep">${so.sales_rep}</span>` : ''}
 ${so && fmtMoney(so.project_sales) ? `<span class="so-project-sales">${fmtMoney(so.project_sales)}</span>` : ''}
 ${receivedAge !== null ? `<span class="so-received">SO received ${receivedAge}d ago</span>` : ''}
-${groupBy === 'so' ? `<span class="so-edit-hint">â Edit</span>` : ''}
+${groupBy === 'so' ? `<span class="so-edit-hint">✎ Edit</span>` : ''}
 ${anyBehind ? '<span class="so-flag-behind">Behind schedule</span>' : ''}
 `;
 group.appendChild(head);
@@ -2158,10 +2158,10 @@ ${leadBadge}
 <div class="unit-name">${u.unit_name || 'Untitled unit'}</div>
 <div class="unit-progress-track"><div class="unit-progress-fill ${p.status === 'complete' ? 'done' : ''}" style="width:${p.pct}%;"></div></div>
 </div>
-<span class="unit-cov">${cov.start ? fmtDate(cov.start) : 'â'}</span>
-<span class="unit-cov">${cov.finish ? fmtDate(cov.finish) : 'â'}</span>
-<span class="unit-cov-days">${sincePo !== null ? sincePo + 'd' : 'â'}</span>
-<span class="unit-cov-days">${approvalAge !== null ? approvalAge + 'd' : 'â'}</span>
+<span class="unit-cov">${cov.start ? fmtDate(cov.start) : '—'}</span>
+<span class="unit-cov">${cov.finish ? fmtDate(cov.finish) : '—'}</span>
+<span class="unit-cov-days">${sincePo !== null ? sincePo + 'd' : '—'}</span>
+<span class="unit-cov-days">${approvalAge !== null ? approvalAge + 'd' : '—'}</span>
 <span class="unit-qty">Qty ${u.qty}</span>
 ${stageCell}
 `;
@@ -2186,7 +2186,7 @@ return `
 <span class="class-badge cls-${classSlug(u.class)}">${classLabel(u.class)}</span>
 <div class="tfr-unit">
 <div class="tfr-unit-name">${u.unit_name || 'Untitled unit'}</div>
-<div class="tfr-so-line">${u.so_number || 'â'}${so && so.company_name ? ' Â· ' + so.company_name : ''}</div>
+<div class="tfr-so-line">${u.so_number || '—'}${so && so.company_name ? ' · ' + so.company_name : ''}</div>
 </div>
 <select class="task-status-pill ${sp.cls}" data-task-id="${t.id}" data-unit-id="${u.id}">
 <option value="not_started" ${sp.value === 'not_started' ? 'selected' : ''}>Not Started</option>
@@ -2196,11 +2196,11 @@ return `
 </select>
 </div>
 <div class="tfr-details">
-<span class="tfr-field">Start <b>${t.start_date ? fmtDate(t.start_date) : 'â'}</b></span>
-<span class="tfr-field">Due <b>${t.completion_date_planned ? fmtDate(t.completion_date_planned) : 'â'}</b></span>
+<span class="tfr-field">Start <b>${t.start_date ? fmtDate(t.start_date) : '—'}</b></span>
+<span class="tfr-field">Due <b>${t.completion_date_planned ? fmtDate(t.completion_date_planned) : '—'}</b></span>
 ${sched ? `<span class="tfr-field sched-badge sched-${sched.status}">${sched.label}</span>` : ''}
 </div>
-<div class="tfr-assignees" data-task-id="${t.id}"><span class="tfr-assignee-chip empty">Loadingâ¦</span></div>
+<div class="tfr-assignees" data-task-id="${t.id}"><span class="tfr-assignee-chip empty">Loading…</span></div>
 <div class="tfr-timer">
 <button type="button" class="tf-timer-btn ${isRunning ? 'running' : ''}" data-task-id="${t.id}" data-unit-id="${u.id}">${isRunning ? 'Stop' : 'Start'}</button>
 <span class="tf-timer-elapsed" data-task-id="${t.id}">00:00:00</span>
@@ -2334,7 +2334,7 @@ const ev = activeByEmail[email];
 if (ev){
 status = 'in';
 const t = (allTasksByUnit[ev.unit_id] || []).find(x => x.id === ev.task_id);
-active = { taskId: ev.task_id, unitId: ev.unit_id, taskName: t ? t.task_name : 'â', startedAt: ev.event_time };
+active = { taskId: ev.task_id, unitId: ev.unit_id, taskName: t ? t.task_name : '—', startedAt: ev.event_time };
 } else if (decisionByEmail[email] === 'absent'){
 status = 'absent';
 } else if (pausedByEmail[email]){
@@ -2372,7 +2372,7 @@ const paused = people.filter(p => p.status === 'paused');
 
 const notClockedHtml = `
 <div class="tsp-banner${notClocked.length ? '' : ' tsp-banner-empty'}">
-<div class="tsp-banner-title">${notClocked.length ? 'ð Not Clocked In â Please Start Your Timer!' : 'â Everyone involved is clocked in'}</div>
+<div class="tsp-banner-title">${notClocked.length ? '🔔 Not Clocked In — Please Start Your Timer!' : '✅ Everyone involved is clocked in'}</div>
 ${notClocked.length ? `
 <div class="tsp-chips">
 ${notClocked.map(p => `
@@ -2391,7 +2391,7 @@ const clockedInHtml = clockedIn.length ? `
 ${clockedIn.map(p => `
 <div class="tsp-status-row" data-started-at="${p.active ? p.active.startedAt : ''}">
 <span class="tsp-sr-person">${p.name}</span>
-<span class="tsp-sr-task">${p.active ? p.active.taskName : 'â'}</span>
+<span class="tsp-sr-task">${p.active ? p.active.taskName : '—'}</span>
 <span class="tsp-sr-time tsp-sr-live">00:00:00</span>
 <button type="button" class="tsp-stop-btn" data-email="${p.email}" data-task-id="${p.active ? p.active.taskId : ''}" data-unit-id="${p.active ? p.active.unitId : ''}" data-started-at="${p.active ? p.active.startedAt : ''}">Stop</button>
 </div>
@@ -2401,13 +2401,13 @@ ${clockedIn.map(p => `
 
 const pausedHtml = paused.length ? `
 <div class="tsp-status-panel tsp-paused">
-<div class="tsp-status-head"><span class="dot"></span>Paused â Resume Where You Left Off (${paused.length})</div>
+<div class="tsp-status-head"><span class="dot"></span>Paused — Resume Where You Left Off (${paused.length})</div>
 ${paused.map(p => {
 const t = (allTasksByUnit[p.paused.unitId] || []).find(x => x.id === p.paused.taskId);
 return `
 <div class="tsp-status-row">
 <span class="tsp-sr-person">${p.name}</span>
-<span class="tsp-sr-task">${t ? t.task_name : 'â'}</span>
+<span class="tsp-sr-task">${t ? t.task_name : '—'}</span>
 <span class="tsp-sr-time">${fmtDateTime(p.paused.updatedAt)}</span>
 <button type="button" class="tsp-resume-btn" data-task-id="${p.paused.taskId}" data-unit-id="${p.paused.unitId}">Resume</button>
 </div>
@@ -2420,17 +2420,17 @@ const taskScheduleRow = (task) => {
 const u = allUnits.find(x => x.id === task.unit_id);
 const so = u ? soInfoByNumber[u.so_number] : null;
 return {
-so: u ? u.so_number : 'â',
+so: u ? u.so_number : '—',
 company: so && so.company_name ? so.company_name : '',
 taskName: task.task_name,
-start: task.start_date ? fmtDate(task.start_date) : 'â',
-due: task.completion_date_planned ? fmtDate(task.completion_date_planned) : 'â',
+start: task.start_date ? fmtDate(task.start_date) : '—',
+due: task.completion_date_planned ? fmtDate(task.completion_date_planned) : '—',
 };
 };
 
 const scheduleHtml = `
 <div class="tsched-panel">
-<div class="tsched-head">ð Team Schedule â What's Next, In Order</div>
+<div class="tsched-head">🗓 Team Schedule — What's Next, In Order</div>
 ${people.map(p => `
 <div class="tsched-block">
 <div class="tsched-person-name">${p.name}</div>
@@ -2440,7 +2440,7 @@ const info = taskScheduleRow(task);
 return `
 <div class="tsched-row">
 <span class="tsched-priority">Priority ${i + 1}</span>
-<span class="tsched-desc"><b>${info.so}</b>${info.company ? ' â ' + info.company : ''} â <span class="tsched-task">${info.taskName}</span></span>
+<span class="tsched-desc"><b>${info.so}</b>${info.company ? ' — ' + info.company : ''} — <span class="tsched-task">${info.taskName}</span></span>
 <span class="tsched-dates">${info.start} &rarr; ${info.due}</span>
 </div>
 `;
@@ -2456,7 +2456,7 @@ el.innerHTML = notClockedHtml + clockedInHtml + pausedHtml + scheduleHtml;
 el.querySelectorAll('.tsp-absent-btn').forEach(btn => {
 btn.addEventListener('click', async () => {
 const email = btn.getAttribute('data-email');
-btn.disabled = true; btn.textContent = 'Savingâ¦';
+btn.disabled = true; btn.textContent = 'Saving…';
 await markAttendanceDecision(email, 'absent');
 renderUnitList();
 });
@@ -2468,7 +2468,7 @@ const taskId = btn.getAttribute('data-task-id');
 const unitId = btn.getAttribute('data-unit-id');
 const startedAt = btn.getAttribute('data-started-at');
 if (!taskId || !unitId){ return; }
-btn.disabled = true; btn.textContent = 'â¦';
+btn.disabled = true; btn.textContent = '…';
 await stopTimerFor(email, taskId, unitId, startedAt);
 renderUnitList();
 });
@@ -2478,7 +2478,7 @@ btn.addEventListener('click', async () => {
 const taskId = btn.getAttribute('data-task-id');
 const unitId = btn.getAttribute('data-unit-id');
 if (!taskId || !unitId) return;
-btn.disabled = true; btn.textContent = 'â¦';
+btn.disabled = true; btn.textContent = '…';
 await startTaskTimer(taskId, unitId);
 renderUnitList();
 });
@@ -2554,7 +2554,7 @@ const wrap = list.querySelector(`.tfr-assignees[data-task-id="${t.id}"]`);
 if (wrap){
 const names = assigneesByTask[t.id] || [];
 wrap.innerHTML = names.length
-? names.map(a => `<span class="tfr-assignee-chip">${a.assignee_name || 'Unassigned'}${a.due_date ? ' Â· due ' + fmtDate(a.due_date) : ''}</span>`).join('')
+? names.map(a => `<span class="tfr-assignee-chip">${a.assignee_name || 'Unassigned'}${a.due_date ? ' · due ' + fmtDate(a.due_date) : ''}</span>`).join('')
 : (t.assigned_to ? `<span class="tfr-assignee-chip">${t.assigned_to}</span>` : '<span class="tfr-assignee-chip empty">Unassigned</span>');
 }
 const elapsedEl = list.querySelector(`.tf-timer-elapsed[data-task-id="${t.id}"]`);
@@ -2575,8 +2575,8 @@ const r = 26, c = 2 * Math.PI * r;
 const dash = c * (p.pct / 100);
 const ringColor = p.status === 'complete' ? 'var(--green)' : (p.overdue ? 'var(--red)' : 'var(--primary)');
 
-// Coverage only counts tasks that are actually enabled â in progress, on hold, done, or with
-// some logged completion â not every task in the chain that's merely been auto-scheduled.
+// Coverage only counts tasks that are actually enabled — in progress, on hold, done, or with
+// some logged completion — not every task in the chain that's merely been auto-scheduled.
 const allDates = [];
 tasks.forEach(t => {
 if (t.is_not_applicable) return;
@@ -2619,7 +2619,7 @@ else if (st === 'in_progress') cntInProgress++;
 else if (st === 'on_hold') cntOnHold++;
 else cntNotStarted++;
 });
-const taskCountText = `${cntDone} done Â· ${cntInProgress} in progress Â· ${cntOnHold} on-hold Â· ${cntNotStarted} not started`;
+const taskCountText = `${cntDone} done · ${cntInProgress} in progress · ${cntOnHold} on-hold · ${cntNotStarted} not started`;
 
 const estimatedHours = tasks.filter(t => !t.is_not_applicable).reduce((sum, t) => sum + (Number(t.duration_days) || 0), 0) * 8;
 
@@ -2633,11 +2633,11 @@ const target = new Date(unit.difot_date + 'T00:00:00');
 const today = new Date(); today.setHours(0,0,0,0);
 const diffDays = Math.round((target - today) / 86400000);
 const dateStr = fmtDate(unit.difot_date);
-if (diffDays < 0){ difotValue = `${dateStr} Â· ${Math.abs(diffDays)}d overdue`; difotCls = 'qs-warn'; }
-else if (diffDays === 0){ difotValue = `${dateStr} Â· Due today`; difotCls = 'qs-warn'; }
-else { difotValue = `${dateStr} Â· ${diffDays}d remaining`; difotCls = diffDays <= 5 ? 'qs-warn' : 'qs-good'; }
+if (diffDays < 0){ difotValue = `${dateStr} · ${Math.abs(diffDays)}d overdue`; difotCls = 'qs-warn'; }
+else if (diffDays === 0){ difotValue = `${dateStr} · Due today`; difotCls = 'qs-warn'; }
+else { difotValue = `${dateStr} · ${diffDays}d remaining`; difotCls = diffDays <= 5 ? 'qs-warn' : 'qs-good'; }
 if (maxDate && maxDate > target && p.status !== 'complete'){
-difotValue += ' â tasks extend past target';
+difotValue += ' — tasks extend past target';
 difotCls = 'qs-warn';
 }
 }
@@ -2655,15 +2655,15 @@ panel.innerHTML = `
 <span class="class-badge cls-${classSlug(unit.class)}">${classLabel(unit.class)}</span>
 <div class="dp-head-actions">
 <button type="button" class="dp-save-btn" id="dpSaveBtn">&check; Save</button>
-<button type="button" class="dp-edit-unit-btn" id="dpEditUnitBtn">â Edit unit</button>
+<button type="button" class="dp-edit-unit-btn" id="dpEditUnitBtn">✎ Edit unit</button>
 </div>
 </div>
 </div>
 <div class="dp-coverage">
 <span>Coverage:</span>
-<b>${minDate ? fmtDate(minDate.toISOString().slice(0,10)) : 'â'}</b>
+<b>${minDate ? fmtDate(minDate.toISOString().slice(0,10)) : '—'}</b>
 <span>&rarr;</span>
-<b>${maxDate ? fmtDate(maxDate.toISOString().slice(0,10)) : 'â'}</b>
+<b>${maxDate ? fmtDate(maxDate.toISOString().slice(0,10)) : '—'}</b>
 <span style="margin-left:auto;">${totalSpanWorkingDays} working day${totalSpanWorkingDays === 1 ? '' : 's'} &middot; ${totalSpanDays} calendar day${totalSpanDays === 1 ? '' : 's'}</span>
 </div>
 <div class="dp-progress">
@@ -2688,7 +2688,7 @@ ${p.pct}% of drafting/production tasks complete
 </div>
 <div class="qs-chip">
 <span class="qs-label">Hours logged</span>
-<span class="qs-value" id="dpHoursLogged">â¦</span>
+<span class="qs-value" id="dpHoursLogged">…</span>
 </div>
 <div class="qs-chip">
 <span class="qs-label">Team</span>
@@ -2708,7 +2708,7 @@ document.getElementById('detailModal').classList.add('hidden');
 });
 panel.querySelector('#dpEditUnitBtn').addEventListener('click', () => openEditUnitModal(unit.id));
 panel.querySelector('#dpSaveBtn').addEventListener('click', () => {
-// Fields already write to the database live as they're edited â Save just closes this
+// Fields already write to the database live as they're edited — Save just closes this
 // view and offers to add another unit to the same sales order.
 document.getElementById('detailModal').classList.add('hidden');
 const so = soInfoByNumber[unit.so_number] || {};
@@ -2784,7 +2784,7 @@ ${schedInfo ? `<span class="task-sched-badge sched-${schedInfo.status}">${schedI
 <div class="tf-group">
 <label>After</label>
 <select data-task-id="${t.id}" data-field="predecessor_task_id" ${dis}>
-<option value="">â none â</option>
+<option value="">— none —</option>
 ${predOptions}
 </select>
 </div>
@@ -2797,16 +2797,16 @@ ${predOptions}
 <div class="task-wrench-menu hidden">
 <label><input type="checkbox" class="task-na-cb" data-task-id="${t.id}" ${t.is_not_applicable ? 'checked' : ''}> Mark not applicable</label>
 <div class="wrench-divider"></div>
-<button type="button" class="wrench-action" data-task-id="${t.id}" data-action="logs">Edit time logsâ¦</button>
-<button type="button" class="wrench-action" data-task-id="${t.id}" data-action="activity">View activity logâ¦</button>
+<button type="button" class="wrench-action" data-task-id="${t.id}" data-action="logs">Edit time logs…</button>
+<button type="button" class="wrench-action" data-task-id="${t.id}" data-action="activity">View activity log…</button>
 </div>
 </div>
 <div class="task-assignees-wrap">
-<div class="task-assignees-list" data-task-id="${t.id}"><span class="ta-loading">Loading assigneesâ¦</span></div>
+<div class="task-assignees-list" data-task-id="${t.id}"><span class="ta-loading">Loading assignees…</span></div>
 <button type="button" class="task-add-assignee-btn" data-task-id="${t.id}" ${dis}>+ Add assignee</button>
 </div>
 <div class="task-remarks-wrap">
-<textarea class="task-remarks-input" data-task-id="${t.id}" placeholder="Remarksâ¦" ${dis}>${remarksVal}</textarea>
+<textarea class="task-remarks-input" data-task-id="${t.id}" placeholder="Remarks…" ${dis}>${remarksVal}</textarea>
 <div class="task-remarks-count" data-task-id="${t.id}">${remarksWords} / 400 words</div>
 </div>
 <div class="task-activity-wrap">
@@ -2876,7 +2876,7 @@ return `
 <select class="ta-name" data-assignee-id="${a.id}">
 <option value="">Unassigned</option>
 ${knownAssignees.map(n => `<option value="${n}" ${a.assignee_name === n ? 'selected' : ''}>${n}</option>`).join('')}
-<option value="__add__">+ Add nameâ¦</option>
+<option value="__add__">+ Add name…</option>
 </select>
 <input type="date" class="ta-start" data-assignee-id="${a.id}" value="${a.start_date || ''}">
 <span class="ta-arrow">&rarr;</span>
@@ -2967,7 +2967,7 @@ if ((field === 'start_date' || field === 'completion_date_planned') && !value) v
 const patch = { [field]: value };
 const t = (allTasksByUnit[unit.id] || []).find(x => x.id === taskId);
 if (t){
-// Keep Days / Start / Due mutually consistent whichever one gets edited. Work MonâFri only â
+// Keep Days / Start / Due mutually consistent whichever one gets edited. Work Mon–Fri only —
 // Days is inclusive (1 day = starts and finishes the same business day), and weekends are
 // skipped when the app derives a date; a date the user typed directly is never overridden.
 if (field === 'duration_days' && t.start_date){
@@ -3078,7 +3078,7 @@ if (isHidden){
 body.classList.remove('hidden');
 chevron.innerHTML = '&#9662;';
 if (!body.dataset.loaded){
-body.innerHTML = '<div class="empty-state" style="padding:10px;">Loadingâ¦</div>';
+body.innerHTML = '<div class="empty-state" style="padding:10px;">Loading…</div>';
 const { data, error } = await sb.from('prod_task_activity')
 .select('id, description, changed_by, created_at')
 .eq('task_id', taskId).order('created_at', { ascending: true });
@@ -3158,7 +3158,7 @@ sb.from('prod_daily_hours').select('task_id, hours_worked, work_date, person_ema
 sb.from('prod_task_assignees').select('id, task_id, assignee_name, start_date, due_date').in('task_id', taskIds).order('created_at'),
 ]).then(([hoursRes, assigneesRes]) => {
 const data = hoursRes.data;
-if (hoursRes.error || !data){ if (hoursEl) hoursEl.textContent = 'â'; }
+if (hoursRes.error || !data){ if (hoursEl) hoursEl.textContent = '—'; }
 const sums = {};
 const logs = {};
 let totalLogged = 0;
@@ -3173,7 +3173,7 @@ if (!el) return;
 if (!(runningTimer && runningTimer.taskId === id)) el.textContent = formatHMS(sums[id] || 0);
 const entries = logs[id] || [];
 el.title = entries.length
-? 'Log history:\n' + entries.map(r => `${fmtDate(r.work_date)} â ${Number(r.hours_worked).toFixed(2)}h${r.person_email ? ' (' + r.person_email.split('@')[0] + ')' : ''}`).join('\n')
+? 'Log history:\n' + entries.map(r => `${fmtDate(r.work_date)} — ${Number(r.hours_worked).toFixed(2)}h${r.person_email ? ' (' + r.person_email.split('@')[0] + ')' : ''}`).join('\n')
 : 'No logged hours yet';
 });
 if (hoursEl) hoursEl.textContent = `${totalLogged.toFixed(1)}h / ${estimatedHours.toFixed(0)}h est.`;
@@ -3213,7 +3213,7 @@ return (str || '').trim().split(/\s+/).filter(Boolean).length;
 }
 
 function fmtDateTime(iso){
-if (!iso) return 'â';
+if (!iso) return '—';
 const d = new Date(iso);
 return d.toLocaleString('en-AU', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit' });
 }
@@ -3228,8 +3228,8 @@ const verb = Number(patch.percent_complete_numeric) >= 1 ? 'Enabled' : 'Disabled
 lines.push(taskName ? `${verb} - ${taskName}` : verb);
 }
 if ('duration_days' in patch) lines.push(`Duration set to ${patch.duration_days} day(s)`);
-if ('start_date' in patch) lines.push(`Start date set to ${patch.start_date ? fmtDate(patch.start_date) : 'â'}`);
-if ('completion_date_planned' in patch) lines.push(`Due date set to ${patch.completion_date_planned ? fmtDate(patch.completion_date_planned) : 'â'}`);
+if ('start_date' in patch) lines.push(`Start date set to ${patch.start_date ? fmtDate(patch.start_date) : '—'}`);
+if ('completion_date_planned' in patch) lines.push(`Due date set to ${patch.completion_date_planned ? fmtDate(patch.completion_date_planned) : '—'}`);
 if ('predecessor_task_id' in patch) lines.push('Predecessor changed');
 if ('assigned_to' in patch) lines.push(`Assigned to ${patch.assigned_to || 'Unassigned'}`);
 if ('is_not_applicable' in patch && !('task_status' in patch) && !('percent_complete_numeric' in patch)){
@@ -3252,7 +3252,7 @@ changed_by: session && session.user ? session.user.email : null,
 async function openActivityModal(taskId, taskName){
 const modal = document.getElementById('activityModal');
 const card = document.getElementById('activityModalCard');
-card.innerHTML = '<div class="empty-state">Loadingâ¦</div>';
+card.innerHTML = '<div class="empty-state">Loading…</div>';
 modal.classList.remove('hidden');
 const { data, error } = await sb.from('prod_task_activity')
 .select('id, description, changed_by, created_at')
@@ -3268,7 +3268,7 @@ return `<div class="activity-list">${rows.map(r => `
 <div class="activity-dot"></div>
 <div class="activity-body">
 <div class="activity-desc">${r.description}</div>
-<div class="activity-meta">${fmtDateTime(r.created_at)}${r.changed_by ? ' Â· ' + r.changed_by.split('@')[0] : ''}</div>
+<div class="activity-meta">${fmtDateTime(r.created_at)}${r.changed_by ? ' · ' + r.changed_by.split('@')[0] : ''}</div>
 </div>
 </div>
 `).join('')}</div>`;
@@ -3279,7 +3279,7 @@ const card = document.getElementById('activityModalCard');
 card.innerHTML = `
 <button class="modal-x-btn" id="activityCloseBtn">&times;</button>
 <h2>Activity log</h2>
-<p class="modal-sub">${taskName} â everything logged from creation to now.</p>
+<p class="modal-sub">${taskName} — everything logged from creation to now.</p>
 ${renderActivityListHtml(rows)}
 <div class="modal-close-row">
 <button class="icon-btn ghost-light" id="activityDoneBtn">Close</button>
@@ -3336,7 +3336,7 @@ person_email: email, work_date: workDate, task_id: taskId, unit_id: unitId,
 hours_worked: hoursThisSession, source: 'manual_adjustment',
 });
 }
-logTaskActivity(taskId, unitId, `Timer stopped â logged ${hoursThisSession.toFixed(2)}h`, 'timer');
+logTaskActivity(taskId, unitId, `Timer stopped — logged ${hoursThisSession.toFixed(2)}h`, 'timer');
 runningTimer = null;
 renderAttendanceReconciliation();
 }
@@ -3345,7 +3345,7 @@ renderAttendanceReconciliation();
 async function openLogsModal(taskId, taskName, unitId){
 const modal = document.getElementById('logsModal');
 const card = document.getElementById('logsModalCard');
-card.innerHTML = '<div class="empty-state">Loadingâ¦</div>';
+card.innerHTML = '<div class="empty-state">Loading…</div>';
 modal.classList.remove('hidden');
 const { data, error } = await sb.from('prod_daily_hours')
 .select('id, work_date, hours_worked, person_email')
@@ -3359,7 +3359,7 @@ const card = document.getElementById('logsModalCard');
 card.innerHTML = `
 <button class="modal-x-btn" id="logsCloseBtn">&times;</button>
 <h2>Time log</h2>
-<p class="modal-sub">${taskName} â add or revise logged hours.</p>
+<p class="modal-sub">${taskName} — add or revise logged hours.</p>
 <div id="logsRows"></div>
 <button class="icon-btn ghost-light" id="logsAddRowBtn" style="margin-top:10px;width:100%;">+ Add entry</button>
 <div class="modal-close-row">
@@ -3373,7 +3373,7 @@ rowsEl.innerHTML = rows.length ? rows.map((r, i) => `
 <div class="log-edit-row" data-idx="${i}">
 <input type="date" class="log-date" value="${r.work_date || ''}">
 <input type="number" step="0.05" min="0" class="log-hours" value="${r.hours_worked || 0}">
-<span class="log-person">${r.person_email ? r.person_email.split('@')[0] : 'â'}</span>
+<span class="log-person">${r.person_email ? r.person_email.split('@')[0] : '—'}</span>
 <button type="button" class="log-del-btn" title="Delete">&times;</button>
 </div>
 `).join('') : '<div class="empty-state" style="padding:14px;">No entries yet.</div>';
@@ -3488,7 +3488,7 @@ msgEl.innerHTML = '<div class="auth-msg error">Type the SO number exactly to con
 return;
 }
 const btn = document.getElementById('deleteSoConfirmBtn');
-btn.disabled = true; btn.textContent = 'Deletingâ¦';
+btn.disabled = true; btn.textContent = 'Deleting…';
 try {
 await deleteSo(soNumber);
 msgEl.innerHTML = '';
@@ -3564,7 +3564,7 @@ return;
 const renaming = newSoNumber !== originalSoNumber;
 
 const submitBtn = document.getElementById('editSoSubmitBtn');
-submitBtn.disabled = true; submitBtn.textContent = 'Savingâ¦';
+submitBtn.disabled = true; submitBtn.textContent = 'Saving…';
 
 const patch = {
 company_name: companyName || null, sales_rep: salesRep || null,
@@ -3679,7 +3679,7 @@ const sel = document.getElementById(selectId);
 if (!sel) return;
 const { data } = await sb.from('prod_sales_orders').select('sales_rep');
 const names = Array.from(new Set((data || []).map(r => (r.sales_rep || '').trim()).filter(Boolean))).sort((a,b) => a.localeCompare(b));
-sel.innerHTML = '<option value="">Selectâ¦</option>' + names.map(n => `<option value="${n}">${n}</option>`).join('') + '<option value="__add__">+ Add newâ¦</option>';
+sel.innerHTML = '<option value="">Select…</option>' + names.map(n => `<option value="${n}">${n}</option>`).join('') + '<option value="__add__">+ Add new…</option>';
 if (selectedValue){
 if (!names.includes(selectedValue)){
 const opt = document.createElement('option');
@@ -3702,7 +3702,7 @@ sel.value = name;
 async function loadTemplateOptionsInto(classSelectId, templateSelectId, includeBlankOption){
 const cls = document.getElementById(classSelectId).value;
 const tplEl = document.getElementById(templateSelectId);
-tplEl.innerHTML = '<option>Loadingâ¦</option>';
+tplEl.innerHTML = '<option>Loading…</option>';
 const { data, error } = await sb
 .from('prod_task_templates')
 .select('item_name, is_generic')
@@ -3715,7 +3715,7 @@ const ga = seen.get(a), gb = seen.get(b);
 if (ga !== gb) return ga ? -1 : 1;
 return a.localeCompare(b);
 });
-const blankOpt = includeBlankOption ? '<option value="">No change â keep current tasks</option>' : '';
+const blankOpt = includeBlankOption ? '<option value="">No change — keep current tasks</option>' : '';
 tplEl.innerHTML = blankOpt + (names.length
 ? names.map(n => `<option value="${n}">${n}${seen.get(n) ? ' (generic)' : ''}</option>`).join('')
 : (includeBlankOption ? '' : '<option value="">(no templates for this class)</option>'));
@@ -3770,7 +3770,7 @@ return;
 }
 
 const submitBtn = document.getElementById('editUnitSubmitBtn');
-submitBtn.disabled = true; submitBtn.textContent = 'Savingâ¦';
+submitBtn.disabled = true; submitBtn.textContent = 'Saving…';
 
 try {
 const { data: existingSo } = await sb.from('prod_sales_orders').select('so_number').eq('so_number', soNumber).maybeSingle();
@@ -3882,7 +3882,7 @@ return;
 }
 
 const submitBtn = document.getElementById('addSoSubmitBtn');
-submitBtn.disabled = true; submitBtn.textContent = 'Creatingâ¦';
+submitBtn.disabled = true; submitBtn.textContent = 'Creating…';
 
 try {
 const { data: existingSo } = await sb.from('prod_sales_orders').select('so_number').eq('so_number', soNumber).maybeSingle();
